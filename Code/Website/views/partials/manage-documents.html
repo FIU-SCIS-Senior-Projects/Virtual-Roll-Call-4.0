@@ -1,0 +1,188 @@
+<div class='col-sm-8 text-left'>
+	<h3>Manage Documents</h3>
+	<hr>
+
+	<!-- Upload Document Panel -->
+	<div class='panel panel-primary {{display_mode}}' ng-init='getCategories()'>
+		<div class='panel-heading'>Upload Documents</div>
+		<div class='panel-body'>
+			<form action="../app/php/upload-document.php" method="post" enctype="multipart/form-data" target="dummyframe">
+				<div>
+					<!-- Upload Document Form -->
+					<label>File <span class="glyphicon glyphicon-file"></span></label>
+					<br>
+					<input type="file" name='document' id='document' ng-model='document' required />
+					<br>
+					<label>Document Name <span class="glyphicon glyphicon-file"></span></label>
+					<br>
+					<input class='fields {{display_mode}}' type="text" name='document_name' required />
+					<br><br>
+					<label>Document Description <span class="glyphicon glyphicon-file"></span></label>
+					<br>
+					<textarea class='fields {{display_mode}}' rows="4" name='document_description'></textarea>
+					<br><br>
+					<label>Category <span class="glyphicon glyphicon-list-alt"></span></label>
+					<br>
+					<select class='fields {{display_mode}}' name="category_id" ngValue='{{category.id}}'
+							ng-options='category as category.name for category in doc_categories track by category.id'
+							ng-model='selected_category' required >
+					</select>
+					<br><br>
+					<input type="checkbox" name='pinned' value="1">
+					<label>Pin Document <span class='glyphicon glyphicon-pushpin' style="padding-right:10px;"></span></label>
+					<input type='checkbox' name='quizz' value='1' ng-click="openQuizMaker()">
+					<span style='padding-left:3px;'>
+					<label><span class="glyphicon glyphicon-edit"></span> Open Quiz Maker</label>
+					</span>
+					<input type="hidden" name="uploaded_by" value='{{name}}'>
+					<br><br>
+					<button type='submit' class='btn btn-success' ng-click="refresh()"><span class="glyphicon glyphicon-upload"></span> Upload</button>
+					<br>
+
+					<div class="modal fade" id="quizModal" role="dialog" ng-controller='supervisorCtrl'>
+						<div class="modal-dialog">
+
+							<!-- Modal content-->
+							<div class="modal-content {{display_mode_modal}}" >
+								<div class="modal-header " style="padding:15px 15px;">
+									<button type="button" class="close" data-dismiss="modal" ng-click='updateErrorMessage = updateSuccessMessage = false'>&times;</button>
+									<h4><span class="glyphicon glyphicon-pencil"></span> <b>Document Quiz Maker</b></h4>
+								</div>
+								<div class="modal-body" style="padding:40px 50px;">
+									<table class="table {{display_mode}}" style='margin:auto; width:100%'>
+										<tr><td colspan="4"> <input name="question_1" type='text' class="form-control {{display_mode_modal}}" placeholder="Question 1"></td></tr>
+										<tr>
+											<td><input name='answer_11' type='text' class="form-control {{display_mode_modal}}" style="width:100%;" placeholder="Correct Answer"> </td>
+											<td><input name='answer_12' type='text' class="form-control {{display_mode_modal}}" style="width:100%;" placeholder="Answer 2"> </td>
+											<td><input name='answer_13' type='text' class="form-control {{display_mode_modal}}" style="width:100%;" placeholder="Answer 3"> </td>
+											<td><input name='answer_14' type='text' class="form-control {{display_mode_modal}}" style="width:100%;" placeholder="Answer 4"> </td>
+										</tr>
+										<tr><td> ....</td></tr>
+										<tr><td colspan="4"> <input name="question_2" type='text' class="form-control {{display_mode_modal}}" placeholder="Question 2"></td></tr>
+										<tr>
+											<td><input name='answer_21' type='text' class="form-control {{display_mode_modal}}" style="width:100%;" placeholder="Correct Answer"> </td>
+											<td><input name='answer_22' type='text' class="form-control {{display_mode_modal}}" style="width:100%;" placeholder="Answer 2"> </td>
+											<td><input name='answer_23' type='text' class="form-control {{display_mode_modal}}" style="width:100%;" placeholder="Answer 3"> </td>
+											<td><input name='answer_24' type='text' class="form-control {{display_mode_modal}}" style="width:100%;" placeholder="Answer 4"> </td>
+										</tr>
+										<tr><td> ....</td></tr>
+										<tr><td colspan="4"> <input name='question_3' type='text' class="form-control {{display_mode_modal}}" placeholder="Question 3"></td></tr>
+										<tr>
+											<td><input name='answer_31' type='text' class="form-control {{display_mode_modal}}" style="width:100%;" placeholder="Correct Answer"> </td>
+											<td><input name='answer_32' type='text' class="form-control {{display_mode_modal}}" style="width:100%;" placeholder="Answer 2"> </td>
+											<td><input name='answer_33' type='text' class="form-control {{display_mode_modal}}" style="width:100%;" placeholder="Answer 3"> </td>
+											<td><input name='answer_34' type='text' class="form-control {{display_mode_modal}}" style="width:100%;" placeholder="Answer 4"> </td>
+										</tr>
+										<tr><td> ....</td></tr>
+										<tr><td colspan="4"> <input name='question_4' type='text' class="form-control {{display_mode_modal}}" placeholder="Question 4"></td></tr>
+										<tr>
+											<td><input name='answer_41' type='text' class="form-control {{display_mode_modal}}" style="width:100%;" placeholder="Correct Answer"> </td>
+											<td><input name='answer_42' type='text' class="form-control {{display_mode_modal}}" style="width:100%;" placeholder="Answer 2"> </td>
+											<td><input name='answer_43' type='text' class="form-control {{display_mode_modal}}" style="width:100%;" placeholder="Answer 3"> </td>
+											<td><input name='answer_44' type='text' class="form-control {{display_mode_modal}}" style="width:100%;" placeholder="Answer 4"> </td>
+										</tr>
+									</table>
+
+									<br>
+									<!-- TO DO: Don't show successful update message when no changes were made to the user -->
+									<button type="button" class="close" data-dismiss="modal" ng-click='updateErrorMessage = updateSuccessMessage = false'>&times; Save Questionaire</button>
+									<br>
+								</div>
+							</div>
+						</div>
+					</div>
+			</form>
+				</div>
+		</div>
+	</div>
+
+
+	<div class="modal fade" id="editModal" role="dialog" ng-controller='supervisorCtrl'>
+		<div class="modal-dialog ">
+
+			<!-- Modal content-->
+			<div class="modal-content {{display_mode_modal}}" >
+				<div class="modal-header " style="padding:15px 15px;">
+					<button type="button" class="close" data-dismiss="modal" ng-click='updateErrorMessage = updateSuccessMessage = false'>&times;</button>
+					<h4><span class="glyphicon glyphicon-pencil"></span> Edit Document</h4>
+				</div>
+				<div class="modal-body" style="padding:40px 50px;">
+					<br>
+						<button ng-click='removeUploadedDocument()' class="btn btn-danger pull-right"><span class="glyphicon glyphicon-remove"></span>Delete Document</button>
+					<form role="form" ng-submit='updateDocument()'>
+						<div class="form-group">
+							<label>Document Name</label>
+							<input type="text" class="form-control fields {{display_mode_modal}}" ng-model='doc_name' required />
+						</div>
+						<div class="form-group" >
+							<label>Categories</label>
+
+							<input type="text" class="form-control fields {{display_mode_modal}}" ng-model='doc_old_cat' ng-readonly="true" required />
+                            <select class="form-control {{display_mode_modal}}" name="doc_category"
+                                    ng-options='category as category.name for category in doc_categories track by category.name' ng-model='doc_cat_name'>
+							</select>
+						</div>
+						<div class="form-group">
+							<label>Pinned</label>
+							<input type="checkbox" class="form-control" ng-model='doc_pinned' />
+						</div>
+
+						<br>
+						<input type='hidden' ng-model='doc_deletedId' />
+						<!-- TO DO: Don't show successful update message when no changes were made to the user -->
+						<button type="submit" class="btn btn-success btn-block">Update</button>
+						<br>
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class='panel panel-primary' ng-init='getDocuments()'>
+		<div class='panel-heading'>Edit Documents</div>
+
+		<!-- TO DO: Overflow not detected until page reloads -->
+		<div class='panel-body {{display_mode}}' style="height:350px; overflow-y:scroll">
+			<div>
+				<table class="table table-striped {{display_mode}} table-hover" style='margin:auto; width:100%'>
+					<form class="form-inline">
+						<div class="form-group">
+							<!-- <label>Category</label> -->
+							<!-- <select ng-options="cat.name for cat in categories" ng-model="cat_filter"> -->
+							<label>Search</label>
+							<input  type="text" ng-model="search" class="form-control fields {{display_mode}}" placeholder="Search">
+							</select>
+						</div>
+					</form>
+					<thead>
+						<tr>
+							<th class="text-center">#</th>
+							<th ng-click="sortTable('name')">Document Name</th>
+							<th ng-click="sortTable('cat_name')">Category</th>
+							<th ng-click="sortTable('date')">Upload Date</th>
+							<th ng-click="sortTable('pinned')">Pinned</th>
+							<th ng-click="sortTable('uploadedBy')">Uploaded By</th>
+							<th ng-click="sortTable('archived')">Archived</th>
+							<th class="text-center">Edit</th>
+						</tr>
+					</thead>
+					<tbody>
+						<!-- <tr ng-repeat='d in documents | orderBy:orderBy |filter:cat_filter.name'> -->
+						<tr {{display_mode}} ng-repeat='d in documents | orderBy:orderBy |filter:search'>
+							<td class='text-center'>{{$index + 1}}</td>
+							<td>{{d.name}}</td>
+							<td>{{d.cat_name}}</td>
+							<td>{{d.date}}</td>
+							<td>{{d.pinned}}</td>
+							<td>{{d.uploadedBy}}</td>
+							<td>{{d.archived}}</td>
+							<td class='text-center'><button class="btn-default" ng-click="editDocument(d.id, d.name, d.pinned, d.cat_name)"><span class="glyphicon glyphicon-edit"></span> Edit</button></td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+
+	<iframe width="0" height="0" border="0" name="dummyframe" id="dummyframe" style="display:none"></iframe>
+</div>

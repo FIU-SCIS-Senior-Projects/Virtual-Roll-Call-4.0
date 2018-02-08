@@ -1,0 +1,282 @@
+<div class='col-sm-8 text-left' >
+	<h3>User Management</h3>
+	<hr>
+
+	<!-- success/error message -->
+	<div uib-alert ng-repeat="a in alert.alerts" ng-class="'alert-' + a.type" close="alert.closeAlert($index)">{{a.msg}}</div>
+
+	<button class="btn btn-success" data-toggle="modal" ng-click='addBatchUsers()'><span class="glyphicon glyphicon-th-list"></span> Batch Add Users</button>
+	<br>
+	<br>
+	<!-- Add User Panel -->
+	<div class='panel panel-primary {{display_mode}}'>
+		<div class='panel-heading'>Add User</div>
+		<div class='panel-body'>
+
+
+			<!-- Add User Form -->
+			<form ng-submit='addUser()'>
+
+				<label>First Name</label>
+				<br>
+				<input class='fields {{display_mode}}' type='text' ng-model='fName' required>
+				<br>
+				<br>
+				<label>Last Name</label>
+				<br>
+				<input class='fields {{display_mode}}' type='text' ng-model='lName' required>
+				<br>
+				<br>
+				<label>Username</label>
+				<br>
+				<input class='fields {{display_mode}}' type='text' ng-model='username' required>
+				<br>
+				<br>
+				<label>Password</label>
+				<br>
+				<!-- TO DO: Validate password pattern in controller as well -->
+				<input class='fields {{display_mode}}' class='fields {{display_mode}}' type='password' ng-model='password' pattern='^[a-zA-Z0-9]{8,}$' title='Must contain at least 8 or more characters. Only alphanumeric characters allowed.' required>
+				<br>
+				<br>
+				<label>Role</label><br>
+				<select class='fields {{display_mode}}' ng-model='role'>
+					<option value='Officer'>Officer</option>
+					<option value='Supervisor'>Supervisor</option>
+					<option value='Administrator'>Administrator</option>
+				</select>
+				<br>
+				<br>
+				<button type='submit' class='btn btn-success'>Add User</button>
+				<br>
+				<br>
+
+				<!-- display message accordingly -->
+				<div class='alert alert-danger' ng-show='errorMessage' style='margin-bottom: 0'>
+					{{message}}
+				</div>
+				<div class='alert alert-success' ng-show='successMessage' style='margin-bottom: 0'>
+					{{message}}
+				</div>
+			</form>
+		</div>
+	</div>
+
+	<!-- Edit User Panel -->
+	<div class='panel panel-primary' ng-init='getOfficers()'>
+		<div class='panel-heading'>Edit User</div>
+
+		<!-- TO DO: Overflow not detected until page reloads -->
+		<div class='panel-body {{display_mode}}' style="height:350px; overflow-y:scroll">
+			<div>
+				<table class="table table-striped {{display_mode}} table-hover" style='margin:auto; width:100%'>
+					<form class="form-inline">
+						<div class="form-group">
+							<label>Search</label>
+							<input type="text" ng-model="search" class="form-control fields {{display_mode}}" placeholder="Search">
+						</div>
+					</form>
+					<thead>
+						<tr>
+							<th class="text-center">#</th>
+							<th>First Name</th>
+							<th>Last Name</th>
+							<th>Username</th>
+							<th>Role</th>
+							<th class="text-center">Edit</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr {{display_mode}} ng-repeat='o in officers|filter:search'>
+							<td class='text-center'>{{$index + 1}}</td>
+							<td>{{o.firstName}}</td>
+							<td>{{o.lastName}}</td>
+							<td>{{o.username}}</td>
+							<td>{{o.role}}</td>
+							<td class='text-center'><button class="btn-default" ng-click='editUser(o.id, o.firstName, o.lastName, o.username, o.role)'><span class="glyphicon glyphicon-edit"></span> Edit</button></td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+
+	<!-- Edit User Modal -->
+	<div class="modal fade" id="editModal" role="dialog">
+		<div class="modal-dialog">
+
+			<!-- Modal content-->
+			<div class="modal-content {{display_mode_modal}}">
+				<div class="modal-header" style="padding:15px 15px;">
+					<button type="button" class="close" data-dismiss="modal" ng-click='updateErrorMessage = updateSuccessMessage = false'>&times;</button>
+					<h4><span class="glyphicon glyphicon-pencil"></span> Edit User</h4>
+				</div>
+				<div class="modal-body" style="padding:40px 50px;">
+					<button ng-click='removeUser()' class="btn btn-danger pull-right"><span class="glyphicon glyphicon-remove"></span> Delete User</button>
+					<br>
+					<br>
+					<form role="form" ng-submit='updateUser()'>
+						<div class="form-group">
+							<label>First Name</label>
+							<input type="text" class="form-control fields {{display_mode_modal}}" ng-model='updateFirst' required>
+						</div>
+						<div class="form-group">
+							<label>Last Name</label>
+							<input type="text" class="form-control fields {{display_mode_modal}}" ng-model='updateLast' required>
+						</div>
+						<div class="form-group">
+							<label>Username</label>
+							<input type="text" class="form-control fields {{display_mode_modal}}" ng-model='updateUsername' required>
+						</div>
+						<div class="form-group">
+							<label>Role</label>
+							<select ng-model='updateRole' class="form-control fields {{display_mode_modal}}">
+								<option value='Officer'>Officer</option>
+								<option value='Supervisor'>Supervisor</option>
+								<option value='Administrator'>Administrator</option>
+							</select>
+						</div>
+						<br>
+						<!-- TO DO: Don't show successful update message when no changes were made to the user -->
+						<button type="submit" class="btn btn-success btn-block">Update</button>
+						<br>
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- Batch Add Users Modal -->
+	<div class="modal fade" id="batchUsersModal" role="dialog">
+		<div class="modal-dialog">
+
+			<!-- Modal content-->
+			<div class="modal-content {{display_mode_modal}}">
+				<div class="modal-header" style="padding:15px 15px;">
+					<button type="button" class="close" data-dismiss="modal" ng-click='updateErrorMessage = updateSuccessMessage = false'>&times;</button>
+					<h4><span class="glyphicon glyphicon-th-list"></span> Batch Add Users</h4>
+				</div>
+				<br>
+				<a href="./misc/users.csv" data-toggle="tooltip" title="Download Sample CSV File" download ="users.csv" class="glyphicon glyphicon-download {{display_mode_modal}}"></a>
+				<span class="glyphicon glyphicon-question-sign question-icon" data-toggle="popover" title="CSV Row Format"
+				data-content="[First Name],[Last Name],[User Name],[Password],[Role]"
+				></span>
+
+				<div class="modal-body" style="padding:40px 50px;">
+					<!-- TO DO: Overflow not detected until page reloads -->
+
+					<input type="file" id="files" accept="text/csv" class = "center-block">
+					<br>
+					<button class="btn btn-success btn-block center-block" ng-click='parseCSV()'><span class="glyphicon glyphicon-refresh"></span> Parse</button>
+					<br>
+
+
+					<div class='panel panel-primary'id="parsedUsersPanel">
+						<div class='panel-heading' id="parseTitle">Parsed Users</div>
+
+
+
+						<label class = "label label-success lable-large" id="successMessage"></label>
+						<label class = "label label-danger lable-large"  id="failMessage"></label>
+
+						<!-- TO DO: Overflow not detected until page reloads -->
+						<div class='panel-body {{display_mode}}' style="height:350px; overflow-y:scroll">
+
+
+							<div>
+								<table class="table table-striped {{display_mode}} table-hover" style='margin:auto; width:100%'>
+									<form class="form-inline">
+										<div class="form-group">
+											<label>Search</label>
+											<input type="text" ng-model="search" class="form-control fields {{display_mode}}" placeholder="Search">
+										</div>
+									</form>
+									<thead>
+										<tr>
+											<th class="text-center">#</th>
+											<th>First Name</th>
+											<th>Last Name</th>
+											<th>Username</th>
+											<th>Password</th>
+											<th>Role</th>
+											<th class="text-center">Edit</th>
+										</tr>
+									</thead>
+									<tbody>
+										<tr {{display_mode}} ng-repeat='u in parsedUsers|filter:search'>
+											<td class='text-center'>{{$index + 1}}</td>
+											<td>{{u[0]}}</td>
+											<td>{{u[1]}}</td>
+											<td>{{u[2]}}</td>
+											<td>{{u[3]}}</td>
+											<td>{{u[4]}}</td>
+											<td class='text-center'><button class="btn-default" ng-click='editParsedUser($index, u[0], u[1], u[2], u[3], u[4])'><span class="glyphicon glyphicon-edit"></span> Edit</button></td>
+										</tr>
+									</tbody>
+								</table>
+							</div>
+
+						</div>
+
+						<div class='panel-body {{display_mode}}' >
+							<div class ='{{display_mode}}'>
+								<button class="btn btn-success btn-block center-block " ng-click='addParsedUsers()'><span class="glyphicon glyphicon-circle-arrow-right"></span> Add All</button>
+							</div>
+						</div>
+
+					</div>
+
+
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- Edit Parsed User Modal -->
+	<div class="modal fade" id="editParseModal" role="dialog">
+		<div class="modal-dialog">
+
+			<!-- Modal content-->
+			<div class="modal-content {{display_mode_modal}}">
+				<div class="modal-header" style="padding:15px 15px;">
+					<button type="button" class="close" data-dismiss="modal" ng-click='updateErrorMessage = updateSuccessMessage = false'>&times;</button>
+					<h4><span class="glyphicon glyphicon-pencil"></span> Edit Parsed User</h4>
+				</div>
+				<div class="modal-body" style="padding:40px 50px;">
+					<button ng-click='removeParsedUser()' class="btn btn-danger pull-right"><span class="glyphicon glyphicon-remove"></span> Delete User</button>
+					<br>
+					<br>
+					<form role="form" ng-submit='updateParseUser()'>
+						<div class="form-group">
+							<label>First Name</label>
+							<input type="text" class="form-control fields {{display_mode_modal}}" ng-model='updateFirst' required>
+						</div>
+						<div class="form-group">
+							<label>Last Name</label>
+							<input type="text" class="form-control fields {{display_mode_modal}}" ng-model='updateLast' required>
+						</div>
+						<div class="form-group">
+							<label>Username</label>
+							<input type="text" class="form-control fields {{display_mode_modal}}" ng-model='updateUsername' required>
+						</div>
+						<div class="form-group">
+							<label>Password</label>
+							<input type="text" class="form-control fields {{display_mode_modal}}" ng-model='updatePassword' required>
+						</div>
+						<div class="form-group">
+							<label>Role</label>
+							<select ng-model='updateRole' class="form-control fields {{display_mode_modal}}">
+								<option value='Officer'>Officer</option>
+								<option value='Supervisor'>Supervisor</option>
+								<option value='Administrator'>Administrator</option>
+							</select>
+						</div>
+						<br>
+						<!-- TO DO: Don't show successful update message when no changes were made to the user -->
+						<button type="submit" class="btn btn-success btn-block">Update</button>
+						<br>
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>

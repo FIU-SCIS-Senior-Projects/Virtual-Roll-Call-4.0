@@ -1,0 +1,63 @@
+<div class='col-sm-8 text-left' flow-init="{target: '../app/php/upload.php', testChunks:false}" flow-file-added="!!{png:1,gif:1,jpg:1,jpeg:1}[$file.getExtension()]" flow-file-success="alert.addAlert('success', 'Logo successfully updated!');">
+	<h3>Site Settings</h3>
+	<hr>
+
+	<!-- success/error message -->
+  <div uib-alert ng-repeat="a in alert.alerts" ng-class="'alert-' + a.type" close="alert.closeAlert($index)">{{a.msg}}</div>
+
+	<!-- UPDATE SITE LOGO PANEL -->
+	<div class='panel panel-primary {{display_mode}}'>
+		<div class='panel-heading'>Site Logo</div>
+		<div class='panel-body'>
+      <!-- Image Preview -->
+      <div class="container" style="padding: 0;">
+        <div class="thumbnail" ng-hide="$flow.files.length">
+          <img src="http://www.placehold.it/200x150/EFEFEF/AAAAAA&text=no+image" />
+        </div>
+        <div ng-show="$flow.files.length">
+          <img id='logo-preview' flow-img="$flow.files[0]" />
+        </div>
+      </div>
+      <p>Only PNG,GIF,JPG files allowed.</p>
+      <button class="btn btn-primary" ng-hide="$flow.files.length" flow-btn flow-attrs="{accept:'image/*'}">Select image</button>
+      <button href="#" class="btn btn-danger" ng-show="$flow.files.length"
+      ng-click="$flow.cancel()">
+      Remove</button>
+      <button href="#" class="btn btn-success" ng-show="$flow.files.length"
+      ng-click="$flow.upload()">
+      Save</button>
+    </div>
+  </div>
+
+  <!-- APP NAME PANEL -->
+	<div class='panel panel-primary {{display_mode}}'>
+		<div class='panel-heading'>Application Name</div>
+		<div class='panel-body'>
+			<!-- Site Customizations Form -->
+			<form ng-submit='updateAppName(application_name)'>
+        <label>Application Name</label>
+        <br>
+        <input class='col-xs-6 fields {{display_mode}}' type='text' ng-model='application_name' required>
+        <br>
+        <br>
+        <button type="submit" class="btn btn-success">Update</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- DEPT NAME PANEL -->
+  <div class='panel panel-primary {{display_mode}}'>
+    <div class='panel-heading'>Department Name</div>
+    <div class='panel-body'>
+      <!-- Site Customizations Form -->
+      <form ng-submit='updateDeptName(department_name)'>
+        <label>Police Department Name</label>
+        <br>
+        <input class='col-xs-6 fields {{display_mode}}' type='text' ng-model='department_name' required>
+        <br>
+        <br>
+        <button type="submit" class="btn btn-success">Update</button>
+      </form>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html ng-app='login' lang='en' ng-controller='loginCtrl' ng-controller='sharedCtrl' ng-init='getSiteNames()'>
+<head>
+  <meta charset='utf-8'>
+  <meta name='description' content=''>
+  <meta name='viewport' content='width=device-width, initial-scale=1.0, shrink-to-fit=no'>
+
+  <title>{{app_name}}</title>
+
+  <!-- STYLE SHEETS -->
+  <link href='style/normalize.css' rel='stylesheet' media='all'>
+  <link rel='stylesheet' href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css' media='all'>
+  <link href='style/bootstrap.min.css' rel='stylesheet' media='all'>
+  <link href='style/login.css' rel='stylesheet' media='all'>
+  
+  <!-- SCRIPTS -->
+  <script src='https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js'></script>
+  <script src='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js'></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.8/angular.js"></script>
+
+  <!--UI-GRID-CDN-->
+  <script src="https://cdn.rawgit.com/angular-ui/bower-ui-grid/master/ui-grid.min.js"></script>
+
+  <script src='../app/vendor/angular-route.min.js'></script>
+  <script src='../app/vendor/angular-local-storage.min.js'></script>
+  <script src='../app/vendor/ui-bootstrap-tpls-2.2.0.min.js'></script>
+  <script src="../app/vendor/ng-flow/dist/ng-flow-standalone.min.js"></script>
+  <script src='../app/app.js' type='text/javascript'></script>
+  <script src='../app/controllers/shared-ctrl.js' type='text/javascript'></script>
+  <script src='../app/controllers/login-ctrl.js' type='text/javascript'></script>
+  <script src='../app/services/data-service.js' type='text/javascript'></script>
+  <script src='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js'></script>
+</head>
+
+<body>
+
+  <!-- Site Names -->
+  <header class='container-fluid text-center'>
+    <h1><strong>{{app_name}}</strong></h1>
+    <h2>{{dept_name}}</h2>
+    <br>
+  </header>
+  <br>
+
+  <!-- Application Logo -->
+  <img src='img/badge.gif' alt='Badge' style='width:14%'>
+  <br>
+
+  <!-- Login Panel -->
+  <div class='container' style='margin: auto; width: 40%'>
+
+  <!-- success/error message for login function -->
+  <div uib-alert ng-repeat="a in alert.alerts" ng-class="'alert-' + a.type" close="alert.closeAlert($index)">{{a.msg}}</div>
+    
+    <div class='panel panel-primary'>
+      <div class='panel-heading'>Login</div>
+      <div class='panel-body'>
+          
+        <main role='main'>
+          <form role='form' method='post' ng-submit='login()'>
+              
+            <!-- Input Fields -->
+            <div class='form-group'>
+              <label><span class='glyphicon glyphicon-user'></span> Username</label>
+              <input ng-model='username' name='username' type='text' class='form-control' required>
+            </div>
+            <div class='form-group'>
+              <label><span class='glyphicon glyphicon-lock'></span> Password</label>
+              <input ng-model='password' name='password' type='password' class='form-control' required>
+            </div>
+
+            <!-- Login Button -->
+            <div class='form-group' style='margin: auto; width: 75%'>
+              <button class='button' name='submit' type='submit'>Login</button><br>
+            </div>
+
+          </form>
+        </main>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

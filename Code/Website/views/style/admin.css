@@ -1,0 +1,223 @@
+/* ---------------------------------------------------------
+   Author's styles
+   ---------------------------------------------------------*/
+
+   /* Remove the navbar's default margin-bottom and rounded borders */
+   .navbar {
+    margin-bottom: 0;
+    border-radius: 0;
+  }
+
+  /* Set height of the grid so .sidenav can be 100% (adjust as needed) */
+  .row.content {height: 1030.5px}
+
+  /* Set gray background color and 100% height */
+  .sidenav {
+    padding-top: 20px;
+    padding-bottom: 20px;
+    background-color: #f1f1f1;
+    height: 100%;
+  }
+
+  /* On small screens, set height to 'auto' for sidenav and grid */
+  @media screen and (max-width: 767px) {
+    .sidenav {
+      height: auto;
+      padding: 15px;
+    }
+    .row.content {height:auto;}
+  }
+
+  .button {
+    background-color: #4CAF50; /* Green */
+    border: none;
+    color: white;
+    padding: 10px 10px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+    width: 15%;
+  }
+
+  .editbutton {
+    background-color: #222222;
+    border: none;
+    border-radius: 8px;
+    color: white;
+    padding: 10px 10px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    margin: 4px 2px;
+    cursor: pointer;
+  }
+
+ /* th {
+    background-color: #4CAF50;
+    color: white;
+  }
+
+  th, td {
+    text-align: left;
+    padding: 8px;
+    border: 1px solid black
+  }*/
+
+  .table > tbody > tr > td {
+     vertical-align: middle;
+  }
+
+  ul.a {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    border: 1px solid #555;
+  }
+
+  li.a {
+    display: block;
+    color: #000;
+    padding: 8px 16px;
+    text-decoration: none;
+    text-align: center;
+    border-bottom: 1px solid #555;
+  }
+
+  li.a:last-child {
+    border-bottom: none;
+  }
+
+  .modal-header, h4, .close-btn {
+      background-color: #337AB7;
+      color:white !important;
+      text-align: center;
+      font-size: 30px;
+  }
+  .modal-footer {
+      background-color: #f9f9f9;
+  }
+
+  .thumbnail {
+      max-width: 200px; max-height: 150px; line-height: 20px; margin-bottom: 5px;
+  }
+
+  #logo-preview {
+    display: block;
+    width:14%;
+  }
+
+/* ---------------------------------------------------------
+   Print styles
+   ---------------------------------------------------------*/
+   @media print {
+    * {
+      color:#000 !important;
+      box-shadow:none !important;
+      text-shadow:none !important;
+      background:transparent !important;
+    }
+    html { background-color:#fff; }
+    /* Hide navigation */
+    nav { display:none; }
+
+    /* Show link destinations in brackets after the link text */
+    a[href]:after { content: " (" attr(href) ") "; }
+    a[href] {
+      font-weight:bold;
+      text-decoration:underline;
+      color:#06c;
+      border:none;
+    }
+    /* Don't show link destinations for JavaScript or internal links */
+    a[href^="javascript:"]:after, a[href^="#"]:after { content:""; }
+
+    /* Show abbr title value in brackets after the text */
+    abbr[title]:after { content: " (" attr(title) ")"; }
+
+    figure {
+      margin-bottom:1em;
+      overflow:hidden;
+    }
+
+    figure img { border:1px solid #000; }
+  }
+
+  /*night-mode*/
+  .night-mode{
+    background-color: black !important;;
+    color: white !important;;
+  }
+
+  .cat-holder.night-mode{
+    background-color: black; /*#4f535d */
+    border-style: solid;
+    border-color: white;
+  }
+  .panel-heading.night-mode{
+    background-color: #454545;
+    color: inherit;
+  }
+
+  .fields.night-mode{
+    background-color: #454545;
+    color: white;
+    border-style: solid;
+    border-color: white;
+  }
+
+  .password.night-mode{
+    border-style: solid;
+    border-color: white;
+  }
+
+  .table-hover tbody tr:hover td, .table-hover tbody tr:hover th {
+    background-color: #2e82f4;
+  }
+  .table-striped>tbody>tr:nth-child(odd):hover> td{
+    background-color: #2e82f4;
+  }
+
+  .night-mode.table-striped>tbody>tr:nth-child(odd):hover> td{
+    background-color: #2e82f4;
+  }
+
+  .night-mode.table-striped>tbody>tr:nth-child(odd)>td,
+tr.found {
+    background-color:#454545;
+}
+
+.col-sm-2.night-mode{
+  background-color:#454545;
+}
+
+#failMessage{
+  margin-bottom: 1px;
+  height: 30px;
+  line-height:30px;
+  padding:0px 15px;
+  font-size: small;
+}
+
+#successMessage{
+  margin-bottom: 1px;
+  height: 30px;
+  line-height:30px;
+  padding:0px 15px;
+  font-size: small;
+}
+
+.glyphicon-question-sign{
+  font-size: 25px;
+}
+
+.glyphicon-download{
+  font-size: 25px;
+  margin-left: 10px;
+}
+
+.popover{
+    max-width: 100%; /* Max Width of the popover (depending on the container!) */
+}

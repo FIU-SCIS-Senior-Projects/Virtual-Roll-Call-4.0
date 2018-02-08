@@ -1,0 +1,24 @@
+<div class = "{{display_mode}}" ng-init='getCategories()'  >
+  <div class="container" >
+    <h3>DOCUMENT CATEGORIES</h3>
+    <hr>
+    <a href ="#watch-orders" style="width:20%" class="btn btn-lg btn-success center-block">
+      <span class="glyphicon glyphicon-pushpin"></span>  View Watch Orders
+    </a href>
+
+    <div class="row">
+      <div class="cat col-lg-4" ng-repeat='c in categories'>
+        <a href='#/documents/{{c.name}}' >
+          <div class= "cat-holder {{display_mode}}">
+            <div class = 'cat-pendingCount' data-badge = "{{ pending_count[c.name]? pending_count[c.name] : 0 }}"  >
+            </div>
+            <div class='cat-name'>{{c.name}}</div>
+          </div>
+        </a>
+        <div>
+          <a class="archive-link" href='#/documents/{{c.name}}/archived'><i class="fa fa-archive fa-fw" aria-hidden="true"></i>&nbsp; Archived</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

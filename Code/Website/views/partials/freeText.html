@@ -1,0 +1,111 @@
+<div class='col-sm-8 text-left'>
+	<h3>Free Message Upload</h3>
+	<hr>
+
+	<!-- Upload Document Panel -->
+	<div class='panel panel-primary {{display_mode}}'>
+		<div class='panel-heading'><label>Message Description <span class="glyphicon glyphicon-file"></span></label></div>
+		<div class='panel-body'>
+			<div>
+				<!-- Upload Document Form -->
+				<form method="post" action="../app/php/postMessage.php">
+					<label>Message Title: </label>
+					<input class='form-control fields {{display_mode}}' type="text" 
+							name="freeTitle" />
+						<br>
+					<label>Message: </label>
+					<textarea class='form-control fields {{display_mode}}'
+							  style='width:100%'
+							  rows="15" name='freeMsg' placeholder="Free Message ..." required />
+					</textarea>
+					<input type='hidden' name='message_by' value="{{id}}" />
+
+					<br><br>
+					<button type='submit' class='btn btn-success'><span class="glyphicon glyphicon-upload"></span> Post Message</button>
+					  <!-- success/error message for login function -->
+					<br>
+				</form>
+			</div>
+		</div>
+	</div>
+
+	<div class='panel panel-primary' ng-init='getMessages()'>
+		<div class='panel-heading'>Edit Messages</div>
+
+		<!-- TO DO: Overflow not detected until page reloads -->
+		<div class='panel-body {{display_mode}}' style="height:350px; overflow-y:scroll">
+			<div>
+				<table class="table table-striped {{display_mode}} table-hover" style='margin:auto; width:100%'>
+					<form class="form-inline">
+						<div class="form-group">
+							<!-- <label>Message</label> -->
+							<label>Search</label>
+							<input  type="text" ng-model="msgSearch" class="form-control fields {{display_mode}}" placeholder="Search">
+							</select>
+						</div>
+					</form>
+					<thead>
+						<tr>
+							<th class="text-center">#</th>
+							<th ng-click="sortTable('id')">Message ID</th>
+							<th ng-click="sortTable('officer_id')">Officer</th>
+							<th ng-click="sortTable('title')">Title</th>
+							<th ng-click="sortTable('created_at')">Created At</th>
+							<th ng-click="sortTable('updated_at')">Updated At</th>
+							<th class="text-center">Edit</th>
+						</tr>
+					</thead>
+					<tbody>
+						<!-- <tr ng-repeat='d in documents | orderBy:orderBy |filter:cat_filter.name'> -->
+						<tr {{display_mode}} ng-repeat="m in messages | orderBy:orderBy | filter:msgSearch">
+							<td class='text-center'>{{$index + 1}}</td>
+							<td>{{m.id}}</td>
+							<td>{{m.officer_id}}</td>
+							<td>{{m.title}}</td>
+							<td>{{m.created_at}}</td>
+							<td>{{m.updated_at}}</td>
+							<td class='text-center'><button class="btn-default" ng-click="editMessage(m.id,d.name,d.pinned,d.cat_name)"><span class="glyphicon glyphicon-edit"></span> Edit</button></td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+	<div class="modal fade" id="editModal" role="dialog" ng-controller='supervisorCtrl'>
+		<div class="modal-dialog ">
+
+			<!-- Modal content-->
+			<div class="modal-content {{display_mode_modal}}" >
+				<div class="modal-header " style="padding:15px 15px;">
+					<button type="button" class="close" data-dismiss="modal" ng-click='updateErrorMessage = updateSuccessMessage = false'>&times;</button>
+					<h4><span class="glyphicon glyphicon-pencil"></span> Edit Document</h4>
+				</div>
+				<div class="modal-body" style="padding:40px 50px;">
+					<br>
+					<form role="form" ng-submit='updateDocument()'>
+						<div class="form-group">
+							<label>Document Name</label>
+							<input type="text" class="form-control fields {{display_mode_modal}}" ng-model='doc_name' required>
+						</div>
+						<div class="form-group" >
+							<label>Categories</label>
+                            <select class="form-control fields {{display_mode_modal}}" name="category_id"
+                                    ng-options='category as category.name for category in categories track by category.name' ng-model='doc_cat_name'>
+					</select>
+						</div>
+						<div class="form-group">
+							<label>Pinned</label>
+							<input type="checkbox" class="form-control"  ng-model='doc_pinned' >
+						</div>
+
+						<br>
+						<!-- TO DO: Don't show successful update message when no changes were made to the user -->
+						<button type="submit" class="btn btn-success btn-block">Update</button>
+						<br>
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!--<iframe width="0" height="0" border="0" name="dummyframe" id="dummyframe" style="display:none"</iframe>-->
+</div>

@@ -1,0 +1,14 @@
+<div class='col-sm-10 text-left' style="height: 800px">
+  <h3>Logs</h3>
+
+  <!-- success/error message for reset password function -->
+  <div uib-alert ng-repeat="a in alert.alerts" ng-class="'alert-' + a.type" close="alert.closeAlert($index)">{{a.msg}}</div>
+
+  <!-- RESET PASSWORD PANEL -->
+  <!-- populate the reset password table on page load with list of officers -->
+  <div class='panel panel-primary {{display_mode}}' ng-init='getlogs()' style="height: 800px, color:black">
+    <div class='panel-body'>
+      <div ui-grid="gridOptions " ui-grid-selection ui-grid-exporter class="grid"></div>
+    </div>
+  </div>
+</div>

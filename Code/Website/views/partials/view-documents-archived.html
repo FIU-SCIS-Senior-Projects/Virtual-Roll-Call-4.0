@@ -1,0 +1,102 @@
+<div style="margin: auto; width: 75%">
+	<h3>{{selected_cat}} {{nightM}}</h3>
+	<hr class="style18"> 	
+	<section class="design-process-section" id="process-tab">
+	  <div class="container">
+	    <div class="row">
+	      <div class="col-xs-12"> 
+	        <!-- design process steps--> 
+	        <!-- Nav tabs -->
+	        <ul class="nav nav-tabs process-model more-icon-preocess" role="tablist">
+	          <li role="presentation" class="active">
+	            <a href="#" style="cursor:pointer;" aria-controls="discover" role="tab" data-toggle="tab">
+	              	<i class="fa fa-qrcode" aria-hidden="true"></i><p>Categories </p>
+	            </a>
+	          </li>
+	          <li role="presentation">
+	          		<i class="fa fa-clipboard" aria-hidden="false"></i>
+	            	<p><b>{{selected_cat}}</b></p>
+	          </li>
+	           <li role="presentation">
+	           		<i class="fa fa-file-archive-o" aria-hidden="true"></i>
+	            <p><b>Archives</b></p>
+	       		</li>
+	        </ul>
+	        <!-- end design process steps--> 
+	        <!-- Tab panes -->
+	        </div>
+	      </div>
+	    </div>
+	  </div>
+	</section>
+</div>
+
+<div style="margin: auto; width: 75%" ng-init='getArchivedDocuments( id )'>
+	<div class='panel panel-primary {{display_mode}}'>
+			<div class='panel-heading'>Archived Documents</div>
+
+			<div class='panel-body'>
+				<div class="row">
+					<div class="cat col-lg-4"  ng-repeat='d in unpinned_documents'>
+						<div class="panel panel-default {{display_mode}}" >
+							<div class="panel-heading {{display_mode}}">
+								{{d.name}}
+								<span class="label label-default label-as-badge {{d.status}}" >{{d.status}}</span>
+							</div>
+							<div class="panel-body">
+								<div class="row">
+									<div class="col-md-3">
+										<i class="fa fa-file-text fa-5x" ng-click="document_log(id, d.id, d.catid, 'unpinned', d.status)"
+										   class="btn btn-info btn-lg" 
+										   data-toggle="modal" data-target="#{{d.id}}" style="color: #2780e3; cursor: pointer;"></i>
+									  <!-- Modal -->
+									  <div class="modal fade" id="{{d.id}}" role="dialog">
+									    <div class="modal-dialog modal-lg" style="width:98%;">
+									      <div class="modal-content" >
+									        <div class="modal-header">
+									          <button type="button" class="close" data-dismiss="modal">&times;</button>
+									          <h4 class="modal-title">
+									          	<b>{{ selected_cat == 'Free Text' ? 'Quick Message ...' : d.name}}</b>
+									          </h4>
+									        </div>
+									        <div class="modal-body" style="width:98%; min-height:700px; height:100%;" >
+									          <iframe align="center" style="margin:0 auto; position:absolute; border: 0; height:98%; width:100%;" 
+									          		  src='{{ selected_cat == "Free Text" 
+									          		  			? "../app/php/download-message.php?message_id=" + d.id 
+									          		  			: "../app/php/download-document.php?upload_name=" + d.upload_name }}'></iframe>
+									        </div>
+									        <div class="modal-footer">
+									          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+									        </div>
+									      </div>
+									    </div>
+									  </div>
+									</div>
+									<div class="col-md-9">
+										<p>{{d.doc_description}}<br>
+											<a style='cursor: pointer' ng-click="takeQuiz(d.name, d.questions, id, d.id, d.catid, d.status, d.answers, d.score)">
+											<span class='{{d.quiz ? "glyphicon glyphicon-new-window" : "" }}'></span> {{ d.quiz ? "Quiz" : "" }}
+											</a>
+									</div>
+								</div>
+
+								<div class="row">
+									<div class="col-md-9 acknowledge {{display_mode}}">
+										<p style="font-size: small;"><br>I have read and understood the content of this document.</p>
+									</div>
+									<div class="col-md-3">
+										<input style="height: 30px;width: 30px;" 
+											   type="checkbox" class="form-check-input pull-right" 
+											   ng-model="d.isDone" ng-disabled="d.doneDisable || d.quiz" 
+											   ng-click="documentStatusUpdate(id, d.id, d.catid, 'unpinned', d.status)">
+									</div>
+								</div>
+
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>

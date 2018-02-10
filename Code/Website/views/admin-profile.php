@@ -1,4 +1,9 @@
-<?php session_start(); ?>
+<?php
+session_start();
+if(!isset($_SESSION["officer_role"])){
+header('location: ../views/');
+}
+?>
 <!DOCTYPE html>
 <html ng-app='admin' lang='en'>
 <head>

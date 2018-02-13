@@ -131,11 +131,67 @@ sharedModule.controller('sharedCtrl', ['$scope', 'sharedService', 'localStorageS
           tmp.lastName = data[x].lastName;
           tmp.username = data[x].username;
           tmp.role = data[x].role;
+          tmp.shift_name = data[x].shift_name;
+          tmp.shift_id = data[x].shift_id;
           //store results in officers
           officers.push(tmp);
         }
         //update value in view for use in ng-repeat (to populate)
         $scope.officers = officers;
+      },
+      function (error) {
+        console.log('Error: ' + error);
+      });
+  };
+
+
+  /***** GET ALL SHIFTS *****/
+  self.getShifts = function () {
+    sharedService.getShifts()
+      .then( function (data) {
+        //initialize an empty array to store results from the database
+        var shifts = [];
+        //for each shift in the result
+        for (var x in data) {
+          //create an object and set object properties (i.e. shift data)
+          var tmp = new Object();
+          tmp.id = data[x].id;
+          tmp.shift_name = data[x].sName;
+          tmp.from_time = data[x].fTime;
+          tmp.to_time = data[x].tTime;
+          tmp.status = data[x].sStatus;
+          //store results in shifts
+          shifts.push(tmp);
+        }
+        //update value in view for use in ng-repeat (to populate)
+        $scope.shifts = shifts;
+      },
+      function (error) {
+        console.log('Error: ' + error);
+      });
+  };
+
+
+
+    /***** GET ACTIVE SHIFTS FOR USER *****/
+  self.getActiveShifts = function () {
+    sharedService.getShifts()
+      .then( function (data) {
+        //initialize an empty array to store results from the database
+        var shifts = [];
+        //for each shift in the result
+        for (var x in data) {
+          //create an object and set object properties (i.e. shift data)
+          var tmp = new Object();
+          tmp.id = data[x].id;
+          tmp.shift_name = data[x].sName;
+          //store results in shifts
+          if (data[x].sStatus === "1"){
+              shifts.push(tmp);
+          }
+        }
+        //update value in view for use in ng-repeat (to populate)
+        $scope.shifts = shifts;
       },
       function (error) {
         console.log('Error: ' + error);

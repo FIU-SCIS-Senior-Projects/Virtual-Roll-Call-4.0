@@ -117,6 +117,7 @@ header('location: ../views/');
           <li data-ng-class="{active: isActive('/categories')}"><a href='#categories'>Document Categories</a></li>
           <li data-ng-class="{active: isActive('/settings')}"><a href='#settings'>Site Settings</a></li>
           <li data-ng-class="{active: isActive('/archive')}"><a href='#archive'>Archive Documents</a></li>
+          <li data-ng-class="{active: isActive('/shift-management')}"><a href='#shift-management'>Shift Management</a></li>
         </ul>
       </div>
       <div class='col-sm-10' >

@@ -135,20 +135,42 @@ class DBHandler
 	{
 		global $db_connection;
 		$officers = [];
-		$stmt = $db_connection->prepare( 'SELECT userID, First_Name, Last_Name, Username, Role FROM OFFICERS' );
+		$stmt = $db_connection->prepare( 'SELECT A.userID, A.First_Name, A.Last_Name, A.Username, A.Role, B.Name FROM OFFICERS A, SHIFTS B WHERE A.Shift_id = B.Id' );
 		$stmt->execute();
-		$stmt->bind_result( $userID, $First_Name, $Last_Name, $Username, $Role );
+		$stmt->bind_result( $userID, $First_Name, $Last_Name, $Username, $Role, $Shift_name);
 		while($stmt->fetch())
 		{
 			$tmp = ["id" => $userID,
 					"firstName" => $First_Name, "lastName" => $Last_Name,
-					"username" => $Username, "role" => $Role];
+					"username" => $Username, "role" => $Role, 'shift_name' => $Shift_name];
 			array_push($officers, $tmp);
 		}
 		$stmt->close();
 		$db_connection->close();
 		return $officers;
 	}
+
+	function getShifts(){
+		global $db_connection;
+		$shifts = [];
+		$stmt = $db_connection->prepare( 'SELECT Id, Name, From_time, To_time, Status FROM SHIFTS' );
+		$stmt->execute();
+		$stmt->bind_result($Id, $Name, $From_time, $To_time, $Status);
+		while($stmt->fetch())
+		{
+			$tmp = ["id" => $Id,
+					"sName" => $Name, 
+					"fTime" => $From_time,
+					"tTime" => $To_time,
+					"sStatus" => $Status];
+			array_push($shifts, $tmp);
+		}
+		$stmt->close();
+		$db_connection->close();
+		return $shifts;
+	}
+
+
 
 	/*******************
 			HELPER FUNCTIONS
@@ -286,15 +308,15 @@ class DBHandler
 	}
 
   //ADD NEW USER TO DATABASE
-	function addUser($first_name, $last_name, $username, $password, $role) {
+	function addUser($first_name, $last_name, $username, $password, $role, $shift) {
 		global $db_connection;
 		global $crypter;
 		$hash_password = $crypter->hash($password);
 
 		$result = ['Added' => false,'Username' => $username, 'Password' => $hash_password];
-		$sql = "INSERT INTO OFFICERS (First_Name, Last_Name, Username, Password, Role) VALUES (?,?,?,?,?)";
+		$sql = "INSERT INTO OFFICERS (First_Name, Last_Name, Username, Password, Role, Shift_id) VALUES (?,?,?,?,?,?)";
 		$stmt = $db_connection->prepare($sql);
-		if (!$stmt->bind_param('sssss', $first_name, $last_name, $username, $hash_password, $role))
+		if (!$stmt->bind_param('ssssss', $first_name, $last_name, $username, $hash_password, $role, $shift))
 			echo "Binding parameters failed: (" . $stmt->errno . ") " . $stmt->error;
 		if (!$stmt->execute())
 			return $result;
@@ -305,14 +327,14 @@ class DBHandler
 		return $result;
 	}
 
-	function editUser($id, $first_name, $last_name, $username, $role) {
+	function editUser($id, $first_name, $last_name, $username, $role, $shift) {
 		global $db_connection;
 		$result = ["Updated" => false];
 		$table = "OFFICERS";
-		$sql = "UPDATE $table SET First_Name=?, Last_Name=?, Username=?, Role=?
+		$sql = "UPDATE $table SET First_Name=?, Last_Name=?, Username=?, Role=?, Shift_id = ?
 		        WHERE userID=?";
 		$stmt = $db_connection->prepare($sql);
-		if( !$stmt->bind_param('ssssd', $first_name, $last_name, $username, $role, $id) )
+		if( !$stmt->bind_param('sssssd', $first_name, $last_name, $username, $role, $shift, $id) )
 		{
 			return $result;
 		}
@@ -464,6 +486,71 @@ class DBHandler
 		$db_connection->close();
 		return $result;
 	}
+
+
+
+	 //ADD NEW SHIFT TO DATABASE
+	function addShift($shift_name, $from_time, $to_time, $status) {
+		global $db_connection;
+
+		$result = ['Added' => false,'Name' => $shift_name, 'From_time' => $from_time, 'To_time' => $to_time, 'Status' => $status];
+		$sql = "INSERT INTO SHIFTS (Name, From_time, To_time, Status) VALUES (?,?,?,?)";
+		$stmt = $db_connection->prepare($sql);
+		if (!$stmt->bind_param('ssss', $shift_name, $from_time, $to_time, $status))
+			echo "Binding parameters failed: (" . $stmt->errno . ") " . $stmt->error;
+		if (!$stmt->execute())
+			return $result;
+
+    	$result['Added'] = true;
+		$stmt->close();
+		$db_connection->close();
+		return $result;
+	}
+
+
+
+	function editShift($id, $shift_name, $from_time, $to_time, $status) {
+		global $db_connection;
+		$result = ["Updated" => false];
+		$table = "SHIFTS";
+		$sql = "UPDATE $table SET Name=?, From_time=?, To_time=?, Status=?
+		        WHERE Id=?";
+		$stmt = $db_connection->prepare($sql);
+		if( !$stmt->bind_param('ssssd', $shift_name, $from_time, $to_time, $status, $id) )
+		{
+			return $result;
+		}
+		if (!$stmt->execute())
+		{
+			return $result;
+		}
+		$result["Updated"] = true;
+		$stmt->close();
+		$db_connection->close();
+		return $result;
+	}
+
+	function removeShift($id) {
+		global $db_connection;
+		$result = ["Removed" => false];
+		$table = "SHIFTS";
+		$sql = "DELETE FROM $table
+		        WHERE Id=?";
+		$stmt = $db_connection->prepare($sql);
+		if( !$stmt->bind_param('d', $id) )
+		{
+			return $result;
+		}
+		if (!$stmt->execute())
+		{
+			return $result;
+		}
+		$result["Removed"] = true;
+		$stmt->close();
+		$db_connection->close();
+		return $result;
+	}
+
 
 	//GET ALL MESSAGES FROM THE DATABASE
 	function getMessages( $user_id )

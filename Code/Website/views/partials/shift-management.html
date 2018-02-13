@@ -1,0 +1,241 @@
+<div class='col-sm-8 text-left' >
+	<h3>Shift Management</h3>
+	<hr>
+
+	<div uib-alert ng-repeat="a in alert.alerts" ng-class="'alert-' + a.type" close="alert.closeAlert($index)">{{a.msg}}</div>
+
+	<div class='panel panel-primary {{display_mode}}'>
+		<div class='panel-heading'>Add Shift</div>
+		<div class='panel-body'>
+
+
+			<!-- Add Shift Form -->
+			<form ng-submit='addShift()'>
+
+				<label>Shift Name</label>
+				<br>
+				<input class='fields {{display_mode}}' type='text' ng-model='sName' required>
+				<br>
+				<br>
+				<label>From</label>
+				<br>
+					<select class='fields {{display_mode}}' ng-model='fTime' required>
+					<option value='00:00'>00:00:00</option>
+					<option value='1:00'>01:00:00</option>
+					<option value='2:00'>02:00:00</option>
+					<option value='3:00'>03:00:00</option>
+					<option value='4:00'>04:00:00</option>
+					<option value='5:00'>05:00:00</option>
+					<option value='6:00'>06:00:00</option>
+					<option value='7:00'>07:00:00</option>
+					<option value='8:00'>08:00:00</option>
+					<option value='9:00'>09:00:00</option>
+					<option value='10:00'>10:00:00</option>
+					<option value='11:00'>11:00:00</option>
+					<option value='12:00'>12:00:00</option>
+					<option value='13:00'>13:00:00</option>
+					<option value='14:00'>14:00:00</option>
+					<option value='15:00'>15:00:00</option>
+					<option value='16:00'>16:00:00</option>
+					<option value='17:00'>17:00:00</option>
+					<option value='18:00'>18:00:00</option>
+					<option value='19:00'>19:00:00</option>
+					<option value='20:00'>20:00:00</option>
+					<option value='21:00'>21:00:00</option>
+					<option value='22:00'>22:00:00</option>
+					<option value='23:00'>23:00:00</option>
+				</select>
+				<br>
+				<br>
+				<label>To</label>
+				<br>
+					<select class='fields {{display_mode}}' ng-model='tTime' required>
+						<option value='00:00'>00:00:00</option>
+						<option value='1:00'>01:00:00</option>
+						<option value='2:00'>02:00:00</option>
+						<option value='3:00'>03:00:00</option>
+						<option value='4:00'>04:00:00</option>
+						<option value='5:00'>05:00:00</option>
+						<option value='6:00'>06:00:00</option>
+						<option value='7:00'>07:00:00</option>
+						<option value='8:00'>08:00:00</option>
+						<option value='9:00'>09:00:00</option>
+						<option value='10:00'>10:00:00</option>
+						<option value='11:00'>11:00:00</option>
+						<option value='12:00'>12:00:00</option>
+						<option value='13:00'>13:00:00</option>
+						<option value='14:00'>14:00:00</option>
+						<option value='15:00'>15:00:00</option>
+						<option value='16:00'>16:00:00</option>
+						<option value='17:00'>17:00:00</option>
+						<option value='18:00'>18:00:00</option>
+						<option value='19:00'>19:00:00</option>
+						<option value='20:00'>20:00:00</option>
+						<option value='21:00'>21:00:00</option>
+						<option value='22:00'>22:00:00</option>
+						<option value='23:00'>23:00:00</option>
+					</select>
+				<br>
+				<br>
+				<label>Status</label>
+				<br>
+					<select class='fields {{display_mode}}' ng-model='sStatus' required>
+						<option value='1'>Active</option>
+						<option value='0'>Inactive</option>
+					</select>
+				<br>
+				<br>
+				<button type='submit' class='btn btn-success'>Add Shift</button>
+				<br>
+				<br>
+
+				<!-- display message accordingly -->
+				<div class='alert alert-danger' ng-show='errorMessage' style='margin-bottom: 0'>
+					{{message}}
+				</div>
+				<div class='alert alert-success' ng-show='successMessage' style='margin-bottom: 0'>
+					{{message}}
+				</div>
+			</form>
+		</div>
+	</div>
+
+
+	<!-- Edit Shift Panel -->
+	<div class='panel panel-primary' ng-init='getShifts()'>
+		<div class='panel-heading'>Edit Shift</div>
+
+		<!-- TO DO: Overflow not detected until page reloads -->
+		<div class='panel-body {{display_mode}}' style="height:350px; overflow-y:scroll">
+			<div>
+				<table class="table table-striped {{display_mode}} table-hover" style='margin:auto; width:100%'>
+					<form class="form-inline">
+						<div class="form-group">
+							<label>Search</label>
+							<input type="text" ng-model="search" class="form-control fields {{display_mode}}" placeholder="Search">
+						</div>
+					</form>
+					<thead>
+						<tr>
+							<th class="text-center">#</th>
+							<th>Shift Name</th>
+							<th>From Time</th>
+							<th>To Time</th>
+							<th>Status</th>
+							<th class="text-center">Edit</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr {{display_mode}} ng-repeat='o in shifts|filter:search'>
+							<td class='text-center'>{{$index + 1}}</td>
+							<td>{{o.shift_name}}</td>
+							<td>{{o.from_time}}</td>
+							<td>{{o.to_time}}</td>
+							<td>{{o.status == '1' ? "Active" : "Inactive"}}</td>
+							<!-- <td>{{o.status}}</td> -->
+							<td class='text-center'><button class="btn-default" ng-click='editShift(o.id, o.shift_name, o.from_time, o.to_time, o.status)'><span class="glyphicon glyphicon-edit"></span> Edit</button></td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+
+	<!-- Edit Shift Modal -->
+	<div class="modal fade" id="editModal" role="dialog">
+		<div class="modal-dialog">
+
+			<!-- Modal content-->
+			<div class="modal-content {{display_mode_modal}}">
+				<div class="modal-header" style="padding:15px 15px;">
+					<button type="button" class="close" data-dismiss="modal" ng-click='updateErrorMessage = updateSuccessMessage = false'>&times;</button>
+					<h4><span class="glyphicon glyphicon-pencil"></span> Edit Shifts</h4>
+				</div>
+				<div class="modal-body" style="padding:40px 50px;">
+					<button ng-click='removeShift()' class="btn btn-danger pull-right"><span class="glyphicon glyphicon-remove"></span> Delete Shift</button>
+					<br>
+					<br>
+					<form role="form" ng-submit='updateShift()'>
+						<div class="form-group">
+							<label>Shift Name</label>
+							<input type="text" class="form-control fields {{display_mode_modal}}" ng-model='updateName' required>
+						</div>
+						<div class="form-group">
+							<label>From Time</label>
+								<select class="form-control fields {{display_mode_modal}}" ng-model='updateFrom' required>
+									<option value='00:00:00'>00:00:00</option>
+									<option value='01:00:00'>01:00:00</option>
+									<option value='02:00:00'>02:00:00</option>
+									<option value='03:00:00'>03:00:00</option>
+									<option value='04:00:00'>04:00:00</option>
+									<option value='05:00:00'>05:00:00</option>
+									<option value='06:00:00'>06:00:00</option>
+									<option value='07:00:00'>07:00:00</option>
+									<option value='08:00:00'>08:00:00</option>
+									<option value='09:00:00'>09:00:00</option>
+									<option value='10:00:00'>10:00:00</option>
+									<option value='11:00:00'>11:00:00</option>
+									<option value='12:00:00'>12:00:00</option>
+									<option value='13:00:00'>13:00:00</option>
+									<option value='14:00:00'>14:00:00</option>
+									<option value='15:00:00'>15:00:00</option>
+									<option value='16:00:00'>16:00:00</option>
+									<option value='17:00:00'>17:00:00</option>
+									<option value='18:00:00'>18:00:00</option>
+									<option value='19:00:00'>19:00:00</option>
+									<option value='20:00:00'>20:00:00</option>
+									<option value='21:00:00'>21:00:00</option>
+									<option value='22:00:00'>22:00:00</option>
+									<option value='23:00:00'>23:00:00</option>
+								</select>
+						</div>
+						<div class="form-group">
+							<label>To Time</label>
+								<select class="form-control fields {{display_mode_modal}}" ng-model='updateTo' required>
+									<option value='00:00:00'>00:00:00</option>
+									<option value='01:00:00'>01:00:00</option>
+									<option value='02:00:00'>02:00:00</option>
+									<option value='03:00:00'>03:00:00</option>
+									<option value='04:00:00'>04:00:00</option>
+									<option value='05:00:00'>05:00:00</option>
+									<option value='06:00:00'>06:00:00</option>
+									<option value='07:00:00'>07:00:00</option>
+									<option value='08:00:00'>08:00:00</option>
+									<option value='09:00:00'>09:00:00</option>
+									<option value='10:00:00'>10:00:00</option>
+									<option value='11:00:00'>11:00:00</option>
+									<option value='12:00:00'>12:00:00</option>
+									<option value='13:00:00'>13:00:00</option>
+									<option value='14:00:00'>14:00:00</option>
+									<option value='15:00:00'>15:00:00</option>
+									<option value='16:00:00'>16:00:00</option>
+									<option value='17:00:00'>17:00:00</option>
+									<option value='18:00:00'>18:00:00</option>
+									<option value='19:00:00'>19:00:00</option>
+									<option value='20:00:00'>20:00:00</option>
+									<option value='21:00:00'>21:00:00</option>
+									<option value='22:00:00'>22:00:00</option>
+									<option value='23:00:00'>23:00:00</option>
+							</select>
+						</div>
+						<div class="form-group">
+							<label>Status</label>
+							<select class="form-control fields {{display_mode_modal}}" ng-model='updateStatus' required>
+								<option value='0'>Inactive</option>
+								<option value='1'>Active</option>
+							</select>	
+						</div>
+						<br>
+						<!-- TO DO: Don't show successful update message when no changes were made to the user -->
+						<button type="submit" class="btn btn-success btn-block">Update</button>
+						<br>
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
+
+
+
+
+</div>	

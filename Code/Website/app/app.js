@@ -30,6 +30,14 @@ adminModule.config(function($routeProvider){
 		templateUrl: 'partials/archive.html',
 		controller: 'adminCtrl'
 	})
+	.when('/temp',{
+		templateUrl: 'partials/user-Temp.html',
+		controller: 'adminCtrl'
+	})
+	.when('/shift-management',{
+		templateUrl: 'partials/shift-management.html',
+		controller: 'adminCtrl'
+	})
 	.otherwise({
 		redirectTo: '/user-management'
 	});

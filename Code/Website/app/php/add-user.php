@@ -7,7 +7,8 @@ $last_name = $request->lName;
 $email = $request->email;
 $password = $request->password;
 $role = $request->role;
+$shift = $request->shift;
 $connection = new DBHandler();
-$result = $connection->addUser($first_name, $last_name, $email, $password, $role);
+$result = $connection->addUser($first_name, $last_name, $email, $password, $role, $shift);
 //convert the response to a json object
 die(json_encode($result));

@@ -65,6 +65,20 @@ sharedModule.factory('sharedService', function ($http, $q) {
           });
       });
     },
+
+    getShifts: function () {
+      return $q(function (resolve, reject) {
+        $http.post('../app/php/get-shifts.php', {})
+          .then(
+          function (response) {
+            resolve(response.data);
+          },
+          function (error) {
+            reject(error);
+          });
+      });
+    },
+
     getlogs: function () {
       return $q(function (resolve, reject) {
         $http.post('../app/php/get-logs.php', {})
@@ -116,8 +130,7 @@ loginModule.factory('dataService', function ($http, $q) {
           });
       });
     },
-    getTally: function( username )
-    {
+    getTally: function( username ){
         return $q(function (resolve) {
           $http.post('../app/php/get-tally.php', {'username': username})
               .then( function(response) { resolve(response.data); });
@@ -133,15 +146,13 @@ loginModule.factory('dataService', function ($http, $q) {
             );
       });
     },
-    lockUser: function (userid)
-    {
+    lockUser: function (userid){
         return $q(function (resolve) {
           $http.post('../app/php/lockUser.php', {'userid': userid})
             .then( function(response) { resolve(response.data); });
         });
     },
-    resetLock: function(userid)
-    {
+    resetLock: function(userid){
         return $q(function(resolve) {
           $http.post('../app/php/resetLock.php', {'userid': userid})
             .then( function(response) {
@@ -155,9 +166,10 @@ loginModule.factory('dataService', function ($http, $q) {
 //SERVICE for admin controller
 adminModule.factory('dataService', function ($http, $q) {
   return {
-    addUser: function (fname, lname, email, password, role) {
+
+    addUser: function (fname, lname, email, password, role, shift) {
       return $q(function (resolve, reject) {
-        $http.post('../app/php/add-user.php', { 'fName': fname, 'lName': lname, 'email': email, 'password': password, 'role': role })
+        $http.post('../app/php/add-user.php', { 'fName': fname, 'lName': lname, 'email': email, 'password': password, 'role': role , 'shift' : shift})
           .then(
           function (response) {
             resolve(response.data);
@@ -179,9 +191,9 @@ adminModule.factory('dataService', function ($http, $q) {
           });
       });
     },
-    updateUser: function (id, fname, lname, username, role) {
+    updateUser: function (id, fname, lname, username, role, shift) {
       return $q(function (resolve, reject) {
-        $http.post('../app/php/edit-user.php', { 'id': id, 'fName': fname, 'lName': lname, 'username': username, 'role': role })
+        $http.post('../app/php/edit-user.php', { 'id': id, 'fName': fname, 'lName': lname, 'username': username, 'role': role, 'shift' : shift})
           .then(
           function (response) {
             resolve(response.data);
@@ -203,6 +215,48 @@ adminModule.factory('dataService', function ($http, $q) {
           });
       });
     },
+
+
+
+    addShift: function (shift_name, from_time, to_time, status) {
+      return $q(function (resolve, reject) {
+        $http.post('../app/php/add-shift.php', { 'sName': shift_name, 'fTime': from_time, 'tTime': to_time, 'sStatus': status})
+          .then(
+          function (response) {
+            resolve(response.data);
+          },
+          function (error) {
+            reject(error);
+          });
+      });
+    },
+
+    updateShift: function (id, shift_name, from_time, to_time, status) {
+      return $q(function (resolve, reject) {
+        $http.post('../app/php/edit-shift.php', { 'id': id, 'sName': shift_name, 'fTime': from_time, 'tTime': to_time, 'sStatus': status })
+          .then(
+          function (response) {
+            resolve(response.data);
+          },
+          function (error) {
+            reject(error);
+          });
+      });
+    },
+
+    removeShift: function (id) {
+      return $q(function (resolve, reject) {
+        $http.post('../app/php/remove-shift.php', { 'id': id })
+          .then(
+          function (response) {
+            resolve(response.data);
+          },
+          function (error) {
+            reject(error);
+          });
+      });
+    },
+
     addCategory: function (new_cat) {
       return $q(function (resolve, reject) {
         $http.post('../app/php/add-category.php', { 'category': new_cat })

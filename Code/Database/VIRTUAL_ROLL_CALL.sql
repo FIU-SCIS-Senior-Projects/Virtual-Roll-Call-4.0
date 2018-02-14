@@ -1,11 +1,11 @@
 -- phpMyAdmin SQL Dump
--- version 4.7.4
+-- version 4.7.0
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost
--- Generation Time: Dec 11, 2017 at 05:12 AM
--- Server version: 10.1.26-MariaDB
--- PHP Version: 7.1.9
+-- Generation Time: Feb 14, 2018 at 05:36 AM
+-- Server version: 10.1.21-MariaDB
+-- PHP Version: 5.6.30
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 SET AUTOCOMMIT = 0;
@@ -21,8 +21,6 @@ SET time_zone = "+00:00";
 --
 -- Database: `virtual_roll_call`
 --
-CREATE DATABASE IF NOT EXISTS `virtual_roll_call` DEFAULT CHARACTER SET latin1 COLLATE latin1_swedish_ci;
-USE `virtual_roll_call`;
 
 -- --------------------------------------------------------
 
@@ -33,6 +31,17 @@ USE `virtual_roll_call`;
 CREATE TABLE `categories` (
   `Category_ID` int(10) UNSIGNED NOT NULL,
   `Category_Name` varchar(50) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `category_shift_access`
+--
+
+CREATE TABLE `category_shift_access` (
+  `Category_ID` int(10) NOT NULL,
+  `Shift_Id` int(2) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
@@ -125,6 +134,7 @@ CREATE TABLE `officers` (
   `Username` varchar(20) NOT NULL,
   `Password` varchar(60) NOT NULL,
   `Role` varchar(40) NOT NULL,
+  `Shift_id` int(2) NOT NULL,
   `Active` tinyint(1) NOT NULL DEFAULT '1'
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
@@ -169,6 +179,20 @@ CREATE TABLE `settings` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `shifts`
+--
+
+CREATE TABLE `shifts` (
+  `Id` int(2) NOT NULL,
+  `Name` varchar(10) NOT NULL,
+  `From_time` time(5) NOT NULL,
+  `To_time` time(5) NOT NULL,
+  `Status` varchar(1) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `user_doc_status`
 --
 
@@ -208,6 +232,12 @@ CREATE TABLE `watch_orders` (
 ALTER TABLE `categories`
   ADD PRIMARY KEY (`Category_ID`),
   ADD UNIQUE KEY `category_name` (`Category_Name`);
+
+--
+-- Indexes for table `category_shift_access`
+--
+ALTER TABLE `category_shift_access`
+  ADD PRIMARY KEY (`Category_ID`,`Shift_Id`);
 
 --
 -- Indexes for table `documents`
@@ -263,6 +293,12 @@ ALTER TABLE `quiz_logs`
   ADD PRIMARY KEY (`Id`);
 
 --
+-- Indexes for table `shifts`
+--
+ALTER TABLE `shifts`
+  ADD PRIMARY KEY (`Id`);
+
+--
 -- Indexes for table `user_doc_status`
 --
 ALTER TABLE `user_doc_status`
@@ -282,68 +318,62 @@ ALTER TABLE `watch_orders`
 -- AUTO_INCREMENT for table `categories`
 --
 ALTER TABLE `categories`
-  MODIFY `Category_ID` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
-
+  MODIFY `Category_ID` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 --
 -- AUTO_INCREMENT for table `documents`
 --
 ALTER TABLE `documents`
-  MODIFY `Document_ID` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=134;
-
+  MODIFY `Document_ID` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 --
 -- AUTO_INCREMENT for table `document_status`
 --
 ALTER TABLE `document_status`
-  MODIFY `Id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
-
+  MODIFY `Id` int(11) NOT NULL AUTO_INCREMENT;
 --
 -- AUTO_INCREMENT for table `login_logs`
 --
 ALTER TABLE `login_logs`
-  MODIFY `Log_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
-
+  MODIFY `Log_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=96;
 --
 -- AUTO_INCREMENT for table `logs`
 --
 ALTER TABLE `logs`
-  MODIFY `Id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=86;
-
+  MODIFY `Id` int(11) NOT NULL AUTO_INCREMENT;
 --
 -- AUTO_INCREMENT for table `messages`
 --
 ALTER TABLE `messages`
-  MODIFY `MessageId` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
-
+  MODIFY `MessageId` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
 --
 -- AUTO_INCREMENT for table `officers`
 --
 ALTER TABLE `officers`
-  MODIFY `UserID` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=95;
-
+  MODIFY `UserID` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=103;
 --
 -- AUTO_INCREMENT for table `quizzes`
 --
 ALTER TABLE `quizzes`
-  MODIFY `Id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
-
+  MODIFY `Id` int(11) NOT NULL AUTO_INCREMENT;
 --
 -- AUTO_INCREMENT for table `quiz_logs`
 --
 ALTER TABLE `quiz_logs`
-  MODIFY `Id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
-
+  MODIFY `Id` int(11) NOT NULL AUTO_INCREMENT;
+--
+-- AUTO_INCREMENT for table `shifts`
+--
+ALTER TABLE `shifts`
+  MODIFY `Id` int(2) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=31;
 --
 -- AUTO_INCREMENT for table `user_doc_status`
 --
 ALTER TABLE `user_doc_status`
-  MODIFY `Id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
-
+  MODIFY `Id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 --
 -- AUTO_INCREMENT for table `watch_orders`
 --
 ALTER TABLE `watch_orders`
-  MODIFY `Id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=275;
-
+  MODIFY `Id` int(10) NOT NULL AUTO_INCREMENT;
 --
 -- Constraints for dumped tables
 --

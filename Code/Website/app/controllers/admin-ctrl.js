@@ -47,6 +47,7 @@ adminModule.controller('adminCtrl', ['$scope', 'dataService', 'localStorageServi
 
   $scope.name = fname + ' ' + lname;
 
+
   $(document).on('show.bs.modal', '.modal', function (event) {
     var zIndex = 1040 + (10 * $('.modal:visible').length);
     $(this).css('z-index', zIndex);
@@ -54,7 +55,6 @@ adminModule.controller('adminCtrl', ['$scope', 'dataService', 'localStorageServi
       $('.modal-backdrop').not('.modal-stack').css('z-index', zIndex - 1).addClass('modal-stack');
     }, 0);
   });
-
 
   /***** SHARED FUNCTIONS *****/
   var sharedCtrl = $controller('sharedCtrl', {$scope: $scope});
@@ -77,6 +77,7 @@ adminModule.controller('adminCtrl', ['$scope', 'dataService', 'localStorageServi
   $scope.getShifts = function(){sharedCtrl.getShifts();};
   $scope.getActiveShifts = function(){sharedCtrl.getActiveShifts();};
   $scope.getCategories = function(){ sharedCtrl.getCategories(); };
+  $scope.populateMultiShifts = function(){sharedCtrl.populateMultiShifts();};
 
   /***********************
   * Toggle between day and night mode*
@@ -94,6 +95,16 @@ adminModule.controller('adminCtrl', ['$scope', 'dataService', 'localStorageServi
 
   //alert functions (displays accordingly in views)
   $scope.alert = sharedCtrl.alert;
+
+
+  /***** MULTISELECT GLOBAL SETTINGS *****/
+  $scope.shiftModel = []; 
+  $scope.shiftSettings = { 
+    checkBoxes: true, 
+    dynamicTitle: true, 
+    showUncheckAll: true, 
+    showCheckAll: true 
+  };
 
   /***** ADMINISTRATOR FUNCTIONS *****/
   /***** APPLY ACTIVE BS CLASS *****/

@@ -43,14 +43,14 @@ class DBHandler
 		$where_clause = '';
 
 		if ( $type == 'archived' )
-			$where_clause = " WHERE ((d.Upload_Date < (DATE(NOW()) - INTERVAL 7 DAY) AND d.Pinned = false) OR d.Manual_Archived = true) " ;
+			$where_clause = " WHERE s.IsArchived = 1 " ;
 		else if ( $type == 'active' )
-			$where_clause = " WHERE ((d.Upload_Date >= (DATE(NOW()) - INTERVAL 7 DAY) OR d.Pinned = true) AND d.Manual_Archived = false) ";
+			$where_clause = " WHERE (s.IsArchived = 0) or (d.document_id NOT IN (select uds.documentId from user_doc_status uds where uds.DocumentId = d.document_ID and uds.officerId = ?)) ";
 
 		$sql = "SELECT
 					d.document_id, d.document_name, d.category_id, d.upload_date,  d.pinned, d.uploaded_by, c.category_name, d.upload_name, d.description,
 					IFNULL(ds.Description, 'Pending') as status,
-					IF( ((d.upload_date < (DATE(now()) - INTERVAL 7 DAY) AND d.Pinned = false) OR d.manual_archived = true), 'Yes', 'No') AS archived,
+					IF((s.IsArchived = 1), 'Yes', 'No') AS archived,
 					d.has_quiz,
 					IFNULL(q.QA, '') AS questions,
 					IFNULL(ql.answers, '') AS answers,
@@ -59,14 +59,17 @@ class DBHandler
 				LEFT JOIN categories c ON d.category_id = c.category_id
     			LEFT JOIN quizzes q ON d.document_name = q.document_name
     			LEFT JOIN ( select answers, score, document_id from quiz_logs where officer_id = ? ) AS ql on ql.document_id = d.document_id
-    			LEFT JOIN ( select max(z.statusid) as statusid, z.DocumentId from user_doc_status z where z.OfficerId = ? group by z.documentid ) AS s on s.documentid = d.document_id
+    			 LEFT JOIN ( select z.statusid as statusid, z.DocumentId, z.IsArchived from user_doc_status z where z.id in (select max(z2.id) from user_doc_status z2 where z2.OfficerId = ? group by documentid) ) AS s on s.documentid = d.document_id
     			LEFT JOIN document_status ds ON s.statusid = ds.id "
     		 . $where_clause
     		 . " AND c.category_name = ? "
 			 . " ORDER BY d.upload_date DESC";
 
 		$stmt = $db_connection->prepare( $sql );
-		$stmt->bind_param('iis', $user_id, $user_id, $category);
+		if ( $type == 'archived' )
+			$stmt->bind_param('iis', $user_id, $user_id, $category);
+		else if ( $type == 'active' )
+			$stmt->bind_param('iiis', $user_id, $user_id, $user_id, $category);
 		$stmt->execute();
 		$stmt->bind_result($id, $name, $cat_id, $created_at, $pinned, $uploaded_by, $cat_name,
 						   $upload_name, $doc_description, $status, $archived, $quiz, $qa, $answers, $score);
@@ -793,7 +796,7 @@ class DBHandler
  				  WHERE document_id NOT IN
 							(select documentId from user_doc_status uds
 						     where uds.DocumentId = d.document_ID and officerId = ? )
-				  AND ((d.Upload_Date >= (DATE(NOW()) - INTERVAL 7 DAY) OR d.Pinned = true) AND d.Manual_Archived = false)
+				  AND d.Manual_Archived = false
 				  GROUP BY category_name
                   UNION
                   SELECT count(1), 'Free Text'
@@ -1084,8 +1087,8 @@ class DBHandler
 		//document is read by first time, status will be set to reviewed and start date time will be set as well
 		if( $insert )
 		{
-			$sql = "INSERT INTO USER_DOC_STATUS (StartDateTime, EndDateTime, DocumentId,OfficerId,StatusId, CategoryId)
-						   values(now(),now(),?,?,?,?) ";
+			$sql = "INSERT INTO USER_DOC_STATUS (StartDateTime, EndDateTime, DocumentId,OfficerId,StatusId, CategoryId, IsArchived)
+						   values(now(),now(),?,?,?,?,0) ";
 			$stmt = $db_connection->prepare($sql);
 			$stmt->bind_param('iiii',$document_id, $user_id, $new_status_id, $category_id);
 		}

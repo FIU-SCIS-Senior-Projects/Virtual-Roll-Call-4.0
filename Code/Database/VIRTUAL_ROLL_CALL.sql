@@ -203,6 +203,7 @@ CREATE TABLE `user_doc_status` (
   `CategoryId` int(11) NOT NULL,
   `StartDateTime` datetime NOT NULL,
   `EndDateTime` datetime NOT NULL,
+  `IsArchived` tinyint(4) NOT NULL,
   `Id` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
@@ -383,6 +384,26 @@ ALTER TABLE `watch_orders`
 --
 ALTER TABLE `documents`
   ADD CONSTRAINT `DOCUMENTS_ibfk_1` FOREIGN KEY (`Category_ID`) REFERENCES `categories` (`Category_ID`) ON DELETE CASCADE;
+COMMIT;
+
+
+--
+-- MySQL event called "MoveDocsToArchive", which is going to archive all documents older than 7 days and are marked as "Done"
+-- The event will run every day. Modify "Start Date" to the day when this schema will be deploy.
+--
+
+CREATE EVENT MoveDocsToArchive 
+	ON SCHEDULE EVERY 1 Day STARTS '2018-02-22 00:00:00' 
+    ON COMPLETION NOT PRESERVE ENABLE 
+    COMMENT 'Archive documents older than 7 days and that are marked as DONE' 
+    DO Update virtual_roll_call.user_doc_status, virtual_roll_call.documents
+		  set user_doc_status.IsArchived = 1
+		where user_doc_status.StatusId = 3 
+		  and documents.Upload_Date < (DATE(NOW()) - INTERVAL 7 DAY) 
+		  and user_doc_status.DocumentId = documents.Document_ID
+--
+-- Commit Action
+--
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

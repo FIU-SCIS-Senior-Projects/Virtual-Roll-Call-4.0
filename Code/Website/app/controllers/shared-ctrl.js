@@ -94,6 +94,7 @@ sharedModule.controller('sharedCtrl', ['$scope', 'sharedService', 'localStorageS
                 var tmp = new Object();
                 tmp.id = data[x].id;
                 tmp.name = data[x].name;
+                tmp.shifts = data[x].shifts;
                 categories.push(tmp);
                 if ( data[x].name !== "Free Text")
                   doc_categories.push(tmp);

@@ -257,9 +257,9 @@ adminModule.factory('dataService', function ($http, $q) {
       });
     },
 
-    addCategory: function (new_cat) {
+    addCategory: function (new_cat, shiftCodes) {
       return $q(function (resolve, reject) {
-        $http.post('../app/php/add-category.php', { 'category': new_cat })
+        $http.post('../app/php/add-category.php', { 'category': new_cat , 'shifts' : shiftCodes})
           .then(
           function (response) {
             resolve(response.data);
@@ -281,9 +281,9 @@ adminModule.factory('dataService', function ($http, $q) {
           });
       });
     },
-    updateCategory: function (cid, cname) {
+    updateCategory: function (cid, cname, shifts) {
       return $q(function (resolve, reject) {
-        $http.post('../app/php/update-category.php', { 'id': cid, 'name': cname })
+        $http.post('../app/php/update-category.php', { 'id': cid, 'name': cname, 'shifts': shifts})
           .then(
           function (response) {
             resolve(response.data);

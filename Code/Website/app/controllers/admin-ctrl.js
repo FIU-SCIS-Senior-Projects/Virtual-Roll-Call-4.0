@@ -472,8 +472,16 @@ adminModule.controller('adminCtrl', ['$scope', 'dataService', 'localStorageServi
   /***** ADD NEW CATEGORY *****/
   $scope.addCategory = function(new_cat){
     //get values from input fields
+    var category_shifts = $scope.shiftModel;
+    var shift_codes = [];
+
+    //populate shift_codes with all shift codes for this category
+    for (var i = 0 ; i<category_shifts.length ; i++){
+      shift_codes[i] = category_shifts[i].id;
+    }
+
     var category = new_cat;
-    dataService.addCategory(category)
+    dataService.addCategory(category, shift_codes)
     .then(
       function(data){
         //check for successful add and notify user accordingly
@@ -482,7 +490,7 @@ adminModule.controller('adminCtrl', ['$scope', 'dataService', 'localStorageServi
           $scope.alert.addAlert('success', 'Category successfully added!');
           sharedCtrl.getCategories();
           //clear input fields
-          $scope.new_category = '';
+          $scope.new_category = ''; 
         }
         else{
           //the add was unsucessful
@@ -534,7 +542,15 @@ adminModule.controller('adminCtrl', ['$scope', 'dataService', 'localStorageServi
 
     var id = $scope.updateID;
     var name = $scope.updateName;
-    dataService.updateCategory(id, name)
+    var category_shifts = $scope.shiftModel;
+    var shift_codes = [];
+
+    //populate shift_codes with all shift codes for this category
+    for (var i = 0 ; i<category_shifts.length ; i++){
+      shift_codes[i] = category_shifts[i].id;
+    }
+
+    dataService.updateCategory(id, name, shift_codes)
     .then(
       function(data){
         if(data['Updated'] === true){

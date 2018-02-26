@@ -47,6 +47,7 @@ adminModule.controller('adminCtrl', ['$scope', 'dataService', 'localStorageServi
 
   $scope.name = fname + ' ' + lname;
 
+
   $(document).on('show.bs.modal', '.modal', function (event) {
     var zIndex = 1040 + (10 * $('.modal:visible').length);
     $(this).css('z-index', zIndex);
@@ -54,7 +55,6 @@ adminModule.controller('adminCtrl', ['$scope', 'dataService', 'localStorageServi
       $('.modal-backdrop').not('.modal-stack').css('z-index', zIndex - 1).addClass('modal-stack');
     }, 0);
   });
-
 
   /***** SHARED FUNCTIONS *****/
   var sharedCtrl = $controller('sharedCtrl', {$scope: $scope});
@@ -77,6 +77,7 @@ adminModule.controller('adminCtrl', ['$scope', 'dataService', 'localStorageServi
   $scope.getShifts = function(){sharedCtrl.getShifts();};
   $scope.getActiveShifts = function(){sharedCtrl.getActiveShifts();};
   $scope.getCategories = function(){ sharedCtrl.getCategories(); };
+  $scope.populateMultiShifts = function(){sharedCtrl.populateMultiShifts();};
 
   /***********************
   * Toggle between day and night mode*
@@ -94,6 +95,16 @@ adminModule.controller('adminCtrl', ['$scope', 'dataService', 'localStorageServi
 
   //alert functions (displays accordingly in views)
   $scope.alert = sharedCtrl.alert;
+
+
+  /***** MULTISELECT GLOBAL SETTINGS *****/
+  $scope.shiftModel = []; 
+  $scope.shiftSettings = { 
+    checkBoxes: true, 
+    dynamicTitle: true, 
+    showUncheckAll: true, 
+    showCheckAll: true 
+  };
 
   /***** ADMINISTRATOR FUNCTIONS *****/
   /***** APPLY ACTIVE BS CLASS *****/
@@ -461,8 +472,16 @@ adminModule.controller('adminCtrl', ['$scope', 'dataService', 'localStorageServi
   /***** ADD NEW CATEGORY *****/
   $scope.addCategory = function(new_cat){
     //get values from input fields
+    var category_shifts = $scope.shiftModel;
+    var shift_codes = [];
+
+    //populate shift_codes with all shift codes for this category
+    for (var i = 0 ; i<category_shifts.length ; i++){
+      shift_codes[i] = category_shifts[i].id;
+    }
+
     var category = new_cat;
-    dataService.addCategory(category)
+    dataService.addCategory(category, shift_codes)
     .then(
       function(data){
         //check for successful add and notify user accordingly
@@ -471,7 +490,7 @@ adminModule.controller('adminCtrl', ['$scope', 'dataService', 'localStorageServi
           $scope.alert.addAlert('success', 'Category successfully added!');
           sharedCtrl.getCategories();
           //clear input fields
-          $scope.new_category = '';
+          $scope.new_category = ''; 
         }
         else{
           //the add was unsucessful
@@ -523,7 +542,15 @@ adminModule.controller('adminCtrl', ['$scope', 'dataService', 'localStorageServi
 
     var id = $scope.updateID;
     var name = $scope.updateName;
-    dataService.updateCategory(id, name)
+    var category_shifts = $scope.shiftModel;
+    var shift_codes = [];
+
+    //populate shift_codes with all shift codes for this category
+    for (var i = 0 ; i<category_shifts.length ; i++){
+      shift_codes[i] = category_shifts[i].id;
+    }
+
+    dataService.updateCategory(id, name, shift_codes)
     .then(
       function(data){
         if(data['Updated'] === true){

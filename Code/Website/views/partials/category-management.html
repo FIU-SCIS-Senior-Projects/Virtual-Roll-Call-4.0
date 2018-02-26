@@ -13,6 +13,15 @@
 				<label>Category</label>
 				<input type="text" ng-model="new_category" class="form-control fields {{display_mode}}" required>
 				<br>
+				<label>Shift Visibility</label><br>
+				<div>
+				    <div ng-init='populateMultiShifts()' ng-dropdown-multiselect=""
+				        options="shiftData" 
+				        selected-model="shiftModel"
+				        extra-settings="shiftSettings">
+				    </div>
+				</div>
+				<br>
 				<button type="submit" class="btn btn-success">Add</button>
 			</form>
 		</div>
@@ -34,6 +43,7 @@
 					<tr>
 						<th class="text-center">#</th>
 						<th>Category Name</th>
+						<th>Category Visibility</th>
 						<th class="text-center">Edit</th>
 					</tr>
 				</thead>
@@ -41,6 +51,7 @@
 					<tr ng-repeat='c in categories|filter:search'>
 						<td class='text-center'>{{$index + 1}}</td>
 						<td>{{c.name}}</td>
+						<td>{{c.shifts}}</td>
 						<td class='text-center'><button class="btn-default" ng-click='editCategory(c.id, c.name)'><span class="glyphicon glyphicon-edit"></span> Edit</button></td>
 					</tr>
 				</tbody>
@@ -66,6 +77,15 @@
 						<div class="form-group">
 							<label>Name</label>
 							<input type="text" class="form-control fields {{display_mode_modal}}" ng-model='updateName' required>
+						</div>
+						<br>
+						<label>New Shift Visibility</label><br>
+						<div>
+						    <div ng-init='populateMultiShifts()' ng-dropdown-multiselect=""
+						        options="shiftData" 
+						        selected-model="shiftModel"
+						        extra-settings="shiftSettings">
+						    </div>
 						</div>
 						<br>
 						<!-- TO DO: Don't show successful update message when no changes were made to the user -->

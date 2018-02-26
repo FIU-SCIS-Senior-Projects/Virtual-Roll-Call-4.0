@@ -37,8 +37,10 @@ header('location: ../views/');
   <script src='../app/controllers/admin-ctrl.js' type='text/javascript'></script>
   <script src='../app/services/data-service.js' type='text/javascript'></script>
   <script src="../app/vendor/ng-flow/dist/ng-flow-standalone.min.js"></script>
-
-    <script>
+  <script src="../app/vendor/angularjs-dropdown-multiselect.js"></script>
+  
+  
+  <script>
   $( function() {
     var dateFormat = "mm/dd/yy",
       from = $( "#from" )

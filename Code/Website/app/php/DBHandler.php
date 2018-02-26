@@ -773,12 +773,51 @@ class DBHandler
 	function getCategories(){
 		global $db_connection;
 		$categories = [];
+
+		//Get all category id and name. Add blanks temporarly for the shifts
 		$sql = "SELECT category_ID, Category_Name FROM CATEGORIES";
 		$stmt = $db_connection->prepare($sql);
 		$stmt->execute();
 		$stmt->bind_result($id, $name);
-		while($stmt->fetch())
-			array_push($categories, ["id" => $id, "name" => $name]);
+		while($stmt->fetch()) {
+			array_push($categories, ["id" => $id, "name" => $name, "shifts" => ""]);
+		}
+
+		//append the shifts for each category
+		$arrayCount = count($categories);
+		for ($i=0; $i <$arrayCount  ; $i++) {
+			$category_shift = []; 
+
+			//get category id
+			$cat_id = $categories[$i]['id'];
+
+			//execute new query
+			$sql2 = 'SELECT distinct s.Name FROM CATEGORY_SHIFT_ACCESS csa LEFT JOIN SHIFTS s ON csa.Shift_Id = s.Id WHERE csa.Category_ID = ?';
+			$stmt2 = $db_connection->prepare($sql2);
+			$stmt2->bind_param('i', $cat_id);
+			$stmt2->execute();
+			$stmt2->bind_result($shifts);
+
+			while($stmt2->fetch()) {
+				array_push($category_shift, ["shift" => $shifts]);
+			}
+
+			$category_shift = array_reverse($category_shift);
+			// convert the array of shifts to a string separated by coma
+			$shift_string = "";
+			for($j = 0 ; $j< count($category_shift) ; $j++){
+				if ($j == (count($category_shift) -1)){
+					$shift_string = $category_shift[$j]['shift'] . $shift_string;
+				}
+				else {
+					$shift_string = ", ". $category_shift[$j]['shift'] . $shift_string;
+				}
+			}
+
+		// append the string of shifts to the category array	
+			$categories[$i]['shifts'] = $shift_string;
+		}
+
 		$stmt->close();
 		$db_connection->close();
 		return $categories;
@@ -821,9 +860,11 @@ class DBHandler
 	}
 
 	//ADD NEW CATEGORY TO DATABASE
-	function addCategory($name) {
+	function addCategory($name, $shift) {
 		global $db_connection;
 		$result = ['Added' => false,'name' => $name];
+		
+		//***********INSERT NEW CATEGORY INTO CATEGORIES TABLE*****************
 		$sql = "INSERT INTO CATEGORIES (Category_Name) VALUES (?)";
 		$stmt = $db_connection->prepare($sql);
 		if (!$stmt->bind_param('s', $name)){
@@ -832,6 +873,37 @@ class DBHandler
 		if (!$stmt->execute()){
 			return $result;
 		}
+
+
+		//***********GET ID OF NEW CATEGORY CREATED*****************
+		$sql2 = "SELECT Category_ID FROM CATEGORIES WHERE Category_Name = (?)";
+		$stmt2 = $db_connection->prepare($sql2);
+		if (!$stmt2->bind_param('s', $name)){
+			echo "Binding parameters failed: (" . $stmt2->errno . ") " . $stmt2->error;
+		}
+		if (!$stmt2->execute()){
+			return $result;
+		}
+		$cat_id = array();
+		$stmt2->bind_result($id);
+		while ( $stmt2->fetch()) {
+			$cat_id[] = $id;
+		}
+		$cId = $cat_id[0];
+
+
+		// //***********INSERT NEW CATEGORY AND SHIFT(S) INTO CATEGORY_SHIFT_ACCESS TABLE**************
+		for ($i = 0 ; $i < count($shift); $i++){
+		$sql3 = "INSERT INTO CATEGORY_SHIFT_ACCESS(Category_ID, Shift_Id) VALUES (?, ?)";
+		$stmt3 = $db_connection->prepare($sql3);
+			if (!$stmt3->bind_param('ii', $cId, $shift[$i])){
+				echo "Binding parameters failed: (" . $stmt3->errno . ") " . $stmt3->error;
+			}
+			if (!$stmt3->execute()){
+				return $result;
+			}
+		}
+
         $result['Added'] = true;
 		$stmt->close();
 		$db_connection->close();
@@ -850,6 +922,17 @@ class DBHandler
 
 		if (!$stmt->execute())
 			return $result;
+
+
+		$sql2 = "DELETE FROM CATEGORY_SHIFT_ACCESS WHERE Category_ID = ?";
+		$stmt2 = $db_connection->prepare($sql2);
+		if( !$stmt2->bind_param('i', $cat_id) )
+			return $result;
+
+		if (!$stmt2->execute())
+			return $result;
+
+
 
 		$result["Removed"] = true;
 		$stmt->close();
@@ -896,9 +979,11 @@ class DBHandler
 	}
 
     //UPDATE CATEGORY IN THE DATABASE
-	function updateCategory($cat_id, $cat_name) {
+	function updateCategory($cat_id, $cat_name, $shift) {
 		global $db_connection;
 		$result = ["Updated" => false];
+
+		//****************UPDATE CATEGORIES TABLE*****************
 		$sql = "UPDATE CATEGORIES SET Category_Name=? WHERE category_ID=?";
 		$stmt = $db_connection->prepare($sql);
 		if( !$stmt->bind_param('sd', $cat_name, $cat_id)){
@@ -907,6 +992,29 @@ class DBHandler
 		if (!$stmt->execute()){
 			return $result;
 		}
+
+		//************REMOVE ALL ROWS FROM CATEGORY_SHIFT_ACCESS TABLES**********
+		$sql2 = "DELETE FROM CATEGORY_SHIFT_ACCESS WHERE Category_ID = ?";
+		$stmt2 = $db_connection->prepare($sql2);
+		if( !$stmt2->bind_param('i', $cat_id) )
+			return $result;
+
+		if (!$stmt2->execute())
+			return $result;
+
+
+		//************INSERT NEW SELECTIONS INTO CATEGORY_SHIFT_ACCESS TABLES**********
+		for ($i = 0 ; $i < count($shift); $i++){
+		$sql3 = "INSERT INTO CATEGORY_SHIFT_ACCESS(Category_ID, Shift_Id) VALUES (?, ?)";
+		$stmt3 = $db_connection->prepare($sql3);
+			if (!$stmt3->bind_param('ii', $cat_id, $shift[$i])){
+				echo "Binding parameters failed: (" . $stmt3->errno . ") " . $stmt3->error;
+			}
+			if (!$stmt3->execute()){
+				return $result;
+			}
+		}
+
 		$result["Updated"] = true;
 		$stmt->close();
 		$db_connection->close();

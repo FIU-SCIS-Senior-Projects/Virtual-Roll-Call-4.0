@@ -94,6 +94,7 @@ sharedModule.controller('sharedCtrl', ['$scope', 'sharedService', 'localStorageS
                 var tmp = new Object();
                 tmp.id = data[x].id;
                 tmp.name = data[x].name;
+                tmp.shifts = data[x].shifts;
                 categories.push(tmp);
                 if ( data[x].name !== "Free Text")
                   doc_categories.push(tmp);
@@ -197,6 +198,29 @@ sharedModule.controller('sharedCtrl', ['$scope', 'sharedService', 'localStorageS
         console.log('Error: ' + error);
       });
   };
+
+
+  /***** POPULATE SHIFTS IN MULTISELECT *****/
+  self.populateMultiShifts = function(){
+    sharedService.getShifts()
+    .then(function (data){
+      var tempShift =[];
+      //populate array with active shifts
+      for (var x in data){
+        var tmp = new Object();
+        tmp.id = data[x].id;
+        tmp.label = data[x].sName;
+        if (data[x].sStatus === "1"){
+          tempShift.push(tmp);
+        }
+      }
+      $scope.shiftData = tempShift;
+    },
+    function (error) {
+      console.log('Error: ' + error);
+    });
+  };
+
 
   /***** GET ALL MESSAGES *****/
   self.getMessages = function() {

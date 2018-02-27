@@ -1,4 +1,4 @@
-<div class = "{{display_mode}}" ng-init='getCategories()'  >
+<div class = "{{display_mode}}" ng-init='getAuthorizedCategories()'  >
   <div class="container" >
     <h3>DOCUMENT CATEGORIES</h3>
     <hr>
@@ -7,7 +7,7 @@
     </a href>
 
     <div class="row">
-      <div class="cat col-lg-4" ng-repeat='c in categories'>
+      <div class="cat col-lg-4" ng-repeat='c in authCategories'>
         <a href='#/documents/{{c.name}}' >
           <div class= "cat-holder {{display_mode}}">
             <div class = 'cat-pendingCount' data-badge = "{{ pending_count[c.name]? pending_count[c.name] : 0 }}"  >

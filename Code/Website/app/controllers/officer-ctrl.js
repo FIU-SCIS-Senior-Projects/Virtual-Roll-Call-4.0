@@ -31,6 +31,7 @@ officerModule.controller('officerCtrl', ['$scope', 'localStorageService', 'dataS
 
     $scope.getSiteNames = function () { sharedCtrl.getSiteNames(); };
     $scope.logout = function () { sharedCtrl.logout(); }
+    $scope.getAuthorizedCategories = function(){sharedCtrl.getAuthorizedCategories(id);};
     $scope.getCategories = function () 
     {  
         sharedCtrl.getCategories(); 

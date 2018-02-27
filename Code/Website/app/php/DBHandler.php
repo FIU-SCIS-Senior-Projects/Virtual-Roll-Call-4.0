@@ -823,6 +823,57 @@ class DBHandler
 		return $categories;
 	}
 
+
+
+   //************GET AUTHORIZED CATEGORIES*************************************
+	function getAuthorizedCategories($id){
+		global $db_connection;
+		$authCategories = [];
+		//Get shift id for the logged in officer
+		$sql = "SELECT Shift_id FROM OFFICERS WHERE userid = ?";
+		$stmt = $db_connection->prepare($sql);
+		$stmt->bind_param('i', $id);
+		$stmt->execute();
+		$stmt->bind_result($sId);
+		$shift_id = array();
+		while($stmt->fetch()) {
+			$shift_id[] = $sId;
+		}
+		$shiftId = $shift_id[0];
+
+		//if officer can see ALL shifts then get all categories
+		if ($shiftId == 1){
+			$sql2 = "SELECT Category_ID, Category_Name FROM CATEGORIES";
+			$stmt2 = $db_connection->prepare($sql2);
+			$stmt2->execute();
+			$stmt2->bind_result($cat_id, $name);
+			while($stmt2->fetch()) {
+				array_push($authCategories, ["id" => $cat_id, "name" => $name]);
+			}
+		}
+		//else, get only the authorized categories for that officer
+		else{
+			$sql3 = "SELECT Category_ID, Category_Name 
+					FROM categories c 
+					WHERE c.Category_ID in (
+											SELECT csa.Category_ID 
+											from category_shift_access csa, officers o 
+											where csa.Shift_Id = o.Shift_id and o.UserID = ?)";
+			$stmt3 = $db_connection->prepare($sql3);
+			$stmt3->bind_param('i', $id);
+			$stmt3->execute();
+			$stmt3->bind_result($cat_id, $name);
+			while($stmt3->fetch()) {
+				array_push($authCategories, ["id" => $cat_id, "name" => $name]);
+			}
+		}
+
+		$stmt->close();
+		$db_connection->close();
+		return $authCategories;
+
+	}
+
 	//GET PENDING DOCS BY CATEGORY
 	function getPendingDocs( $user_id )
 	{

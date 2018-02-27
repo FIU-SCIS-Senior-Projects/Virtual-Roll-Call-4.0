@@ -87,7 +87,7 @@ header('location: ../views/');
         <ul class='nav navbar-nav'>
           <li class='active'><a>Administrator</a></li>
           <li><a href='supervisor-profile.php#/upload'>Supervisor</a></li>
-          <li><a href='officer-profile.php#/categories'>Officer</a></li>
+          <li><a href='officer-profile.php#/categories'>Dashboard</a></li>
         </ul>
         <ul class='nav navbar-nav navbar-right'>
           <li class='dropdown'>

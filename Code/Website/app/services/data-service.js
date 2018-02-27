@@ -33,6 +33,16 @@ sharedModule.factory('sharedService', function ($http, $q) {
           function (error) { reject(error); });
       });
     },
+
+    getAuthorizedCategories: function (id) {
+      return $q(function (resolve, reject) {
+        $http.post('../app/php/get-authorized-categories.php', {'user_id': id})
+          .then(
+          function (response) { resolve(response.data); },
+          function (error) { reject(error); });
+      });
+    },
+
     getDocuments: function () {
       return $q(function (resolve, reject) {
         $http.post('../app/php/get-documents.php', {'type': 'all', 'user_id': 0, 'cat' : ''})

@@ -105,6 +105,30 @@ sharedModule.controller('sharedCtrl', ['$scope', 'sharedService', 'localStorageS
         function (error) {});
   };
 
+
+  self.getAuthorizedCategories= function (id){
+      sharedService.getAuthorizedCategories(id)
+        .then(
+        function (data) {
+            var authCategories = [];
+            var doc_categories = [];
+            for (var x in data)
+            {
+                var tmp = new Object();
+                tmp.id = data[x].id;
+                tmp.name = data[x].name;
+                authCategories.push(tmp);
+                if ( data[x].name !== "Free Text")
+                  doc_categories.push(tmp);
+            }
+            $scope.authCategories = authCategories;
+            $scope.doc_categories = doc_categories;
+        },
+        function (error) {});
+  };
+
+
+
   self.getPendingCount = function (id)
   {
       sharedService.getPendingCount( id )

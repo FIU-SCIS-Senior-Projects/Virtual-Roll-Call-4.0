@@ -70,7 +70,7 @@ header('location: ../views/');
           echo "<li><a href='admin-profile.php'>" . $_SESSION["officer_role"] . "</a></li>";
         ?>
         <li class='active'><a class='active'>Supervisor</a></li>
-        <li><a href='officer-profile.php'>Officer</a></li>
+        <li><a href='officer-profile.php'>Dashboard</a></li>
       </ul>
         <ul class='nav navbar-nav navbar-right'>
           <li class='dropdown'>

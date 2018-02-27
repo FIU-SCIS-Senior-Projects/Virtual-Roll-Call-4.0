@@ -63,7 +63,7 @@ header('location: ../views/');
                     echo "<li><a href='supervisor-profile.php'>Supervisor</a></li>";
             }
         ?>
-          <li class='active'><a class='active'>Officer</a></li>
+          <li class='active'><a class='active'>Dashboard</a></li>
         </ul>
         <ul class='nav navbar-nav navbar-right'>
           <li class='dropdown'>

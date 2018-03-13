@@ -1,0 +1,37 @@
+<div class='col-sm-8 text-left' >
+	<h3>Archived Watch Orders</h3>
+	<hr>
+	<div class='panel panel-primary' ng-init='getArchivedWatchOrders()'>
+		<div class='panel-heading'>Archived Watch Orders</div>
+		<div class='panel-body {{display_mode}}' style="height:350px; overflow-y:scroll">
+			<div>
+				<table class="table table-striped {{display_mode}} table-hover" style='margin:auto; width:100%'>
+					<form class="form-inline">
+						<div class="form-group">
+							<label>Search</label>
+							<input type="text" ng-model="search" class="form-control fields {{display_mode}}" placeholder="Search">
+						</div>
+					</form>
+					<thead>
+						<tr>
+							<th class="text-center">#</th>
+							<th>Address</th>
+							<th>Description</th>
+							<th>Add Date</th>
+							<th>Expiration Date</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr {{display_mode}} ng-repeat='o in watch_archived_orders|filter:search'>
+							<td class='text-center'>{{$index + 1}}</td>
+							<td>{{o.Address}}</td>
+							<td>{{o.Desc}}</td>
+							<td>{{o.AddDate}}</td>
+							<td>{{o.ExpDate}}</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+</div>

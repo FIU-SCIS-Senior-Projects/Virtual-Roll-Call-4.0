@@ -212,27 +212,27 @@
 					<br>
 					<form role="form" ng-submit='updateWatchOrder()'>
 						<div class="form-group">
-							<label>Description</label>
+							<label>Description<span style="color:red"> *</span></label>
 							<input type="text" class="form-control fields {{display_mode_modal}}" ng-model='updateDesc' required>
 						</div>
 						<br>
 						<div class="form-group">
-							<label>Address</label>
+							<label>Address<span style="color:red"> *</span></label>
 							<input type="text" class="form-control fields {{display_mode_modal}}" ng-model='updateAddress' required>
 						</div>
 						<br>
 						<div class="form-group">
-							<label>Start Date (YYYY-MM-DD)</label>
+							<label>Start Date (YYYY-MM-DD)<span style="color:red"> *</span></label>
 							<input type="text" class="form-control fields {{display_mode_modal}}" ng-model='updateStartDate' required>
 						</div>
 						<br>
 						<div class="form-group">
-							<label>Expiration Date (YYYY-MM-DD)</label>
+							<label>Expiration Date (YYYY-MM-DD)<span style="color:red"> *</span></label>
 							<input type="text" class="form-control fields {{display_mode_modal}}" ng-model='updateExpDate' required>
 						</div>
 						<br>
 						<div class="form-group">
-							<label>Start Time (hh:mm)</label>
+							<label>Start Time<span style="color:red"> *</span></label>
 							<!--<input type="text" class="form-control fields {{display_mode_modal}}" ng-model='updateStartTime' required>-->
 							<select class='form-control fields {{display_mode}}' ng-model='updateStartTime' required>
 								<option value='00:00:00'>00:00:00</option>
@@ -263,7 +263,7 @@
 						</div>
 						<br>
 						<div class="form-group">
-							<label>Expiration Time (hh:mm)</label>
+							<label>Expiration Time<span style="color:red"> *</span></label>
 							<!--<input type="text" class="form-control fields {{display_mode_modal}}" ng-model='updateExpTime' required>-->
 							<select class='form-control fields {{display_mode}}' ng-model='updateExpTime' required>
 								<option value='00:00:00'>00:00:00</option>
@@ -294,6 +294,35 @@
 						</div>
 						<br>
 						<div class="form-group">
+							<label>Watch Order Requester<span style="color:red"> *</span></label>
+							<input type="text" class="form-control fields {{display_mode_modal}}" ng-model='updateWORequester' required>
+						</div>
+						<br>
+						<div class="form-group">
+							<label>Phone<span style="color:red"> *</span></label>
+							<input type="text" class="form-control fields {{display_mode_modal}}" ng-model='updatePhone' required>
+						</div>						
+						<br>
+						<label>
+				        	<input type="checkbox" ng-model="copycontactinfo" ng-change="CopyContactInfoUpdate()"/>
+				        	Check if Emergency Contact and Requester are the same
+				    	</label>
+						<div class="form-group">
+							<label>Emergency Name<span style="color:red"> *</span></label>
+							<input type="text" class="form-control fields {{display_mode_modal}}" ng-model='updateEName' required>
+						</div>
+						<br>
+						<div class="form-group">
+							<label>Emergency Address<span style="color:red"> *</span></label>
+							<input type="text" class="form-control fields {{display_mode_modal}}" ng-model='updateEAddress' required>
+						</div>
+						<br>
+						<div class="form-group">
+							<label>Emergency Phone<span style="color:red"> *</span></label>
+							<input type="text" class="form-control fields {{display_mode_modal}}" ng-model='updateEPhone' required>
+						</div>
+						<br>					
+						<div class="form-group">
 							<label>Zone</label>
 							<input type="text" class="form-control fields {{display_mode_modal}}" ng-model='updateZone' >
 						</div>
@@ -306,38 +335,14 @@
 						<div class="form-group">
 							<label>Owner Name</label>
 							<input type="text" class="form-control fields {{display_mode_modal}}" ng-model='updateOwnerName' >
-						</div>
-						<br>
-						<div class="form-group">
-							<label>Watch Order Requester</label>
-							<input type="text" class="form-control fields {{display_mode_modal}}" ng-model='updateWORequester' required>
-						</div>
-						<br>
-						<div class="form-group">
-							<label>Phone</label>
-							<input type="text" class="form-control fields {{display_mode_modal}}" ng-model='updatePhone' required>
-						</div>
+						</div>						
 						<br>
 						<div class="form-group">
 							<label>Watch Order Instruction</label>
 							<input type="text" class="form-control fields {{display_mode_modal}}" ng-model='updateWOInstruction' >
 						</div>
 						<br>
-						<div class="form-group">
-							<label>Emergency Name</label>
-							<input type="text" class="form-control fields {{display_mode_modal}}" ng-model='updateEName' required>
-						</div>
-						<br>
-						<div class="form-group">
-							<label>Emergency Address</label>
-							<input type="text" class="form-control fields {{display_mode_modal}}" ng-model='updateEAddress' required>
-						</div>
-						<br>
-						<div class="form-group">
-							<label>Emergency Phone</label>
-							<input type="text" class="form-control fields {{display_mode_modal}}" ng-model='updateEPhone' required>
-						</div>
-						<br>
+						
 						<!-- TO DO: Don't show successful update message when no changes were made to the user -->
 						<button type="submit" class="btn btn-success btn-block">Update</button>
 						<br>

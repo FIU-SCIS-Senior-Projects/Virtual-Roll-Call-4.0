@@ -230,6 +230,19 @@ supervisorModule.controller('supervisorCtrl', ['$scope', 'localStorageService', 
     }
    
   };
+  $scope.CopyContactInfoUpdate = function(){
+    if ($scope.copycontactinfo) {
+        $scope.updateEName = $scope.updateWORequester;
+        $scope.updateEAddress = $scope.updateAddress;
+        $scope.updateEPhone = $scope.updatePhone;
+    }
+    else{
+        $scope.order.eName = "";
+        $scope.order.eAddress = "";
+        $scope.order.ePhone = "";
+    }
+   
+  };
 
   $scope.addSingleWatchOrder = function(){
 

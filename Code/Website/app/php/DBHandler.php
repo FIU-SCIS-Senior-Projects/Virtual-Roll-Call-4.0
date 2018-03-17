@@ -264,18 +264,18 @@ class DBHandler
 	}
 
 	//ADD NEW WATCH ORDER TO DATABASE
-	function addWatchOrder($desc, $address, $lat, $long, $addDate, $expDate) {
+	function addWatchOrder($desc, $address, $lat, $long, $addDate, $expDate, $startDate, $startTime, $expTime, $zone, $businessName,                                 $ownerName, $woRequester, $phone, $woInstruction, $eName, $eAddress, $ePhone, $createdby) {
 		global $db_connection;
 		$result = ['Added' => false];
-		$sql = "INSERT INTO WATCH_ORDERS (`Desc`,`Address`,`Lat`,`Lng`,`AddDate`,`ExpDate`) VALUES (?,?,?,?,?,?)";
+		$sql = "INSERT INTO WATCH_ORDERS (`Desc`,`Address`,`Lat`,`Lng`,`AddDate`,`ExpDate`,`StartDate`, `StartTime`, `ExpTime`,`Zone`,`BusinessName`,`OwnerName`,`WORequester`,`Phone`,`WOInstruction`,`EName`,`EAddress`,`EPhone`,`CreatedBy`) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 		$stmt = $db_connection->prepare($sql);
-		if (!$stmt->bind_param('ssddss', $desc, $address, $lat, $long, $addDate, $expDate))
+		if (!$stmt->bind_param('ssddsssssssssssssss', $desc, $address, $lat, $long, $addDate, $expDate, $startDate, $startTime, $expTime, $zone, $businessName, $ownerName, $woRequester, $phone, $woInstruction, $eName, $eAddress, $ePhone, $createdby))
 			echo "Binding parameters failed: (" . $stmt->errno . ") " . $stmt->error;
 		if (!$stmt->execute())
 		{
 			return $result;
 		}
-			$result['Added'] = true;
+		$result['Added'] = true;
 		$stmt->close();
 		$db_connection->close();
 		return $result;
@@ -317,10 +317,10 @@ class DBHandler
 	function getWatchOrders() {
 		global $db_connection;
 		$orders = [];
-		$sql = "SELECT `Id`,`Desc`,`Address`,`Lat`,`Lng`,`AddDate`,`ExpDate` FROM WATCH_ORDERS";
+		$sql = "SELECT `Id`,`Desc`,`Address`,`Lat`,`Lng`,`AddDate`,`ExpDate`,`StartDate`, `StartTime`, `ExpTime`,`Zone`,`BusinessName`,`OwnerName`,`WORequester`,`Phone`,`WOInstruction`,`EName`,`EAddress`,`EPhone`,`CreatedBy` FROM WATCH_ORDERS";
 		$stmt = $db_connection->prepare($sql);
 		$stmt->execute();
-		$stmt->bind_result($Id, $Desc, $Address, $Lat, $Lng, $AddDate, $ExpDate);
+		$stmt->bind_result($Id, $Desc, $Address, $Lat, $Lng, $AddDate, $ExpDate, $StartDate, $StartTime, $ExpTime, $Zone, $BusinessName, $OwnerName, $WORequester, $Phone, $WOInstruction, $EName, $EAddress, $EPhone, $CreatedBy);
 		while($stmt->fetch()){
 			$tmp = ["Id" => $Id,
 			"Desc" => $Desc,
@@ -328,20 +328,33 @@ class DBHandler
 			"Lat" => $Lat,
 			"Lng" => $Lng,
 			"AddDate" => $AddDate,
-			"ExpDate" => $ExpDate];
+			"ExpDate" => $ExpDate,
+			"StartDate" => $StartDate,
+			"StartTime" => $StartTime,
+			"ExpTime" => $ExpTime, 
+			"Zone" => $Zone,
+			"BusinessName" => $BusinessName, 
+			"OwnerName" => $OwnerName, 
+			"WORequester" => $WORequester, 
+			"Phone" => $Phone, 
+			"WOInstruction" => $WOInstruction, 
+			"EName" => $EName, 
+			"EAddress" => $EAddress,
+			"EPhone" => $EPhone,
+			"CreatedBy" => $CreatedBy];
 			array_push($orders, $tmp);
 		}
 		$stmt->close();
 		$db_connection->close();
 		return $orders;
 	}
-	function editWatchOrder($id, $desc, $address, $lat, $lng, $expDate) {
+	function editWatchOrder($id, $desc, $address, $lat, $lng, $expDate, $startDate, $startTime, $expTime, $zone, $businessName,                                 $ownerName, $woRequester, $phone, $woInstruction, $eName, $eAddress, $ePhone) {
 		global $db_connection;
 		$result = ["Updated" => false];
 		$table = "WATCH_ORDERS";
-		$sql = "UPDATE $table SET `Desc`=?, `Address`=?, `Lat`=?, `Lng`=?, `ExpDate`=? WHERE `Id`=?";
+		$sql = "UPDATE $table SET `Desc`=?, `Address`=?, `Lat`=?, `Lng`=?, `ExpDate`=?, `StartDate`=?, `StartTime`=?, `ExpTime`=?,`Zone`=?,`BusinessName`=?,`OwnerName`=?,`WORequester`=?,`Phone`=?,`WOInstruction`=?,`EName`=?,`EAddress`=?,`EPhone`=? WHERE `Id`=?";
 		$stmt = $db_connection->prepare($sql);
-		if( !$stmt->bind_param('sssssd', $desc, $address, $lat, $lng, $expDate, $id) )
+		if( !$stmt->bind_param('sssssssssssssssssd', $desc, $address, $lat, $lng, $expDate, $startDate, $startTime, $expTime, $zone, $businessName, $ownerName, $woRequester, $phone, $woInstruction, $eName, $eAddress, $ePhone, $id) )
 		{
 			return $result;
 		}

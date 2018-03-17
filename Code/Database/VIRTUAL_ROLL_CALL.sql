@@ -214,14 +214,28 @@ CREATE TABLE `user_doc_status` (
 --
 
 CREATE TABLE `watch_orders` (
-  `Id` int(10) NOT NULL,
+  `Id` int(10) NOT NULL AUTO_INCREMENT,
   `Desc` varchar(60) DEFAULT 'No Description',
   `Address` varchar(100) NOT NULL,
   `Lat` float(10,6) NOT NULL,
   `Lng` float(10,6) NOT NULL,
   `AddDate` date NOT NULL,
-  `ExpDate` date NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+  `ExpDate` date NOT NULL,
+  `StartDate` date DEFAULT NULL,
+  `StartTime` time DEFAULT NULL,
+  `ExpTime` time DEFAULT NULL,
+  `Zone` varchar(60) DEFAULT NULL,
+  `BusinessName` varchar(100) DEFAULT NULL,
+  `OwnerName` varchar(60) DEFAULT NULL,
+  `WORequester` varchar(60) DEFAULT NULL,
+  `Phone` varchar(45) DEFAULT NULL,
+  `WOInstruction` varchar(250) DEFAULT NULL,
+  `EName` varchar(60) DEFAULT NULL,
+  `EAddress` varchar(100) DEFAULT NULL,
+  `EPhone` varchar(45) DEFAULT NULL,
+  `CreatedBy` varchar(60) DEFAULT NULL,
+  PRIMARY KEY (`Id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8
 
 --
 -- Indexes for dumped tables
@@ -401,6 +415,13 @@ CREATE EVENT MoveDocsToArchive
 		where user_doc_status.StatusId = 3 
 		  and documents.Upload_Date < (DATE(NOW()) - INTERVAL 7 DAY) 
 		  and user_doc_status.DocumentId = documents.Document_ID
+
+		  --
+-- ACTIVATE EVENT
+--
+
+set global event_scheduler = ON;
+
 --
 -- Commit Action
 --

@@ -118,6 +118,7 @@ supervisorModule.controller('supervisorCtrl', ['$scope', 'localStorageService', 
   $scope.night_mode = localStorageService.get('nightMode');
 
   /***** BATCH ADD WATCH ORDERS MODAL *****/
+   /***** BATCH ADD WATCH ORDERS MODAL *****/
   $scope.addBatchWatchOrders = function(){
     document.getElementById("parsedWatchOrdersPanel").style.display = "none";
     document.getElementById("successMessage").style.display = "none";
@@ -216,7 +217,19 @@ supervisorModule.controller('supervisorCtrl', ['$scope', 'localStorageService', 
     });
   }
 
-
+  $scope.CopyContactInfo = function(){
+    if ($scope.copycontactinfo) {
+        $scope.order.eName = $scope.order.woRequester;
+        $scope.order.eAddress = $scope.order.address;
+        $scope.order.ePhone = $scope.order.phone;
+    }
+    else{
+        $scope.order.eName = "";
+        $scope.order.eAddress = "";
+        $scope.order.ePhone = "";
+    }
+   
+  };
 
   $scope.addSingleWatchOrder = function(){
 
@@ -237,6 +250,24 @@ supervisorModule.controller('supervisorCtrl', ['$scope', 'localStorageService', 
         order[1] = results[0].formatted_address;   //pick first formatted address returned
         order.push(results[0].geometry.viewport.f.b, results[0].geometry.viewport.b.b);   // add lat and long coordinates
         order.push($scope.order.expDate);
+        order.push($scope.order.startDate);
+        order.push($scope.order.startTime);
+        order.push($scope.order.expTime);
+        order.push($scope.order.zone);
+        order.push($scope.order.businessName);
+        order.push($scope.order.ownerName);
+        order.push($scope.order.woRequester);
+        order.push($scope.order.phone);
+        order.push($scope.order.woInstruction);
+        order.push($scope.order.eName);
+         if ($scope.copycontactinfo) {
+          $scope.order.eAddress = results[0].formatted_address;
+        }
+        order.push($scope.order.eAddress);
+        order.push($scope.order.ePhone);
+        order.push($scope.name);
+
+
         addWatchOrder(order).then(
           function(data){
             if(data == true )
@@ -248,6 +279,18 @@ supervisorModule.controller('supervisorCtrl', ['$scope', 'localStorageService', 
               $scope.order.desc = '';
               $scope.order.address = '';
               $scope.order.expDate = '';
+              $scope.order.startDate = '';
+              $scope.order.startTime = '';
+              $scope.order.expTime = '';
+              $scope.order.zone = '';
+              $scope.order.businessName = '';
+              $scope.order.ownerName = '';
+              $scope.order.woRequester = '';
+              $scope.order.phone = '';
+              $scope.order.woInstruction = '';
+              $scope.order.eName = '';
+              $scope.order.eAddress = '';
+              $scope.order.ePhone = '';
 
               $scope.getWatchOrders();
             }
@@ -337,11 +380,24 @@ supervisorModule.controller('supervisorCtrl', ['$scope', 'localStorageService', 
 
 
         /***** EDIT PARSED WATCH ORDER MODAL *****/
-        $scope.editParsedWatchOrder = function(index, desc, address, expDate){
+        $scope.editParsedWatchOrder = function(index, desc, address, expDate, startDate, startTime, expTime, zone, businessName, ownerName, woRequester, phone, woInstruction, eName, eAddress, ePhone){
           $scope.updateIndex = index;
           $scope.updateDesc = desc;
           $scope.updateAddress = address;
           $scope.updateExpDate = expDate;
+          $scope.updateStartDate = startDate;
+          $scope.updateStartTime = startTime;
+          $scope.updateExpTime = expTime;          
+          $scope.updateZone = zone;
+          $scope.updateBusinessName = businessName;
+          $scope.updateOwnerName = ownerName;
+          $scope.updateWORequester = woRequester;
+          $scope.updatePhone = phone;
+          $scope.updateWOInstruction = woInstruction;
+          $scope.updateEName = eName;
+          $scope.updateEAddress = eAddress;
+          $scope.updateEPhone = ePhone;
+
           $scope.display_mode_modal = sharedCtrl.getDisplayMode();
           $('#editParseModal').modal('show');
         };
@@ -351,11 +407,35 @@ supervisorModule.controller('supervisorCtrl', ['$scope', 'localStorageService', 
           var desc = $scope.updateDesc;
           var address = $scope.updateAddress;
           var expDate = $scope.updateExpDate;
+          var startDate = $scope.updateStartDate;
+          var startTime = $scope.updateStartTime;
+          var expTime = $scope.updateExpTime;          
+          var zone = $scope.updateZone;
+          var businessName = $scope.updateBusinessName;
+          var ownerName = $scope.updateOwnerName;
+          var woRequester = $scope.updateWORequester;
+          var phone = $scope.updatePhone;
+          var woInstruction = $scope.updateWOInstruction;
+          var eName = $scope.updateEName;
+          var eAddress = $scope.updateEAddress;
+          var ePhone = $scope.updateEPhone;
 
           var temp = $scope.parsedWatchOrders[index];
           temp[0] = desc;
           temp[1] = address;
           temp[2] = expDate;
+          temp[3] = startDate;
+          temp[4] = startTime;
+          temp[5] = expTime;
+          temp[6] = zone;
+          temp[7] = businessName;
+          temp[8] = ownerName;
+          temp[9] = woRequester;
+          temp[10] = phone;
+          temp[11] = woInstruction;
+          temp[12] = eName;
+          temp[13] = eAddress;
+          temp[14] = ePhone;
 
           geoCodeAddress(temp).then(
             function(data){
@@ -378,11 +458,24 @@ supervisorModule.controller('supervisorCtrl', ['$scope', 'localStorageService', 
         };
 
         /***** EDIT WATCH ORDER MODAL *****/
-        $scope.editWatchOrder = function(id, desc, address, expDate){
+        $scope.editWatchOrder = function(id, desc, address, expDate, startDate, startTime, expTime, zone, businessName, ownerName, woRequester, phone, woInstruction, eName, eAddress, ePhone){
           $scope.updateID = id;
           $scope.updateDesc = desc;
           $scope.updateAddress = address;
           $scope.updateExpDate = expDate;
+          $scope.updateStartDate = startDate;
+          $scope.updateStartTime = startTime;
+          $scope.updateExpTime = expTime;          
+          $scope.updateZone = zone;
+          $scope.updateBusinessName = businessName;
+          $scope.updateOwnerName = ownerName;
+          $scope.updateWORequester = woRequester;
+          $scope.updatePhone = phone;
+          $scope.updateWOInstruction = woInstruction;
+          $scope.updateEName = eName;
+          $scope.updateEAddress = eAddress;
+          $scope.updateEPhone = ePhone;
+
           $scope.display_mode_modal = sharedCtrl.getDisplayMode();
           $('#editModal').modal('show');
         };
@@ -394,6 +487,18 @@ supervisorModule.controller('supervisorCtrl', ['$scope', 'localStorageService', 
           var desc = $scope.updateDesc;
           var address = $scope.updateAddress;
           var expDate = $scope.updateExpDate;
+          var startDate = $scope.updateStartDate;
+          var startTime = $scope.updateStartTime;
+          var expTime = $scope.updateExpTime;          
+          var zone = $scope.updateZone;
+          var businessName = $scope.updateBusinessName;
+          var ownerName = $scope.updateOwnerName;
+          var woRequester = $scope.updateWORequester;
+          var phone = $scope.updatePhone;
+          var woInstruction = $scope.updateWOInstruction;
+          var eName = $scope.updateEName;
+          var eAddress = $scope.updateEAddress;
+          var ePhone = $scope.updateEPhone;
           var order = [desc, address, expDate, 0, 0];
 
           geoCodeAddress(order).then(
@@ -402,7 +507,7 @@ supervisorModule.controller('supervisorCtrl', ['$scope', 'localStorageService', 
               lat = data[2];
               lng = data[3];
 
-              dataService.updateWatchOrder(id, desc, address, lat, lng, expDate)
+              dataService.updateWatchOrder(id, desc, address, lat, lng, expDate, startDate, startTime, expTime, zone, businessName, ownerName, woRequester, phone, woInstruction, eName, eAddress, ePhone)
               .then(
                 function(data){
                   if(data['Updated'] === true){
@@ -474,8 +579,24 @@ supervisorModule.controller('supervisorCtrl', ['$scope', 'localStorageService', 
               return;
             }
 
+            var startDate = order[5];
+            var startTime = order[6];
+            var expTime = order[7];
+            var zone = order[8];
+            var businessName = order[9];
+            var ownerName = order[10]; 
+            var woRequester = order[11];
+            var phone = order[12];
+            var woInstruction = order[13]; 
+            var eName = order[14]; 
+            var eAddress = order[15]; 
+            var ePhone = order[16];
+            var createdby = order[17];
 
-            dataService.addWatchOrder(desc, address, lat, long, expDate)
+
+            dataService.addWatchOrder(desc, address, lat, long, expDate, startDate, startTime, expTime, 
+                                      zone, businessName, ownerName, woRequester, phone, woInstruction,
+                                      eName, eAddress, ePhone, createdby)
             .then(
               function(data){
                 if(data['Added'] === true){
@@ -516,6 +637,20 @@ supervisorModule.controller('supervisorCtrl', ['$scope', 'localStorageService', 
                   tmp.Lng = data[x].Lng;
                   tmp.AddDate = data[x].AddDate;
                   tmp.ExpDate = data[x].ExpDate;
+                  tmp.StartDate = data[x].StartDate;
+                  tmp.StartTime = data[x].StartTime;
+                  tmp.ExpTime = data[x].ExpTime;
+                  tmp.Zone = data[x].Zone;
+                  tmp.BusinessName = data[x].BusinessName;
+                  tmp.OwnerName = data[x].OwnerName;
+                  tmp.WORequester = data[x].WORequester;
+                  tmp.Phone = data[x].Phone;
+                  tmp.WOInstruction = data[x].WOInstruction;
+                  tmp.EName = data[x].EName;
+                  tmp.EAddress = data[x].EAddress;
+                  tmp.EPhone = data[x].EPhone;
+                  tmp.CreatedBy = data[x].CreatedBy;
+
                   if(validDate(tmp)){
                     watch_orders.push(tmp);
                   }

@@ -348,9 +348,13 @@ adminModule.factory('dataService', function ($http, $q) {
 //SERVICE for supervisor controller
 supervisorModule.factory('dataService', function ($http, $q) {
   return {
-    addWatchOrder: function (desc, address, lat, long, expDate) {
+    addWatchOrder: function (desc, address, lat, long, expDate, startDate, startTime, expTime, zone, businessName, ownerName, woRequester, phone, woInstruction, eName, eAddress, ePhone, createdby) {
       return $q(function (resolve, reject) {
-        $http.post('../app/php/add-watch-order.php', { 'desc': desc, 'address': address, 'lat': lat, 'long': long, 'expDate': expDate })
+        $http.post('../app/php/add-watch-order.php', { 'desc': desc, 'address': address, 'lat': lat, 'long': long, 'expDate': expDate, 
+                                                       'startDate': startDate, 'startTime': startTime, 'expTime': expTime, 'zone': zone,
+                                                       'businessName': businessName, 'ownerName': ownerName, 'woRequester': woRequester,
+                                                       'phone': phone, 'woInstruction': woInstruction, 'eName': eName, 'eAddress': eAddress,
+                                                       'ePhone': ePhone, 'createdby': createdby})
           .then(
           function (response) {
             resolve(response.data);
@@ -393,9 +397,13 @@ supervisorModule.factory('dataService', function ($http, $q) {
             );
       });
     },
-    updateWatchOrder: function (id, desc, address, lat, lng, expDate) {
+    updateWatchOrder: function (id, desc, address, lat, lng, expDate, startDate, startTime, expTime, zone, businessName, ownerName, woRequester, phone, woInstruction, eName, eAddress, ePhone) {
       return $q(function (resolve, reject) {
-        $http.post('../app/php/edit-watch-order.php', { 'id': id, 'desc': desc, 'address': address, 'lat': lat, 'lng': lng, 'expDate': expDate})
+        $http.post('../app/php/edit-watch-order.php', { 'id': id, 'desc': desc, 'address': address, 'lat': lat, 'lng': lng, 'expDate': expDate,
+                                                        'startDate': startDate, 'startTime': startTime, 'expTime': expTime, 'zone': zone,
+                                                        'businessName': businessName, 'ownerName': ownerName, 'woRequester': woRequester,
+                                                        'phone': phone, 'woInstruction': woInstruction, 'eName': eName, 'eAddress': eAddress,
+                                                        'ePhone': ePhone})
           .then(
           function (response) {
             resolve(response.data);

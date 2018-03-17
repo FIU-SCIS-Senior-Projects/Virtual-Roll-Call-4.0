@@ -8,7 +8,20 @@ $address = $request->address;
 $lat = $request->lat;
 $lng = $request->lng;
 $expDate = $request->expDate;
+$startDate = $request->startDate;
+$startTime = $request->startTime;
+$expTime = $request->expTime;
+$zone = $request->zone; 
+$businessName = $request->businessName;
+$ownerName = $request->ownerName; 
+$woRequester = $request->woRequester; 
+$phone = $request->phone;
+$woInstruction = $request->woInstruction;
+$eName = $request->eName;
+$eAddress = $request->eAddress;
+$ePhone = $request->ePhone;
+
 $connection = new DBHandler();
-$result = $connection->editWatchOrder($id, $desc, $address, $lat, $lng, $expDate);
+$result = $connection->editWatchOrder($id, $desc, $address, $lat, $lng, $expDate, $startDate, $startTime, $expTime, $zone, $businessName,                                  $ownerName, $woRequester, $phone, $woInstruction, $eName, $eAddress, $ePhone);
 //convert the response to a json object
 die(json_encode($result));

@@ -372,6 +372,8 @@ supervisorModule.factory('dataService', function ($http, $q) {
           });
       });
     },
+
+    //Depricated in version 4.0 No need to delete watch orders. 
     removeWatchOrders: function () {
       return $q(function (resolve, reject) {
         $http.post('../app/php/remove-watch-orders.php')

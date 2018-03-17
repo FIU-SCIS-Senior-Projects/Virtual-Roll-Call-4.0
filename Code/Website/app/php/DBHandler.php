@@ -32,8 +32,47 @@ class DBHandler
 	//Get All Documents from DB
 	function getDocuments($type, $id, $category)
 	{
-		return (strtolower($category) == 'free text')
-			? $this->getMessages( $id )  : $this->getMediaDocs($id, $type, $category);
+		if (strtolower($type) == 'all')
+			return $this->getDocumentList();
+		else if (strtolower($category) == 'free text')
+			return $this->getMessages( $id );
+		else
+			return $this->getMediaDocs($id, $type, $category);
+
+		// return (strtolower($category) == 'free text')
+		// 	? $this->getMessages( $id )  : $this->getMediaDocs($id, $type, $category);
+	}
+
+
+	function getDocumentList(){
+		global $db_connection;
+		$documents = [];
+		$sql = "SELECT d.Document_ID, 
+					   d.Document_Name, 
+					   c.Category_ID, 
+					   c.Category_Name, 
+					   d.Upload_Date, 
+					   CASE WHEN d.Pinned = 0 THEN 'N' else 'Y' end as 'Pinned', 
+					   d.Uploaded_By, CASE WHEN D.Manual_Archived = 0 THEN 'N' ELSE 'Y' END as 'Archived'
+				FROM DOCUMENTS d JOIN CATEGORIES c on d.Category_ID = c.Category_ID";
+		$stmt = $db_connection->prepare( $sql );
+		$stmt->execute();
+		$stmt->bind_result($id, $name, $cat_id, $cat_name, $created_at, $pinned, $uploaded, $archived);
+		while($stmt->fetch())
+		{
+			$tmpArray = ["id" => $id,
+					"name" => $name,
+					"catid" => $cat_id,
+					"category" => $cat_name,
+					"date" => $created_at,
+					"pinned" => $pinned,
+					"uploadedBy" => $uploaded,
+					"archived" => $archived];
+			array_push($documents, $tmpArray);
+		}
+		$stmt->close();
+		$db_connection->close();
+		return $documents;
 	}
 
 	function getMediaDocs($user_id, $type, $category)
@@ -45,8 +84,11 @@ class DBHandler
 		if ( $type == 'archived' )
 			$where_clause = " WHERE s.IsArchived = 1 " ;
 		else if ( $type == 'active' )
-			$where_clause = " WHERE (s.IsArchived = 0) or (d.document_id NOT IN (select uds.documentId from user_doc_status uds where uds.DocumentId = d.document_ID and uds.officerId = ?)) ";
-
+			// $where_clause = " WHERE (s.IsArchived = 0) or (d.document_id NOT IN (select uds.documentId from user_doc_status uds where uds.DocumentId = d.document_ID and uds.officerId = ?)) ";
+			$where_clause = " WHERE ((s.IsArchived = 0) or (d.document_id NOT IN (select uds.documentId 
+																				from user_doc_status uds 
+																				join categories cat on uds.CategoryId = cat.Category_ID 
+																				where (uds.DocumentId = d.document_ID and cat.Category_ID  = d.Category_ID and cat.Category_Name = ? and uds.officerId = ? )))) ";
 		$sql = "SELECT
 					d.document_id, d.document_name, d.category_id, d.upload_date,  d.pinned, d.uploaded_by, c.category_name, d.upload_name, d.description,
 					IFNULL(ds.Description, 'Pending') as status,
@@ -69,7 +111,8 @@ class DBHandler
 		if ( $type == 'archived' )
 			$stmt->bind_param('iis', $user_id, $user_id, $category);
 		else if ( $type == 'active' )
-			$stmt->bind_param('iiis', $user_id, $user_id, $user_id, $category);
+			// $stmt->bind_param('iiis', $user_id, $user_id, $user_id, $category);
+			$stmt->bind_param('iisis', $user_id, $user_id, $category, $user_id, $category);
 		$stmt->execute();
 		$stmt->bind_result($id, $name, $cat_id, $created_at, $pinned, $uploaded_by, $cat_name,
 						   $upload_name, $doc_description, $status, $archived, $quiz, $qa, $answers, $score);
@@ -138,7 +181,9 @@ class DBHandler
 	{
 		global $db_connection;
 		$officers = [];
-		$stmt = $db_connection->prepare( 'SELECT A.userID, A.First_Name, A.Last_Name, A.Username, A.Role, B.Name FROM OFFICERS A, SHIFTS B WHERE A.Shift_id = B.Id' );
+		$stmt = $db_connection->prepare( 'SELECT A.userID, A.First_Name, A.Last_Name, A.Username, A.Role, B.Name 
+										  FROM OFFICERS A
+ 										  LEFT JOIN SHIFTS B ON B.Id = A.Shift_id ' );
 		$stmt->execute();
 		$stmt->bind_result( $userID, $First_Name, $Last_Name, $Username, $Role, $Shift_name);
 		while($stmt->fetch())
@@ -858,7 +903,9 @@ class DBHandler
 					WHERE c.Category_ID in (
 											SELECT csa.Category_ID 
 											from category_shift_access csa, officers o 
-											where csa.Shift_Id = o.Shift_id and o.UserID = ?)";
+											where (csa.Shift_Id = o.Shift_id and o.UserID = ?)
+											UNION 
+                        					SELECT csa1.Category_ID from category_shift_access csa1 where csa1.Shift_Id = 1) ";
 			$stmt3 = $db_connection->prepare($sql3);
 			$stmt3->bind_param('i', $id);
 			$stmt3->execute();
@@ -996,12 +1043,23 @@ class DBHandler
 	{
 			global $db_connection;
 			$result = ["Document_Removed" => false];
+			
+			//remove entries from documents table
 			$query = 'DELETE FROM Documents WHERE Document_ID = ?';
 			$stmt = $db_connection->prepare($query);
 
 			if( !$stmt->bind_param('i', $document_id) )
 				return $result;
 			if (!$stmt->execute())
+				return $result;
+
+			//remove entries from user_doc_status
+			$query2 = 'DELETE FROM user_doc_status WHERE DocumentId = ?';
+			$stmt2 = $db_connection->prepare($query2);
+
+			if( !$stmt2->bind_param('i', $document_id) )
+				return $result;
+			if (!$stmt2->execute())
 				return $result;
 
 			$result["Document_Removed"] = true;
@@ -1182,6 +1240,8 @@ class DBHandler
 
 	function updateDocument($id,$name,$categories,$pinned){
 		global $db_connection;
+		
+		//update DOCUMENTS table
 		$sql = "Update DOCUMENTS set Document_Name=?,Category_ID=?,Pinned=? where document_ID =?";
 		$rs = $db_connection->prepare($sql);
 		if(!$rs->bind_param('siii',$name,$categories,$pinned,$id))
@@ -1190,6 +1250,17 @@ class DBHandler
 		if(!$rs->execute())
 			return "Execute Error";
 		$rs->close();
+
+		//update user_doc_staus if row exist
+		$sql2 = "Update USER_DOC_STATUS set CategoryId=? where DocumentId =?";
+		$rs2 = $db_connection->prepare($sql2);
+		if(!$rs2->bind_param('ii',$categories,$id))
+				return "Bind paramenter error";
+
+		if(!$rs2->execute())
+			return "Execute Error";
+		$rs2->close();
+
 		$db_connection->close();
 		return true;
 	}

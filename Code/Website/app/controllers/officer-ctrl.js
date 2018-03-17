@@ -196,6 +196,19 @@ officerModule.controller('officerCtrl', ['$scope', 'localStorageService', 'dataS
                   tmp.Lng = data[x].Lng;
                   tmp.AddDate = data[x].AddDate;
                   tmp.ExpDate = data[x].ExpDate;
+                  tmp.StartDate = data[x].StartDate;
+                  tmp.StartTime = data[x].StartTime;
+                  tmp.ExpTime = data[x].ExpTime;
+                  tmp.Zone = data[x].Zone;
+                  tmp.BusinessName = data[x].BusinessName;
+                  tmp.OwnerName = data[x].OwnerName;
+                  tmp.WORequester = data[x].WORequester;
+                  tmp.Phone = data[x].Phone;
+                  tmp.WOInstruction = data[x].WOInstruction;
+                  tmp.EName = data[x].EName;
+                  tmp.EAddress = data[x].EAddress;
+                  tmp.EPhone = data[x].EPhone;
+                  tmp.CreatedBy = data[x].CreatedBy;
 
                   watch_orders.push(tmp);
               }
@@ -232,8 +245,11 @@ officerModule.controller('officerCtrl', ['$scope', 'localStorageService', 'dataS
 
               var contentString = "<h5><b>" + order.Address + "</b> </h5><hr>";
               contentString += "<p><b>Description:</b> " + order.Desc + "</p>";
-              contentString += "<p><b>Date Added:</b> " + order.AddDate + "</p>";
+              contentString += "<p><b>Created On:</b> " + order.AddDate + "</p>";
+              contentString += "<p><b>Start Date:</b> " + order.StartDate + "</p>";
               contentString += "<p><b>Expiration:</b> " + order.ExpDate + "</p>";
+              contentString += "<p><b>Start Time:</b> " + order.StartTime + "</p>";
+              contentString += "<p><b>Expiration Time:</b> " + order.ExpTime + "</p>";
 
               var infowindow = new google.maps.InfoWindow({
                 content: contentString
@@ -248,14 +264,19 @@ officerModule.controller('officerCtrl', ['$scope', 'localStorageService', 'dataS
               marker.addListener('click', function() {
                 infowindow.open(map, marker);
               });
+
+              /* **** CODE TO VIEW DETAIL WITHIN MAP... NOT WORKING PROPERLY *****
+              marker.addListener('dblclick', function() {
+                if (order.Address !== null) {
+                  $scope.viewWatchOrder(order.Id, order.Desc, order.Address, order.ExpDate, order.StartDate, order.StartTime, order.ExpTime,
+                                        order.Zone, order.BusinessName, order.OwnerName, order.WORequester, order.Phone, order.WOInstruction,
+                                        order.EName, order.EAddress, order.EPhone);};});*/
             }
           );
 
           $scope.$apply(function () {
             $scope.markerCount = markerCount;
           });
-
-
           }
         );
       };
@@ -274,6 +295,30 @@ officerModule.controller('officerCtrl', ['$scope', 'localStorageService', 'dataS
           }
         });
       }
+
+      /***** VIEW WATCH ORDER MODAL *****/
+      $scope.viewWatchOrder = function(id, desc, address, expDate, startDate, startTime, expTime, zone, businessName, ownerName, woRequester, phone, woInstruction, eName, eAddress, ePhone){
+
+        $scope.updateID = id;
+        $scope.updateDesc = desc;
+        $scope.updateAddress = address;
+        $scope.updateExpDate = expDate;
+        $scope.updateStartDate = startDate;
+        $scope.updateStartTime = startTime;
+        $scope.updateExpTime = expTime;          
+        $scope.updateZone = zone;
+        $scope.updateBusinessName = businessName;
+        $scope.updateOwnerName = ownerName;
+        $scope.updateWORequester = woRequester;
+        $scope.updatePhone = phone;
+        $scope.updateWOInstruction = woInstruction;
+        $scope.updateEName = eName;
+        $scope.updateEAddress = eAddress;
+        $scope.updateEPhone = ePhone;
+
+        $scope.display_mode_modal = sharedCtrl.getDisplayMode();
+        $('#editModal').modal('show');
+      };
 
 
 

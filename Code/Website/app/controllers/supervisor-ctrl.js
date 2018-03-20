@@ -627,7 +627,7 @@ supervisorModule.controller('supervisorCtrl', ['$scope', 'localStorageService', 
           };
 
           /***********************
-          * GET WATCH ORDERS
+          * GET ACTIVE WATCH ORDERS
           ***********************/
           $scope.getWatchOrders = function getWatchOrders(){
             dataService.viewWatchOrders()
@@ -636,7 +636,9 @@ supervisorModule.controller('supervisorCtrl', ['$scope', 'localStorageService', 
 
                 //initialize an empty array to store results from the database
                 var watch_orders = [];
-                var exp_watch_orders = [];
+
+                //Depricated for version 4.0. No longer deleting expired watch orders.
+                //var exp_watch_orders = [];
 
                 //for each category in the result
                 for (var x in data) {
@@ -667,21 +669,58 @@ supervisorModule.controller('supervisorCtrl', ['$scope', 'localStorageService', 
                   if(validDate(tmp)){
                     watch_orders.push(tmp);
                   }
-                  else {
-                    exp_watch_orders.push(tmp);
-                  }
+                  // else {
+                  //   exp_watch_orders.push(tmp);
+                  // }
                 }
 
                 //update for use in view
                 $scope.watch_orders = watch_orders;
 
                 //remove expired watch orders
-                removeExpiredWatchOrders(exp_watch_orders);
+                //removeExpiredWatchOrders(exp_watch_orders);
               },
               function (error) {
                 console.log('Error: ' + error);
               });
             };
+
+          /***********************
+          * GET ARCHIVED ORDERS
+          ***********************/
+          $scope.getArchivedWatchOrders = function getArchivedWatchOrders(){
+            dataService.viewWatchOrders()
+            .then(
+              function (data) {
+
+                //initialize an empty array to store results from the database
+                var watch_archived_orders = [];
+
+                //for each category in the result
+                for (var x in data) {
+
+                  //create an object and set object properties
+                  var tmp = new Object();
+                  tmp.Id = data[x].Id;
+                  tmp.Desc = data[x].Desc;
+                  tmp.Address = data[x].Address;
+                  tmp.Lat = data[x].Lat;
+                  tmp.Lng = data[x].Lng;
+                  tmp.AddDate = data[x].AddDate;
+                  tmp.ExpDate = data[x].ExpDate;
+                  if(!validDate(tmp)){
+                    watch_archived_orders.push(tmp);
+                  }
+                }
+
+                //update for use in view
+                $scope.watch_archived_orders = watch_archived_orders;
+
+              },
+              function (error) {
+                console.log('Error: ' + error);
+              });
+            };    
 
             //compare current date with expiration date
             self.validDate = function(order){

@@ -210,7 +210,9 @@ officerModule.controller('officerCtrl', ['$scope', 'localStorageService', 'dataS
                   tmp.EPhone = data[x].EPhone;
                   tmp.CreatedBy = data[x].CreatedBy;
 
-                  watch_orders.push(tmp);
+                  if(validDate(tmp)){
+                    watch_orders.push(tmp);
+                  }
               }
 
               resolve(watch_orders);
@@ -222,6 +224,30 @@ officerModule.controller('officerCtrl', ['$scope', 'localStorageService', 'dataS
             });
         });
       }
+
+
+    //compare current date with expiration date
+    function validDate(order){
+      var today = new Date();
+      var currDay = today.getDate();
+      var currMonth = today.getMonth();
+      var currYear = today.getFullYear();
+
+      var expDate = order.ExpDate.split("-");
+      var expDay = Number(expDate[2]);
+      var expMonth = Number(expDate[1]);
+      var expYear = Number(expDate[0]);
+
+      var expiration = new Date();
+      expiration.setFullYear(expYear, expMonth - 1, expDay);
+
+      if(expiration < today)
+      {
+        return false;
+      }
+      return true;
+
+    };
 
       //Initialize map
       $scope.initMap = function initMap() {

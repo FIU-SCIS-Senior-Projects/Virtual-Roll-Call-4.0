@@ -53,6 +53,10 @@ supervisorModule.config(function($routeProvider){
 		templateUrl: 'partials/manage-watch-orders.html',
 		controller: 'supervisorCtrl'
 	})
+	.when('/archived-watch-orders', {
+	templateUrl: 'partials/archived-watch-orders.html',
+	controller: 'supervisorCtrl'
+	})
 	.when('/manage-freetext', {
 		templateUrl: 'partials/manage-freetext.php'
 	})

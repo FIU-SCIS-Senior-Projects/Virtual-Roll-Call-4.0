@@ -105,6 +105,7 @@ header('location: ../views/');
           <li data-ng-class="{active: isActive('/upload')}"><a class='active' href='#upload'>Manage Documents</a></li>
           <li data-ng-class="{active: isActive('/manage-freetext')}"><a href='#manage-freetext'>Manage Free Messages</a></li>
           <li data-ng-class="{active: isActive('/manage-watch-orders')}"><a class='active' href='#manage-watch-orders'>Manage Watch Orders</a></li>
+          <li data-ng-class="{active: isActive('/archived-watch-orders')}"><a class='active' href='#archived-watch-orders'>Archived Watch Orders</a></li>
           <li data-ng-class="{active: isActive('/reset')}"><a href='#reset'>Reset Password</a></li>
           <li data-ng-class="{active: isActive('/log')}"><a href='#log'>Logs</a></li>
         </ul>

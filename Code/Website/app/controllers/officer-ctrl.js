@@ -323,7 +323,7 @@ officerModule.controller('officerCtrl', ['$scope', 'localStorageService', 'dataS
       }
 
       /***** VIEW WATCH ORDER MODAL *****/
-      $scope.viewWatchOrder = function(id, desc, address, expDate, startDate, startTime, expTime, zone, businessName, ownerName, woRequester, phone, woInstruction, eName, eAddress, ePhone){
+      $scope.viewWatchOrder = function(id, desc, address, expDate, startDate, startTime, expTime, zone, businessName, ownerName, woRequester, phone, woInstruction, eName, eAddress, ePhone, createdBy){
 
         $scope.updateID = id;
         $scope.updateDesc = desc;
@@ -341,6 +341,7 @@ officerModule.controller('officerCtrl', ['$scope', 'localStorageService', 'dataS
         $scope.updateEName = eName;
         $scope.updateEAddress = eAddress;
         $scope.updateEPhone = ePhone;
+        $scope.updateCreatedBy = createdBy;
 
         $scope.display_mode_modal = sharedCtrl.getDisplayMode();
         $('#editModal').modal('show');

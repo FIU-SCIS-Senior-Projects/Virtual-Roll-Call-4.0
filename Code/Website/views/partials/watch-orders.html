@@ -81,22 +81,7 @@
               <input type="text" class="form-control fields {{display_mode_modal}}" ng-model='updateExpTime' ng-readonly="true">
             </div>
             <br>
-            <div class="form-group">
-              <label>Zone</label>
-              <input type="text" class="form-control fields {{display_mode_modal}}" ng-model='updateZone' ng-readonly="true">
-            </div>
-            <br>
-            <div class="form-group">
-              <label>Business Name</label>
-              <input type="text" class="form-control fields {{display_mode_modal}}" ng-model='updateBusinessName' ng-readonly="true">
-            </div>
-            <br>
-            <div class="form-group">
-              <label>Owner Name</label>
-              <input type="text" class="form-control fields {{display_mode_modal}}" ng-model='updateOwnerName' ng-readonly="true">
-            </div>
-            <br>
-            <div class="form-group">
+             <div class="form-group">
               <label>Watch Order Requester</label>
               <input type="text" class="form-control fields {{display_mode_modal}}" ng-model='updateWORequester' ng-readonly="true">
             </div>
@@ -104,11 +89,6 @@
             <div class="form-group">
               <label>Phone</label>
               <input type="text" class="form-control fields {{display_mode_modal}}" ng-model='updatePhone' ng-readonly="true">
-            </div>
-            <br>
-            <div class="form-group">
-              <label>Watch Order Instruction</label>
-              <input type="text" class="form-control fields {{display_mode_modal}}" ng-model='updateWOInstruction' ng-readonly="true">
             </div>
             <br>
             <div class="form-group">
@@ -125,6 +105,30 @@
               <label>Emergency Phone</label>
               <input type="text" class="form-control fields {{display_mode_modal}}" ng-model='updateEPhone' ng-readonly="true">
             </div>
+            <div class="form-group">
+              <label>Created By</label>
+              <input type="text" class="form-control fields {{display_mode_modal}}" ng-model='updateCreatedBy' ng-readonly="true">
+            </div>
+            <div class="form-group">
+              <label>Zone</label>
+              <input type="text" class="form-control fields {{display_mode_modal}}" ng-model='updateZone' ng-readonly="true">
+            </div>
+            <br>
+            <div class="form-group">
+              <label>Business Name</label>
+              <input type="text" class="form-control fields {{display_mode_modal}}" ng-model='updateBusinessName' ng-readonly="true">
+            </div>
+            <br>
+            <div class="form-group">
+              <label>Owner Name</label>
+              <input type="text" class="form-control fields {{display_mode_modal}}" ng-model='updateOwnerName' ng-readonly="true">
+            </div>
+            <br>           
+            <div class="form-group">
+              <label>Watch Order Instruction</label>
+              <input type="text" class="form-control fields {{display_mode_modal}}" ng-model='updateWOInstruction' ng-readonly="true">
+            </div>
+            <br>            
           </form>
         </div>
       </div>
@@ -159,7 +163,7 @@
               <td>{{o.Desc}}</td>
               <td>{{o.AddDate}}</td>
               <td>{{o.ExpDate}}</td>
-              <td class='text-center'><button class="btn-default" ng-click='viewWatchOrder(o.Id, o.Desc, o.Address, o.ExpDate, o.StartDate, o.StartTime, o.ExpTime, o.Zone, o.BusinessName, o.OwnerName, o.WORequester, o.Phone, o.WOInstruction, o.EName, o.EAddress, o.EPhone)'><span class="glyphicon glyphicon-edit"></span> View Detail</button></td>
+              <td class='text-center'><button class="btn-default" ng-click='viewWatchOrder(o.Id, o.Desc, o.Address, o.ExpDate, o.StartDate, o.StartTime, o.ExpTime, o.Zone, o.BusinessName, o.OwnerName, o.WORequester, o.Phone, o.WOInstruction, o.EName, o.EAddress, o.EPhone, o.CreatedBy)'><span class="glyphicon glyphicon-edit"></span> View Detail</button></td>
             </tr>
           </tbody>
         </table>

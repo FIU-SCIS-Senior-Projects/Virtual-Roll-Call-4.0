@@ -708,6 +708,21 @@ supervisorModule.controller('supervisorCtrl', ['$scope', 'localStorageService', 
                   tmp.Lng = data[x].Lng;
                   tmp.AddDate = data[x].AddDate;
                   tmp.ExpDate = data[x].ExpDate;
+                  tmp.StartDate = data[x].StartDate;
+                  tmp.StartTime = data[x].StartTime;
+                  tmp.ExpTime = data[x].ExpTime;
+                  tmp.Zone = data[x].Zone;
+                  tmp.BusinessName = data[x].BusinessName;
+                  tmp.OwnerName = data[x].OwnerName;
+                  tmp.WORequester = data[x].WORequester;
+                  tmp.Phone = data[x].Phone;
+                  tmp.WOInstruction = data[x].WOInstruction;
+                  tmp.EName = data[x].EName;
+                  tmp.EAddress = data[x].EAddress;
+                  tmp.EPhone = data[x].EPhone;
+                  tmp.CreatedBy = data[x].CreatedBy;
+
+
                   if(!validDate(tmp)){
                     watch_archived_orders.push(tmp);
                   }
@@ -806,6 +821,34 @@ supervisorModule.controller('supervisorCtrl', ['$scope', 'localStorageService', 
         $scope.selected = {};
         $scope.pick = null;
       });
+
+
+      /***** VIEW WATCH ORDER MODAL *****/
+      $scope.viewWatchOrder = function(id, desc, address, expDate, startDate, startTime, expTime, zone, businessName, ownerName, woRequester, phone, woInstruction, eName, eAddress, ePhone, createdBy){
+
+        $scope.updateID = id;
+        $scope.updateDesc = desc;
+        $scope.updateAddress = address;
+        $scope.updateExpDate = expDate;
+        $scope.updateStartDate = startDate;
+        $scope.updateStartTime = startTime;
+        $scope.updateExpTime = expTime;          
+        $scope.updateZone = zone;
+        $scope.updateBusinessName = businessName;
+        $scope.updateOwnerName = ownerName;
+        $scope.updateWORequester = woRequester;
+        $scope.updatePhone = phone;
+        $scope.updateWOInstruction = woInstruction;
+        $scope.updateEName = eName;
+        $scope.updateEAddress = eAddress;
+        $scope.updateEPhone = ePhone;
+        $scope.updateCreatedBy = createdBy;
+
+        $scope.display_mode_modal = sharedCtrl.getDisplayMode();
+        $('#editModal').modal('show');
+      };
+
+
 
       /***** RESET USER PASSWORD *****/
       $scope.resetPassword = function(reset_password, reset_password_conf){

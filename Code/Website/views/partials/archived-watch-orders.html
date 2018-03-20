@@ -19,6 +19,7 @@
 							<th>Description</th>
 							<th>Add Date</th>
 							<th>Expiration Date</th>
+							<th>View Detail</th>
 						</tr>
 					</thead>
 					<tbody>
@@ -28,10 +29,107 @@
 							<td>{{o.Desc}}</td>
 							<td>{{o.AddDate}}</td>
 							<td>{{o.ExpDate}}</td>
+							<td class='text-center'><button class="btn-default" ng-click='viewWatchOrder(o.Id, o.Desc, o.Address, o.ExpDate, o.StartDate, o.StartTime, o.ExpTime, o.Zone, o.BusinessName, o.OwnerName, o.WORequester, o.Phone, o.WOInstruction, o.EName, o.EAddress, o.EPhone, o.CreatedBy)'><span class="glyphicon glyphicon-edit"></span> View Detail</button></td>
 						</tr>
 					</tbody>
 				</table>
 			</div>
 		</div>
 	</div>
+
+      <!-- View Watch Order Modal -->
+  <div class="modal fade" id="editModal" role="dialog">
+    <div class="modal-dialog">
+
+      <!-- Modal content-->
+      <div class="modal-content {{display_mode_modal}}">
+        <div class="modal-header" style="padding:15px 15px;">
+          <button type="button" class="close" data-dismiss="modal" ng-click='updateErrorMessage = updateSuccessMessage = false'>&times;</button>
+          <h4><span class="glyphicon glyphicon-pencil"></span> View Watch Order</h4>
+        </div>
+        <div class="modal-body" style="padding:40px 50px;">
+          <form role="form" >
+            <div class="form-group">
+              <label>Description</label>
+              <input type="text" class="form-control fields {{display_mode_modal}}" ng-model='updateDesc' ng-readonly="true">
+            </div>
+            <br>
+            <div class="form-group">
+              <label>Address</label>
+              <input type="text" class="form-control fields {{display_mode_modal}}" ng-model='updateAddress' ng-readonly="true">
+            </div>
+            <br>
+            <div class="form-group">
+              <label>Start Date</label>
+              <input type="text" class="form-control fields {{display_mode_modal}}" ng-model='updateStartDate' ng-readonly="true">
+            </div>
+            <br>
+            <div class="form-group">
+              <label>Expiration Date</label>
+              <input type="text" class="form-control fields {{display_mode_modal}}" ng-model='updateExpDate' ng-readonly="true">
+            </div>
+            <br>
+            <div class="form-group">
+              <label>Start Time</label>
+              <input type="text" class="form-control fields {{display_mode_modal}}" ng-model='updateStartTime' ng-readonly="true">
+            </div>
+            <br>
+            <div class="form-group">
+              <label>Expiration Time</label>
+              <input type="text" class="form-control fields {{display_mode_modal}}" ng-model='updateExpTime' ng-readonly="true">
+            </div>
+            <br>
+             <div class="form-group">
+              <label>Watch Order Requester</label>
+              <input type="text" class="form-control fields {{display_mode_modal}}" ng-model='updateWORequester' ng-readonly="true">
+            </div>
+            <br>
+            <div class="form-group">
+              <label>Phone</label>
+              <input type="text" class="form-control fields {{display_mode_modal}}" ng-model='updatePhone' ng-readonly="true">
+            </div>
+            <br>
+            <div class="form-group">
+              <label>Emergency Name</label>
+              <input type="text" class="form-control fields {{display_mode_modal}}" ng-model='updateEName' ng-readonly="true">
+            </div>
+            <br>
+            <div class="form-group">
+              <label>Emergency Address</label>
+              <input type="text" class="form-control fields {{display_mode_modal}}" ng-model='updateEAddress' ng-readonly="true">
+            </div>
+            <br>
+            <div class="form-group">
+              <label>Emergency Phone</label>
+              <input type="text" class="form-control fields {{display_mode_modal}}" ng-model='updateEPhone' ng-readonly="true">
+            </div>
+            <div class="form-group">
+              <label>Created By</label>
+              <input type="text" class="form-control fields {{display_mode_modal}}" ng-model='updateCreatedBy' ng-readonly="true">
+            </div>
+            <div class="form-group">
+              <label>Zone</label>
+              <input type="text" class="form-control fields {{display_mode_modal}}" ng-model='updateZone' ng-readonly="true">
+            </div>
+            <br>
+            <div class="form-group">
+              <label>Business Name</label>
+              <input type="text" class="form-control fields {{display_mode_modal}}" ng-model='updateBusinessName' ng-readonly="true">
+            </div>
+            <br>
+            <div class="form-group">
+              <label>Owner Name</label>
+              <input type="text" class="form-control fields {{display_mode_modal}}" ng-model='updateOwnerName' ng-readonly="true">
+            </div>
+            <br>           
+            <div class="form-group">
+              <label>Watch Order Instruction</label>
+              <input type="text" class="form-control fields {{display_mode_modal}}" ng-model='updateWOInstruction' ng-readonly="true">
+            </div>
+            <br>            
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>

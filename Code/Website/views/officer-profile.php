@@ -37,6 +37,8 @@ header('location: ../views/');
   <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAuubk4Obni7qiK7Umj7CdvUUxO23688cM"></script>
   <link rel="stylesheet" href="partials/css/style.css">
   <script src="../app/vendor/angularjs-dropdown-multiselect.js"></script>
+  <script src="../app/vendor/angular-idle.min.js"></script>
+
 
 </head>
 <body class = "{{display_mode}}" ng-controller='officerCtrl' ng-init='getSiteNames()'>

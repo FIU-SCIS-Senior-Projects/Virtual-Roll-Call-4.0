@@ -1,4 +1,4 @@
-var sharedModule = angular.module('shared', ['admin', 'supervisor', 'officer', 'login']);
+var sharedModule = angular.module('shared', ['admin', 'supervisor', 'officer', 'login', 'ngIdle', 'ui.bootstrap']);
 var loginModule = angular.module('login', ['ngRoute', 'LocalStorageModule', 'shared', 'flow', 'ui.bootstrap']);
 var adminModule = angular.module('admin', ['ngRoute', 'LocalStorageModule', 'shared', 'flow', 'ui.bootstrap']);
 var supervisorModule = angular.module('supervisor', ['ngRoute', 'LocalStorageModule', 'shared', 'flow', 'ui.bootstrap', 'ui.grid', 'ui.grid.selection', 'ui.grid.exporter', 'angularjs-dropdown-multiselect']);
@@ -95,3 +95,4 @@ officerModule.config(function($routeProvider){
 		redirectTo: '/categories'
 	});
 });
+

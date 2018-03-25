@@ -219,10 +219,26 @@ class DBHandler
 	}
 
 
+ 	function getTimeout(){
+ 		global $db_connection;
+ 		$minutes = 0;
+ 		$stmt = $db_connection->prepare( 'SELECT Session_Timeout FROM SETTINGS' );
+		$stmt->execute();
+		$stmt->bind_result($min);
+		while($stmt->fetch())
+		{
+			$minutes = $min;
+		}
+		$stmt->close();
+		$db_connection->close();
+	    return $minutes;
+
+ 	}
+
 
 	/*******************
 			HELPER FUNCTIONS
-			******************/
+	******************/
 	//
 	function GetStatusDescription($statusId)
 	{
@@ -1236,6 +1252,37 @@ class DBHandler
 		$db_connection->close();
 		return $result;
 	}
+
+
+	//UPDATE SESSION TIMEOUT IN DATABASE
+	function updateTimeout($time) {
+		global $db_connection;
+		$result = ["Updated" => false];
+		$sql = "UPDATE SETTINGS SET Session_Timeout=?";
+		$stmt = $db_connection->prepare($sql);
+		if( !$stmt->bind_param('s', $time)) return $result;
+		if (!$stmt->execute()) return $result;
+		$result["Updated"] = true;
+		$stmt->close();
+		$db_connection->close();
+		return $result;
+	}
+
+	//UPDATE APP DEFAULT MAP LATITUDE AND LONGITUDE
+	function updateLatLong($lat, $lon) {
+		global $db_connection;
+		$result = ["Updated" => false];
+		$sql = "UPDATE settings SET Latitude= ?,Longitude = ?";
+		$stmt = $db_connection->prepare($sql);
+		if( !$stmt->bind_param('dd', $lat, $lon)) return $result;
+		if (!$stmt->execute()) return $result;
+		$result["Updated"] = true;
+		$stmt->close();
+		$db_connection->close();
+		return $result;
+	}
+
+
 
 	function logQuiz( $officerId, $documentId, $category_id, $answers, $score, $status )
 	{

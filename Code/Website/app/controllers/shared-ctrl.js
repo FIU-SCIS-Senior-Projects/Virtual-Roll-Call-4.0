@@ -1,4 +1,4 @@
-sharedModule.controller('sharedCtrl', ['$scope', 'sharedService', 'localStorageService', '$window', '$location', function ($scope, sharedService, localStorageService, $window, $location) {
+sharedModule.controller('sharedCtrl', ['$scope', 'sharedService', 'localStorageService', '$window', '$location', 'Idle', 'Keepalive', '$uibModal', function ($scope, sharedService, localStorageService, $window, $location, Idle, Keepalive, $uibModal) {
 
   var self = this;
 
@@ -80,6 +80,54 @@ sharedModule.controller('sharedCtrl', ['$scope', 'sharedService', 'localStorageS
         });
     }
   };
+
+
+
+  /***** SESSION TIMEOUT FUNCTIONS *****/
+    function closeModals() {
+        if ($scope.warning) {
+          $scope.warning.close();
+          $scope.warning = null;
+        }
+
+        if ($scope.timedout) {
+          $scope.timedout.close();
+          $scope.timedout = null;
+        }
+      }
+
+      $scope.$on('IdleStart', function() {
+        closeModals();
+
+        $scope.warning = $uibModal.open({
+          templateUrl: 'warning-dialog.html',
+          windowClass: 'modal-danger'
+        });
+      });
+
+      $scope.$on('IdleEnd', function() {
+        closeModals();
+      });
+
+      $scope.$on('IdleTimeout', function() {
+        closeModals();
+        $scope.timedout = $uibModal.open({
+          templateUrl: 'timedout-dialog.html',
+          windowClass: 'modal-danger'
+        });
+      });
+
+  //Get all the documents Categories
+  self.getTimeoutMinutes = function ()
+  {
+      sharedService.getTimeoutMinutes()
+        .then(
+        function (minutes) {
+            $scope.timeout_minutes = minutes;
+        },
+        function (error) {});
+  };
+
 
   //Get all the documents Categories
   self.getCategories = function ()
@@ -379,4 +427,5 @@ sharedModule.controller('sharedCtrl', ['$scope', 'sharedService', 'localStorageS
   };
   return self;
 
-}]);
+}])
+

@@ -2,7 +2,8 @@
 require_once('DBHandler.php');
 $postdata = file_get_contents("php://input");
 $request = json_decode($postdata);
-$id = $request->user_id;
+$time = $request->time;
 $connection = new DBHandler();
-$result = $connection->getAuthorizedCategories($id);
+$result = $connection->updateTimeout($time);
+//convert the response to a json object
 die(json_encode($result));

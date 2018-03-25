@@ -60,4 +60,71 @@
       </form>
     </div>
   </div>
+
+  <!-- SESSION TIMEOUT PANEL -->
+    <div class='panel panel-primary {{display_mode}}'>
+    <div class='panel-heading'>Session Timeout</div>
+    <div class='panel-body'>
+      <!-- Site Customizations Form -->
+      <form ng-submit='updateTimeout(session_timeout)'>
+        <label>Enter time in minutes</label>
+        <br>
+        <input class='col-xs-6 fields {{display_mode}}' type='number' ng-model='session_timeout' required>
+        <br>
+        <br>
+        <button type="submit" class="btn btn-success">Update</button>
+      </form>
+    </div>
+  </div>
+
+
+  <!-- DEFAUTL MAP LATITUDE AND LONGITUDE PANEL -->
+    <div class='panel panel-primary {{display_mode}}'>
+    <div class='panel-heading'>Map Latitude and Longitude</div>
+    <div class='panel-body'>
+      <!-- Site Customizations Form -->
+      <form ng-submit='updateLatLang(latitude,longitude)'>
+        <label>Latitude</label>
+        <br>
+        <input class='col-xs-6 fields {{display_mode}}' type='number' ng-model='latitude' required>
+        <br>
+        <br>
+        <label>Longitude</label>
+        <br>
+        <input class='col-xs-6 fields {{display_mode}}' type='number' ng-model='longitude' required>
+        <br>
+        <br>
+        <button type="submit" class="btn btn-success">Update</button>
+      </form>
+    </div>
+  </div>
+
+
+  <!-- View Site Settings Panel -->
+  <div class='panel panel-primary {{display_mode}}'>
+    <div class='panel-heading'>View Current Settings</div>
+    <div class='panel-body'>
+      <div>
+        <table class="table table-striped {{display_mode}} table-hover" style='margin:auto; width:100%'>
+          <form class="form-inline"></form>
+          <thead>
+            <tr>
+              <th>Application Name Name</th>
+              <th>Department Name</th>
+              <th>Session Timeout</th>
+              <th>Map Lat/Long</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr {{display_mode}}>
+              <td><div ng-init='getSiteNames()'>{{app_name}}</div></td>
+              <td><div ng-init='getSiteNames()'>{{dept_name}}</div></td>
+              <td><div ng-init='getTimeoutMinutes()'></div>{{timeout_minutes}}</td>
+              <td>LatLang</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
 </div>

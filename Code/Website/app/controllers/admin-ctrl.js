@@ -33,7 +33,7 @@ adminModule.directive('mydatepickerto', function () {
 });
 
 
-adminModule.controller('adminCtrl', ['$scope', 'dataService', 'localStorageService', '$window', '$controller', '$location', function($scope, dataService, localStorageService, $window, $controller, $location){
+adminModule.controller('adminCtrl', ['$scope', 'dataService', 'localStorageService', '$window', '$controller', '$location', function($scope, dataService, localStorageService, $window, $controller, $location, Idle, Keepalive, $uibModal){
 
   $("[data-toggle=popover]").popover();
   $('[data-toggle="tooltip"]').tooltip();
@@ -78,6 +78,8 @@ adminModule.controller('adminCtrl', ['$scope', 'dataService', 'localStorageServi
   $scope.getActiveShifts = function(){sharedCtrl.getActiveShifts();};
   $scope.getCategories = function(){ sharedCtrl.getCategories(); };
   $scope.populateMultiShifts = function(){sharedCtrl.populateMultiShifts();};
+  $scope.getTimeoutMinutes = function(){sharedCtrl.getTimeoutMinutes();};
+  $scope.getSiteNames = function(){sharedCtrl.getSiteNames();};
 
   /***********************
   * Toggle between day and night mode*
@@ -112,6 +114,7 @@ adminModule.controller('adminCtrl', ['$scope', 'dataService', 'localStorageServi
     return $location.path() === path; //TO DO: Pull this function into shared ctrl
   };
   $scope.user = {};
+
   /***** ADD NEW USER *****/
   $scope.addUser = function(){
 
@@ -581,6 +584,8 @@ adminModule.controller('adminCtrl', ['$scope', 'dataService', 'localStorageServi
           $scope.alert.closeAll();
           $scope.alert.addAlert('success', 'Application name successfully updated!');
           $scope.application_name = '';
+          sharedCtrl.getSiteNames();
+          sharedCtrl.getTimeoutMinutes();
         }
         else{
           $scope.alert.closeAll();
@@ -601,6 +606,9 @@ adminModule.controller('adminCtrl', ['$scope', 'dataService', 'localStorageServi
           $scope.alert.closeAll();
           $scope.alert.addAlert('success', 'Department name successfully updated!');
           $scope.department_name = '';
+          sharedCtrl.getSiteNames();
+          sharedCtrl.getTimeoutMinutes();
+
         }
         else{
           $scope.alert.closeAll();
@@ -611,6 +619,53 @@ adminModule.controller('adminCtrl', ['$scope', 'dataService', 'localStorageServi
         console.log('Error: ' + error);
       });
     };
+
+  /***** UPDATE SESSION TIMEOUT*****/
+  $scope.updateTimeout = function(time){
+    dataService.updateTimeout(time)
+    .then(
+      function(data){
+        if(data['Updated'] === true){
+          $scope.alert.closeAll();
+          $scope.alert.addAlert('success', 'Session timeout successfully updated!');
+          $scope.session_timeout = '';
+          sharedCtrl.getSiteNames();
+          sharedCtrl.getTimeoutMinutes();
+        }
+        else{
+          $scope.alert.closeAll();
+          $scope.alert.addAlert('danger', 'Could not update session timeout!');
+        }
+      },
+      function(error){
+        console.log('Error: ' + error);
+      });
+    };
+
+
+
+  /***** UPDATE LATITUDE AND LONGITUDE*****/
+  $scope.updateLatLang = function(latitude, longitude){
+    dataService.updateLatLang(latitude, longitude)
+    .then(
+      function(data){
+        if(data['Updated'] === true){
+          $scope.alert.closeAll();
+          $scope.alert.addAlert('success', 'Latitude/longitude successfully updated!');
+          $scope.latitude = $scope.longitude = '';
+          sharedCtrl.getSiteNames();
+          sharedCtrl.getTimeoutMinutes();
+        }
+        else{
+          $scope.alert.closeAll();
+          $scope.alert.addAlert('danger', 'Could not update latitude/longitude!');
+        }
+      },
+      function(error){
+        console.log('Error: ' + error);
+      });
+    };
+
 
   $scope.addShift = function(){ 
     //get data from inpt fields

@@ -101,6 +101,22 @@ sharedModule.factory('sharedService', function ($http, $q) {
           });
       });
     },
+
+
+    getTimeoutMinutes:function(){
+      return $q(function (resolve, reject) {
+        $http.post('../app/php/get-timeout.php', {})
+          .then(
+          function (response) {
+            resolve(response.data);
+          },
+          function (error){
+            reject(error);
+          });
+      });
+    },
+
+
    updateDocument: function(id,categorie,name,pinned){
      return $q(function (resolve, reject){
          	$http.post('../app/php/update-document.php',{'id':id,'categories':categorie,'name':name,'pinned':pinned})
@@ -316,6 +332,21 @@ adminModule.factory('dataService', function ($http, $q) {
           });
       });
     },
+
+    updateLatLang: function(lat, lon){
+      return $q(function (resolve, reject) {
+        $http.post('../app/php/update-lat-long.php', { 'lat': lat, 'lon': lon })
+          .then(
+          function (response) {
+            resolve(response.data);
+          },
+          function (error) {
+            reject(error);
+          });
+      });
+    },
+
+
     deleteArchive: function(from,to) {
       return $q(function (resolve, reject) {
 
@@ -332,6 +363,19 @@ adminModule.factory('dataService', function ($http, $q) {
     updateDeptName: function (name) {
       return $q(function (resolve, reject) {
         $http.post('../app/php/update-dept-name.php', { 'name': name })
+          .then(
+          function (response) {
+            resolve(response.data);
+          },
+          function (error) {
+            reject(error);
+          });
+      });
+    },
+
+    updateTimeout: function (time) {
+      return $q(function (resolve, reject) {
+        $http.post('../app/php/update-session-timeout.php', { 'time': time })
           .then(
           function (response) {
             resolve(response.data);

@@ -32,6 +32,7 @@ officerModule.controller('officerCtrl', ['$scope', 'localStorageService', 'dataS
     $scope.getSiteNames = function () { sharedCtrl.getSiteNames(); };
     $scope.logout = function () { sharedCtrl.logout(); }
     $scope.getAuthorizedCategories = function(){sharedCtrl.getAuthorizedCategories(id);};
+    $scope.getLatLong = function(){sharedCtrl.getLatLong();};
     $scope.getCategories = function () 
     {  
         sharedCtrl.getCategories(); 
@@ -252,8 +253,29 @@ officerModule.controller('officerCtrl', ['$scope', 'localStorageService', 'dataS
       //Initialize map
       $scope.initMap = function initMap() {
 
+
         $scope.markerCount = 0;
-        var defaultLocation = {lat: 25.6622835, lng: -80.307}; //default location set in Pinecrest,FL
+
+        //updated in version 4.0 to get latitude and longitude specified in Site Settings.
+        // var defaultLocation = {lat: 25.6622835, lng: -80.307}; //default location set in Pinecrest,FL
+
+        //set defualt lat/long for site
+        dataService.getLatLong()
+        .then(
+          function(data){
+            localStorageService.set('lat', data.lat);
+            localStorageService.set('lon', data.lon);
+        });
+
+        
+        var defaultLat = localStorageService.get('lat');
+        var defaultLong = localStorageService.get('lon');
+        var defaultLocation = {lat: 0, lng: 0};
+        defaultLocation.lat = defaultLat;
+        defaultLocation.lng = defaultLong;
+
+        // alert(defaultLocation.lat);
+        // alert(defaultLocation.lng);
 
         var map = new google.maps.Map(document.getElementById('map'), {
           zoom: 13,

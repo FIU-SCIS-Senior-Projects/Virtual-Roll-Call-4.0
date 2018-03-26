@@ -80,6 +80,7 @@ adminModule.controller('adminCtrl', ['$scope', 'dataService', 'localStorageServi
   $scope.populateMultiShifts = function(){sharedCtrl.populateMultiShifts();};
   $scope.getTimeoutMinutes = function(){sharedCtrl.getTimeoutMinutes();};
   $scope.getSiteNames = function(){sharedCtrl.getSiteNames();};
+  $scope.getLatLong = function(){sharedCtrl.getLatLong();};
 
   /***********************
   * Toggle between day and night mode*
@@ -586,6 +587,7 @@ adminModule.controller('adminCtrl', ['$scope', 'dataService', 'localStorageServi
           $scope.application_name = '';
           sharedCtrl.getSiteNames();
           sharedCtrl.getTimeoutMinutes();
+          sharedCtrl.getLatLong();
         }
         else{
           $scope.alert.closeAll();
@@ -608,6 +610,7 @@ adminModule.controller('adminCtrl', ['$scope', 'dataService', 'localStorageServi
           $scope.department_name = '';
           sharedCtrl.getSiteNames();
           sharedCtrl.getTimeoutMinutes();
+          sharedCtrl.getLatLong();
 
         }
         else{
@@ -631,6 +634,7 @@ adminModule.controller('adminCtrl', ['$scope', 'dataService', 'localStorageServi
           $scope.session_timeout = '';
           sharedCtrl.getSiteNames();
           sharedCtrl.getTimeoutMinutes();
+          sharedCtrl.getLatLong();
         }
         else{
           $scope.alert.closeAll();
@@ -655,6 +659,7 @@ adminModule.controller('adminCtrl', ['$scope', 'dataService', 'localStorageServi
           $scope.latitude = $scope.longitude = '';
           sharedCtrl.getSiteNames();
           sharedCtrl.getTimeoutMinutes();
+          sharedCtrl.getLatLong();
         }
         else{
           $scope.alert.closeAll();

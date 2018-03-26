@@ -129,6 +129,19 @@ sharedModule.controller('sharedCtrl', ['$scope', 'sharedService', 'localStorageS
   };
 
 
+
+  self.getLatLong = function()
+  {
+      sharedService.getLatLong()
+        .then(
+        function (data) {
+            $scope.lat = data.lat;
+            $scope.lon = data.lon;
+        },
+        function (error) {});
+  };
+
+
   //Get all the documents Categories
   self.getCategories = function ()
   {

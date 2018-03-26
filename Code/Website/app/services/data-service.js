@@ -116,6 +116,18 @@ sharedModule.factory('sharedService', function ($http, $q) {
       });
     },
 
+    getLatLong:function(){
+      return $q(function (resolve, reject) {
+        $http.post('../app/php/get-lat-long.php', {})
+          .then(
+          function (response) {
+            resolve(response.data);
+          },
+          function (error){
+            reject(error);
+          });
+      });
+    },
 
    updateDocument: function(id,categorie,name,pinned){
      return $q(function (resolve, reject){
@@ -578,6 +590,23 @@ return {
           });
       });
     },
+
+
+
+    getLatLong:function(){
+      return $q(function (resolve, reject) {
+        $http.post('../app/php/get-lat-long.php', {})
+          .then(
+          function (response) {
+            resolve(response.data);
+          },
+          function (error){
+            reject(error);
+          });
+      });
+    },
+
+    
     viewWatchOrders: function () {
       return $q(function (resolve, reject) {
         $http.post('../app/php/get-watch-orders.php')

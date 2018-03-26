@@ -236,6 +236,26 @@ class DBHandler
  	}
 
 
+ 	function getLatLong(){
+ 		global $db_connection;
+ 		$lat_long = [];
+ 		$stmt = $db_connection->prepare( 'SELECT Latitude, Longitude FROM SETTINGS' );
+		$stmt->execute();
+		$stmt->bind_result($lat, $lon);
+
+		while($stmt->fetch())
+		{
+			$lat_long = [
+						"lat" => $lat,
+						"lon" => $lon
+						];
+		}
+		$stmt->close();
+		$db_connection->close();
+	    return $lat_long;
+
+ 	}
+
 	/*******************
 			HELPER FUNCTIONS
 	******************/

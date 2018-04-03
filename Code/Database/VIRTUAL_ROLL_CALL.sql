@@ -172,8 +172,12 @@ CREATE TABLE `quiz_logs` (
 --
 
 CREATE TABLE `settings` (
+  `ID` int(2) NOT NULL,
   `Application_Name` varchar(255) NOT NULL,
-  `Department_Name` varchar(255) NOT NULL
+  `Department_Name` varchar(255) NOT NULL,
+  `Session_Timeout` int(3) NOT NULL,
+  `Latitude` double NOT NULL,
+  `Longitude` double NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------

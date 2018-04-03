@@ -122,7 +122,7 @@ sharedModule.controller('sharedCtrl', ['$scope', 'sharedService', 'localStorageS
           templateUrl: 'timedout-dialog.html',
           windowClass: 'modal-danger',
           keyboard : false,
-          backdrop: true
+          backdrop: "static"
         });
        setTimeout(()=>{ $window.location.href = 'index.html';}, 10000);
           

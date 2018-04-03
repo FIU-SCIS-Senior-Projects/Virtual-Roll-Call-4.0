@@ -617,12 +617,6 @@ return {
           });
       });
     },
-
-<<<<<<< HEAD
-    viewWatchOrders: function () {
-=======
-
-
     getLatLong:function(){
       return $q(function (resolve, reject) {
         $http.post('../app/php/get-lat-long.php', {})
@@ -636,7 +630,6 @@ return {
       });
     },  
     updateWatchOrderTracking: function (wo_id, user_id, is_selected) {
->>>>>>> a2803149e7c0133bc5a86cf6251cde0e759ffbf4
       return $q(function (resolve, reject) {
         $http.post('../app/php/edit-watch-order-tracking.php', { 'wo_id': wo_id, 'user_id': user_id, 'is_selected': is_selected })
           .then(

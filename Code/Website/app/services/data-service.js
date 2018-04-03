@@ -184,6 +184,33 @@ loginModule.factory('dataService', function ($http, $q) {
             );
       });
     },
+
+    getLatLong:function(){
+      return $q(function (resolve, reject) {
+        $http.post('../app/php/get-lat-long.php', {})
+          .then(
+          function (response) {
+            resolve(response.data);
+          },
+          function (error){
+            reject(error);
+          });
+      });
+    },
+
+    getTimeoutMinutes:function(){
+      return $q(function (resolve, reject) {
+        $http.post('../app/php/get-timeout.php', {})
+          .then(
+          function (response) {
+            resolve(response.data);
+          },
+          function (error){
+            reject(error);
+          });
+      });
+    },
+
     lockUser: function (userid){
         return $q(function (resolve) {
           $http.post('../app/php/lockUser.php', {'userid': userid})
@@ -591,22 +618,6 @@ return {
       });
     },
 
-
-
-    getLatLong:function(){
-      return $q(function (resolve, reject) {
-        $http.post('../app/php/get-lat-long.php', {})
-          .then(
-          function (response) {
-            resolve(response.data);
-          },
-          function (error){
-            reject(error);
-          });
-      });
-    },
-
-    
     viewWatchOrders: function () {
       return $q(function (resolve, reject) {
         $http.post('../app/php/get-watch-orders.php')

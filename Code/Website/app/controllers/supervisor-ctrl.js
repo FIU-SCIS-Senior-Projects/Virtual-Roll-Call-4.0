@@ -31,6 +31,7 @@ supervisorModule.controller('supervisorCtrl', ['$scope', 'localStorageService', 
   $scope.getDocuments = function(){ sharedCtrl.getDocuments(); }
   $scope.getMessages = function() { sharedCtrl.getMessages(); }
   $scope.getlogs = function(){ sharedCtrl.getlogs(); }
+  $scope.timeoutInit = function(){sharedCtrl.timeoutInit();};
   $scope.refresh = function(){ setTimeout(function(){ window.location.reload(); }, 100); }
 
   $scope.editDocument = function(id ,name, pinned, category)

@@ -1,5 +1,5 @@
 var sharedModule = angular.module('shared', ['admin', 'supervisor', 'officer', 'login', 'ngIdle', 'ui.bootstrap']);
-var loginModule = angular.module('login', ['ngRoute', 'LocalStorageModule', 'shared', 'flow', 'ui.bootstrap']);
+var loginModule = angular.module('login', ['ngRoute', 'LocalStorageModule', 'shared', 'flow', 'ui.bootstrap','ngIdle']);
 var adminModule = angular.module('admin', ['ngRoute', 'LocalStorageModule', 'shared', 'flow', 'ui.bootstrap']);
 var supervisorModule = angular.module('supervisor', ['ngRoute', 'LocalStorageModule', 'shared', 'flow', 'ui.bootstrap', 'ui.grid', 'ui.grid.selection', 'ui.grid.exporter', 'angularjs-dropdown-multiselect']);
 var officerModule = angular.module('officer', ['ngRoute', 'LocalStorageModule', 'shared', 'flow', 'ui.bootstrap']);
@@ -95,4 +95,19 @@ officerModule.config(function($routeProvider){
 		redirectTo: '/categories'
 	});
 });
+
+
+sharedModule.config(['KeepaliveProvider', 'IdleProvider', function(KeepaliveProvider, IdleProvider) {
+  //default timeout is 1 hour (3600 seconds). This value is updated to the minutes entered in Site Settings
+  //from function timeoutInit() in shared controller which is called from all views
+  IdleProvider.idle(3600);
+
+  //defualt countdonw is 1 minute before login user out. 
+  IdleProvider.timeout(60);
+  KeepaliveProvider.interval(10);
+}]);
+
+sharedModule.run(['Idle', function(Idle) {
+  Idle.watch();
+}]);
 

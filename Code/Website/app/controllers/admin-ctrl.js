@@ -81,6 +81,7 @@ adminModule.controller('adminCtrl', ['$scope', 'dataService', 'localStorageServi
   $scope.getTimeoutMinutes = function(){sharedCtrl.getTimeoutMinutes();};
   $scope.getSiteNames = function(){sharedCtrl.getSiteNames();};
   $scope.getLatLong = function(){sharedCtrl.getLatLong();};
+  $scope.timeoutInit = function(){sharedCtrl.timeoutInit();};
 
   /***********************
   * Toggle between day and night mode*

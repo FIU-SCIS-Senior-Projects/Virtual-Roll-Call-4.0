@@ -146,25 +146,28 @@
               <label>Search</label>
               <input type="text" ng-model="search" class="form-control fields {{display_mode}}" placeholder="Search">
             </div>
+            <div class="form-group">             
+              <button class="btn btn-success" ng-click='UnselectAllLocations(o)'><span class="glyphicon glyphicon-remove-circle"></span> Unselect All Locations</button>
+            </div>
           </form>
-          <thead>
+         <thead>
             <tr>
               <th class="text-center">#</th>
               <th>Address</th>
               <th>Description</th>
               <th>Add Date</th>
               <th>Expiration Date</th>
-              <th>View Detail</th>
+              <th> </th>
             </tr>
           </thead>
           <tbody>
-            <tr {{display_mode}} ng-repeat='o in watch_orders|filter:search'>
-              <td class='text-center'>{{$index + 1}}</td>
-              <td>{{o.Address}}</td>
-              <td>{{o.Desc}}</td>
-              <td>{{o.AddDate}}</td>
-              <td>{{o.ExpDate}}</td>
-              <td class='text-center'><button class="btn-default" ng-click='viewWatchOrder(o.Id, o.Desc, o.Address, o.ExpDate, o.StartDate, o.StartTime, o.ExpTime, o.Zone, o.BusinessName, o.OwnerName, o.WORequester, o.Phone, o.WOInstruction, o.EName, o.EAddress, o.EPhone, o.CreatedBy)'><span class="glyphicon glyphicon-edit"></span> View Detail</button></td>
+            <tr {{display_mode}} ng-class="{'selected': o.selected}" ng-repeat='o in watch_orders|filter:search' >
+              <td ng-click="select(o)" class='text-center'>{{$index + 1}}</td>
+              <td ng-click="select(o)">{{o.Address}}</td>
+              <td ng-click="select(o)">{{o.Desc}}</td>
+              <td ng-click="select(o)">{{o.AddDate}}</td>
+              <td ng-click="select(o)">{{o.ExpDate}}</td>
+              <td class='text-center' style="width: 120px"><button class="btn-default" ng-click='viewWatchOrder(o.Id, o.Desc, o.Address, o.ExpDate, o.StartDate, o.StartTime, o.ExpTime, o.Zone, o.BusinessName, o.OwnerName, o.WORequester, o.Phone, o.WOInstruction, o.EName, o.EAddress, o.EPhone, o.CreatedBy)'><span class="glyphicon glyphicon-edit"></span> View Detail</button></td>
             </tr>
           </tbody>
         </table>

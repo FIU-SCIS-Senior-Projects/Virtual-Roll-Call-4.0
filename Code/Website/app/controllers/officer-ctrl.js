@@ -175,11 +175,23 @@ officerModule.controller('officerCtrl', ['$scope', 'localStorageService', 'dataS
      * GET WATCH ORDERS
      To do: move to shared ctrl
      ***********************/
+      /* Select Row */
+      $scope.select = function(item) {
+        item.selected ? item.selected = false : item.selected = true;
+        $scope.updateWatchOrderTracking(item.Id, id, item.selected);
+      };
+      $scope.UnselectAllLocations = function() {
+          angular.forEach($scope.watch_orders, function(o) {
+            o.selected = false;
+            $scope.updateWatchOrderTracking(o.Id, id, o.selected);
+          })
+      };
+
       function getWatchOrders(){
 
         return new Promise(function(resolve, reject) {
 
-          dataService.viewWatchOrders()
+          dataService.viewWatchOrders(id)
             .then(
             function (data) {
 
@@ -211,6 +223,7 @@ officerModule.controller('officerCtrl', ['$scope', 'localStorageService', 'dataS
                   tmp.EAddress = data[x].EAddress;
                   tmp.EPhone = data[x].EPhone;
                   tmp.CreatedBy = data[x].CreatedBy;
+                  tmp.selected = data[x].is_selected;
 
                   if(validDate(tmp)){
                     watch_orders.push(tmp);
@@ -393,6 +406,18 @@ officerModule.controller('officerCtrl', ['$scope', 'localStorageService', 'dataS
           function (error) { console.log('Error: ' + error);
           });
     };
+
+    $scope.updateWatchOrderTracking = function (wo_id, user_id, is_selected)
+    {
+        dataService.updateWatchOrderTracking(wo_id, user_id, is_selected)
+          .then(
+            function (data) {
+              console.log('Update Successful');             
+          },
+          function (error) { console.log('Error: ' + error);
+          });
+    };
+
     //alert functions (displays accordingly in views)
     $scope.alert = sharedCtrl.alert;
   }]);

@@ -604,12 +604,24 @@ return {
             reject(error);
           });
       });
-    },
-
-    
-    viewWatchOrders: function () {
+    },  
+    updateWatchOrderTracking: function (wo_id, user_id, is_selected) {
       return $q(function (resolve, reject) {
-        $http.post('../app/php/get-watch-orders.php')
+        $http.post('../app/php/edit-watch-order-tracking.php', { 'wo_id': wo_id, 'user_id': user_id, 'is_selected': is_selected })
+          .then(
+          function (response) {
+            console.log(response.data);
+            resolve(response.data);
+          },
+          function (error) {
+            console.log(error);
+            reject(error);
+          });
+      });
+    },  
+    viewWatchOrders: function (user_id) {      
+      return $q(function (resolve, reject) {
+        $http.post('../app/php/get-watch-orders.php',{'user_id': user_id})
           .then(
           function (response) {
             resolve(response.data);

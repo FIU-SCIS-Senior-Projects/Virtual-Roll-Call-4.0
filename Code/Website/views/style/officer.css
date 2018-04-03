@@ -164,3 +164,11 @@ tr.found {
 .gm-style-iw {
    color:black !important;
 }
+
+tr td {
+  cursor: pointer
+}
+
+tr.selected td {
+  background: #2e82f4!important;
+}

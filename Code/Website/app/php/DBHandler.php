@@ -384,6 +384,67 @@ class DBHandler
 		$db_connection->close();
 		return $orders;
 	}
+	function getWatchOrdersForUser($user_id) {
+		global $db_connection;
+		$orders = [];
+
+		$sql =" SELECT a.Id
+				     , a.Desc
+				     , a.Address
+				     , a.Lat
+				     , a.Lng
+				     , a.AddDate
+				     , a.ExpDate
+				     , a.StartDate
+				     , a.StartTime
+				     , a.ExpTime
+				     , a.Zone
+				     , a.BusinessName
+				     , a.OwnerName
+				     , a.WORequester
+				     , a.Phone
+				     , a.WOInstruction
+				     , a.EName
+					 , a.EAddress
+				     , a.EPhone
+				     , a.CreatedBy
+				     , b.is_selected
+				  FROM WATCH_ORDERS a
+				  left join watch_orders_tracking b on a.Id = b.watch_orders_id and b.officers_userid = ?";
+
+		$stmt = $db_connection->prepare($sql);
+	    $stmt->bind_param('s', $user_id);
+		$stmt->execute();
+		$stmt->bind_result($Id, $Desc, $Address, $Lat, $Lng, $AddDate, $ExpDate, $StartDate, $StartTime, $ExpTime, $Zone, $BusinessName, $OwnerName, $WORequester, $Phone, $WOInstruction, $EName, $EAddress, $EPhone, $CreatedBy, $is_selected);
+		while($stmt->fetch()){
+			$tmp = ["Id" => $Id,
+			"Desc" => $Desc,
+			"Address" => $Address,
+			"Lat" => $Lat,
+			"Lng" => $Lng,
+			"AddDate" => $AddDate,
+			"ExpDate" => $ExpDate,
+			"StartDate" => $StartDate,
+			"StartTime" => $StartTime,
+			"ExpTime" => $ExpTime, 
+			"Zone" => $Zone,
+			"BusinessName" => $BusinessName, 
+			"OwnerName" => $OwnerName, 
+			"WORequester" => $WORequester, 
+			"Phone" => $Phone, 
+			"WOInstruction" => $WOInstruction, 
+			"EName" => $EName, 
+			"EAddress" => $EAddress,
+			"EPhone" => $EPhone,
+			"CreatedBy" => $CreatedBy,
+			"is_selected" => $is_selected];
+
+			array_push($orders, $tmp);
+		}
+		$stmt->close();
+		$db_connection->close();
+		return $orders;
+	}
 	function editWatchOrder($id, $desc, $address, $lat, $lng, $expDate, $startDate, $startTime, $expTime, $zone, $businessName,                                 $ownerName, $woRequester, $phone, $woInstruction, $eName, $eAddress, $ePhone) {
 		global $db_connection;
 		$result = ["Updated" => false];
@@ -391,6 +452,25 @@ class DBHandler
 		$sql = "UPDATE $table SET `Desc`=?, `Address`=?, `Lat`=?, `Lng`=?, `ExpDate`=?, `StartDate`=?, `StartTime`=?, `ExpTime`=?,`Zone`=?,`BusinessName`=?,`OwnerName`=?,`WORequester`=?,`Phone`=?,`WOInstruction`=?,`EName`=?,`EAddress`=?,`EPhone`=? WHERE `Id`=?";
 		$stmt = $db_connection->prepare($sql);
 		if( !$stmt->bind_param('sssssssssssssssssd', $desc, $address, $lat, $lng, $expDate, $startDate, $startTime, $expTime, $zone, $businessName, $ownerName, $woRequester, $phone, $woInstruction, $eName, $eAddress, $ePhone, $id) )
+		{
+			return $result;
+		}
+		if (!$stmt->execute())
+		{
+			return $result;
+		}
+		$result["Updated"] = true;
+		$stmt->close();
+		$db_connection->close();
+		return $result;
+	}
+	function editWatchOrderTracking($wo_id, $user_id, $is_selected) {
+		global $db_connection;
+		$result = ["Updated" => false];
+		$table = "watch_orders_tracking";
+		$sql = "UPDATE $table SET `is_selected`=? WHERE `watch_orders_id` = ? and `officers_userid`=?";
+		$stmt = $db_connection->prepare($sql);
+		if( !$stmt->bind_param('ddd', $is_selected, $wo_id, $user_id))
 		{
 			return $result;
 		}

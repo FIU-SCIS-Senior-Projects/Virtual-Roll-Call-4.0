@@ -46,6 +46,7 @@ header('location: ../views/');
   <!-- Vertical Navigation -->
   <nav class='navbar navbar-default'>
     <div class='container-fluid'>
+      <div ng-init='timeoutInit()'></div>
       <div class='navbar-header'>
         <button type='button' class='navbar-toggle' data-toggle='collapse' data-target='#myNavbar'>
           <span class='icon-bar'></span>
@@ -91,6 +92,10 @@ header('location: ../views/');
 
   <!-- content will change according to route -->
   <section ng-view></section>
+
+<?php
+  include("../app/vendor/timeout-script.js");
+?>
 
 </body>
 </html>

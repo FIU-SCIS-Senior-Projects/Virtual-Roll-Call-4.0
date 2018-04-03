@@ -163,6 +163,15 @@ li.a:last-child {
     border-color: white;
   }
 
+  .modal-header, h4, .close-btn {
+      background-color: #337AB7;
+      color:white !important;
+      text-align: center;
+      font-size: 30px;
+  }
+  .modal-footer {
+      background-color: #f9f9f9;
+  }
 
   .table-hover tbody tr:hover td, .table-hover tbody tr:hover th {
     background-color: #2e82f4;

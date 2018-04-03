@@ -24,14 +24,20 @@ sharedModule.controller('sharedCtrl', ['$scope', 'sharedService', 'localStorageS
     delete $scope.login;
   };
 
-
   self.redirect = function (login) {
     if (login == "")
       $window.location.href = 'index.html';
   };
 
+
+  self.timeoutInit = function(){
+    //set idle time when calling every view
+    var timeoutTotal = localStorageService.get('timeout')* 60;
+    Idle.setIdle(timeoutTotal);
+  }
+
   /***** GET APP NAME *****/
-  self.getSiteNames = function () {
+  self.getSiteNames = function (){ 
     sharedService.getSiteNames()
       .then(
       function (data) {
@@ -93,15 +99,15 @@ sharedModule.controller('sharedCtrl', ['$scope', 'sharedService', 'localStorageS
         if ($scope.timedout) {
           $scope.timedout.close();
           $scope.timedout = null;
+          localStorageService.set('timeoutModal', false);
         }
       }
 
       $scope.$on('IdleStart', function() {
         closeModals();
-
         $scope.warning = $uibModal.open({
           templateUrl: 'warning-dialog.html',
-          windowClass: 'modal-danger'
+          windowClass: 'modal-danger',
         });
       });
 
@@ -111,10 +117,15 @@ sharedModule.controller('sharedCtrl', ['$scope', 'sharedService', 'localStorageS
 
       $scope.$on('IdleTimeout', function() {
         closeModals();
+        localStorageService.set('timeoutModal', 'true');
         $scope.timedout = $uibModal.open({
           templateUrl: 'timedout-dialog.html',
-          windowClass: 'modal-danger'
+          windowClass: 'modal-danger',
+          keyboard : false,
+          backdrop: true
         });
+       setTimeout(()=>{ $window.location.href = 'index.html';}, 10000);
+          
       });
 
   //Get all the documents Categories

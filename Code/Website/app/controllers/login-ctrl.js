@@ -1,5 +1,5 @@
 //CONTROLLER for login
-loginModule.controller('loginCtrl', ['$scope', 'localStorageService', 'dataService', '$window', '$controller', function($scope, localStorageService, dataService, $window, $controller) {
+loginModule.controller('loginCtrl', ['$scope', 'localStorageService', 'dataService', '$window', '$controller','Idle', function($scope, localStorageService, dataService, $window, $controller, Idle) {
 
   /***** SHARED FUNCTIONS *****/
   var sharedCtrl = $controller('sharedCtrl', {$scope: $scope});
@@ -18,6 +18,22 @@ loginModule.controller('loginCtrl', ['$scope', 'localStorageService', 'dataServi
 
    //when login button is clicked...
   $scope.login = function(){
+
+    //set defualt latitude and longitude for watch order map at login
+    dataService.getLatLong()
+    .then(
+      function(data){
+        localStorageService.set('lat', data.lat);
+        localStorageService.set('lon', data.lon);
+    });
+
+
+      //set set timeout value to site's preferred idle period
+      dataService.getTimeoutMinutes()
+      .then(
+        function(minutes){
+          localStorageService.set('timeout', minutes);
+      });
 
       //get values from the login input fields
       var username = $scope.username;

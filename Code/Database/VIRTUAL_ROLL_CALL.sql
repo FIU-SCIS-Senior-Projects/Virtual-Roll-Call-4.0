@@ -235,7 +235,16 @@ CREATE TABLE `watch_orders` (
   `EPhone` varchar(45) DEFAULT NULL,
   `CreatedBy` varchar(60) DEFAULT NULL,
   PRIMARY KEY (`Id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE `watch_orders_tracking` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `watch_orders_id` int(11) NOT NULL,
+  `officers_userid` int(11) NOT NULL,
+  `is_selected` tinyint(4) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `id_UNIQUE` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
 -- Indexes for dumped tables
@@ -320,12 +329,6 @@ ALTER TABLE `user_doc_status`
   ADD PRIMARY KEY (`Id`);
 
 --
--- Indexes for table `watch_orders`
---
-ALTER TABLE `watch_orders`
-  ADD PRIMARY KEY (`Id`);
-
---
 -- AUTO_INCREMENT for dumped tables
 --
 
@@ -400,31 +403,88 @@ ALTER TABLE `documents`
   ADD CONSTRAINT `DOCUMENTS_ibfk_1` FOREIGN KEY (`Category_ID`) REFERENCES `categories` (`Category_ID`) ON DELETE CASCADE;
 COMMIT;
 
-
 --
 -- MySQL event called "MoveDocsToArchive", which is going to archive all documents older than 7 days and are marked as "Done"
 -- The event will run every day. Modify "Start Date" to the day when this schema will be deploy.
 --
-
+DROP EVENT IF EXISTS `MoveDocsToArchive`;
 CREATE EVENT MoveDocsToArchive 
-	ON SCHEDULE EVERY 1 Day STARTS '2018-02-22 00:00:00' 
+	ON SCHEDULE EVERY 1 Day STARTS '2018-02-22' 
     ON COMPLETION NOT PRESERVE ENABLE 
     COMMENT 'Archive documents older than 7 days and that are marked as DONE' 
     DO Update virtual_roll_call.user_doc_status, virtual_roll_call.documents
 		  set user_doc_status.IsArchived = 1
 		where user_doc_status.StatusId = 3 
 		  and documents.Upload_Date < (DATE(NOW()) - INTERVAL 7 DAY) 
-		  and user_doc_status.DocumentId = documents.Document_ID
+		  and user_doc_status.DocumentId = documents.Document_ID;
 
-		  --
+--
+-- Delete Watch Order Tracking records after the watch Order has expired
+--
+DROP EVENT IF EXISTS `DelWOTrackOnExpDate`;
+CREATE EVENT DelWOTrackOnExpDate 
+	ON SCHEDULE EVERY 1 Day STARTS '2018-03-24' 
+    ON COMPLETION NOT PRESERVE ENABLE 
+    COMMENT 'Delete the watch orders tracking records after it has expired' 
+    DO Delete From watch_orders_tracking 
+			 where watch_orders_id in (select Id from watch_orders where ExpDate < NOW());		  
+
+		  
+--
 -- ACTIVATE EVENT
 --
 
 set global event_scheduler = ON;
 
 --
+-- PROCEDURE to create watch order tracking records for all users, on officers table, on watch_orders_tracking table 
+--
+DROP PROCEDURE IF EXISTS `CreateWatchOrdersForOfficers`;
+DELIMITER //
+CREATE PROCEDURE `CreateWatchOrdersForOfficers`(IN wo_id INT(10))
+BEGIN
+  DECLARE done INT DEFAULT 0;
+  DECLARE officerid INT(10);
+  DECLARE officers CURSOR FOR SELECT userid FROM officers;
+  DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+
+  OPEN officers;
+  insert_loop: LOOP
+    FETCH officers INTO officerid;
+    IF done THEN
+      LEAVE insert_loop;
+    END IF; 
+      INSERT INTO watch_orders_tracking (watch_orders_id, officers_userid, is_selected) values (wo_id, officerid, 0);
+  END LOOP;
+
+  CLOSE officers;
+END ; //
+DELIMITER ;
+
+--
+-- Create Trigger to create watch order tracking
+--
+DELIMITER //
+CREATE TRIGGER `watch_orders_AFTER_INSERT` AFTER INSERT ON `watch_orders` FOR EACH ROW
+BEGIN
+	call virtual_roll_call.CreateWatchOrdersForOfficers(new.id);
+END;//
+DELIMITER ;
+
+--
+-- Create trigger to delete watch order tracking when watch order is deleted
+--
+DELIMITER //
+CREATE TRIGGER `watch_orders_AFTER_DELETE` AFTER DELETE ON `watch_orders` FOR EACH ROW
+BEGIN
+	delete from watch_orders_tracking where watch_orders_id = old.id;
+END;//
+DELIMITER ;
+
+--
 -- Commit Action
 --
+
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

@@ -19,8 +19,11 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Database: `virtual_roll_call`
+-- Create Database: `virtual_roll_call`
 --
+
+create schema virtual_roll_call;
+use virtual_roll_call;
 
 -- --------------------------------------------------------
 
@@ -465,6 +468,129 @@ BEGIN
 END ; //
 DELIMITER ;
 
+
+
+DROP PROCEDURE IF EXISTS `ViewDocuments`;
+DELIMITER //
+--
+-- Procedure to retrieve supervisor logs info to populate
+--
+CREATE DEFINER=`root`@`localhost` PROCEDURE `ViewDocuments` ()  BEGIN
+  DECLARE done INT DEFAULT 0;
+  DECLARE officerid INT(10);
+  DECLARE shiftid INT(2);
+  DECLARE firstname char(20);
+  DECLARE lastname char(20);
+  
+  declare document_name char(50);
+  declare status_desc char(20);
+  declare logdoc datetime;
+  declare uploaddate datetime;
+  declare startdt datetime;
+  declare enddt datetime;
+  declare duration char(10);
+  
+  DECLARE officers CURSOR FOR SELECT userid, shift_id, first_name, last_name FROM officers;
+  DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+  DROP TEMPORARY TABLE IF EXISTS view_all_documents;
+  CREATE TEMPORARY TABLE view_all_documents (firstname char(20), lastname char(20), docuname char(50), 
+            logdoc datetime, uploaddt datetime, startdt datetime, enddt datetime,
+                                             duration char(10), statusdesc char(20));
+  OPEN officers;
+  insert_loop: LOOP
+    FETCH officers INTO officerid, shiftid, firstname, lastname;
+    IF done THEN
+      LEAVE insert_loop;
+    END IF; 
+     
+     BLOCK2: begin
+    declare attribute_done int default 0;
+          
+    declare docs cursor for select (select d.Document_Name from documents d where d.Document_ID = ds.DocumentId) 
+            , (select max(l.doc) from logs l where l.DocumentID = ds.DocumentId and l.userid = officerid )
+                                       , (select d.Upload_Date from documents d where d.Document_ID = ds.DocumentId)
+                                       , ds.StartDateTime
+                                       , ds.EndDateTime
+                                       , CONCAT(TRUNCATE((TIMESTAMPDIFF(SECOND, ds.startdatetime, ds.enddatetime)), 2)) AS Duration
+                                       , (select s.Description from document_status s where s.id = ds.statusid)
+                                    from user_doc_status ds 
+           where ds.OfficerId = officerid;
+    
+          DECLARE CONTINUE HANDLER FOR NOT FOUND SET attribute_done = TRUE;
+    open docs;
+   insertintotemp: LOOP
+    fetch docs into document_name, logdoc, uploaddate, startdt, enddt, duration, status_desc;
+    IF attribute_done THEN
+     LEAVE insertintotemp;
+    END IF; 
+                
+    insert into view_all_documents values (firstname, lastname, document_name, logdoc, uploaddate, startdt, enddt, duration, status_desc);
+    
+   end Loop insertintotemp;
+     end block2;
+BLOCK3: begin
+    declare attribute_done int default 0;
+         
+    declare docsShiftAll cursor for select D.Document_Name
+              , 0
+              , D.Upload_Date AS Uploaded
+              , 0
+              , 0
+              , 0
+              , 'Pending'
+           from documents d 
+             where d.Document_ID not in (select ds.DocumentId
+                   from user_doc_status ds
+                   where ds.OfficerId = officerid);
+                                                                         
+   declare docs cursor for SELECT D.Document_Name
+                                      , 0
+                                      , D.Upload_Date AS Uploaded
+           , 0
+           , 0
+           , 0
+           , 'Pending'
+        FROM CATEGORY_SHIFT_ACCESS CSA 
+        JOIN DOCUMENTS D ON D.CATEGORY_ID = CSA.CATEGORY_ID
+        WHERE  CSA.SHIFT_ID = shiftid AND D.document_ID NOT IN (SELECT UDS.DocumentId FROM USER_DOC_STATUS UDS WHERE UDS.OfficerId = officerid);
+   
+          DECLARE CONTINUE HANDLER FOR NOT FOUND SET attribute_done = TRUE; 
+           
+          if shiftid <> 1 then   
+   open docs;
+   insertintotemp: LOOP
+    fetch docs into document_name, logdoc, uploaddate, startdt, enddt, duration, status_desc;
+    IF attribute_done THEN
+     LEAVE insertintotemp;
+    END IF;                 
+    insert into view_all_documents values (firstname, lastname, document_name, logdoc, uploaddate, startdt, enddt, duration, status_desc);    
+   end Loop insertintotemp;
+            
+          else 
+          
+     open docsShiftAll;
+     insertintotemp: LOOP
+     fetch docsShiftAll into document_name, logdoc, uploaddate, startdt, enddt, duration, status_desc;
+     IF attribute_done THEN
+      LEAVE insertintotemp;
+     END IF;                 
+     insert into view_all_documents values (firstname, lastname, document_name, logdoc, uploaddate, startdt, enddt, duration, status_desc);
+    end Loop insertintotemp;      
+     end if; 
+    
+     end BLOCK3;
+     
+        
+  END LOOP;
+    select * from view_all_documents;
+    
+   DROP TEMPORARY TABLE IF EXISTS view_all_documents;  
+  CLOSE officers;
+END;//
+
+DELIMITER ;
+
+
 --
 -- Create Trigger to create watch order tracking
 --
@@ -485,6 +611,21 @@ BEGIN
 END;//
 DELIMITER ;
 
+
+--DEFAULT INSERTS
+INSERT INTO `document_status` (`Id`, `Description`) VALUES
+(1, 'Pending'),
+(2, 'Reviewed'),
+(3, 'Done');
+
+INSERT INTO `settings` (`ID`, `Application_Name`, `Department_Name`, `Session_Timeout`, `Latitude`, `Longitude`) VALUES
+(1, 'Virtual Roll Call', 'Pinecrest Police Department', 30, 25.6622835, -80.307);
+
+INSERT INTO `shifts` (`Id`, `Name`, `From_time`, `To_time`, `Status`) VALUES
+(1, 'ALL', '00:00:00.00000', '23:00:00.00000', '1');
+
+INSERT INTO `officers` (`UserID`, `First_Name`, `Last_Name`, `Username`, `Password`, `Role`, `Shift_id`, `Active`) VALUES
+(1, 'admin', 'Default', 'Admin', '$2y$10$m.sQWBJH.91SDz6uC44TK.MUMTwYZ0Gf5ykwbaLdKrFn3KW2SWrHW', 'Administrator', 1, 1);
 --
 -- Commit Action
 --

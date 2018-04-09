@@ -847,45 +847,54 @@ class DBHandler
 
     function getlogs()
     {
-		$statusArray = $this->GetStatusArray();
+		// $statusArray = $this->GetStatusArray();
 
         global $db_connection;
         $logs = [];
-        $sql = 'SELECT
-				OFFICERS.First_Name,
-				OFFICERS.Last_Name,
-				DOCUMENTS.Document_Name,
-				LOGS.DOC,
-				DOCUMENTS.Upload_Date AS Uploaded,
-				USER_DOC_STATUS.StartDateTime AS Started,
-				USER_DOC_STATUS.EndDateTime AS Completed,
-				CONCAT(TRUNCATE((TIMESTAMPDIFF(SECOND, USER_DOC_STATUS.startdatetime, USER_DOC_STATUS.enddatetime)), 2), \' Sec\') AS Duration,
-				USER_DOC_STATUS.StatusId
-				FROM DOCUMENTS
-				LEFT JOIN LOGS ON LOGS.documentid = DOCUMENTS.document_ID
-				LEFT JOIN OFFICERS ON LOGS.userid = OFFICERS.userID
-				LEFT JOIN USER_DOC_STATUS ON DOCUMENTS.document_ID = USER_DOC_STATUS.DocumentId AND OFFICERS.userID = USER_DOC_STATUS.OfficerId
-				LEFT JOIN DOCUMENT_STATUS ON USER_DOC_STATUS.StatusId = DOCUMENT_STATUS.Id
-				ORDER BY DOCUMENTS.Upload_Date DESC';
+     //    $sql = "call ViewDocuments()";
+     //    $stmt = $db_connection->prepare($sql);
+     //    $stmt->execute();
+     //    $stmt->bind_result($First_Name, $Last_Name, $Document_Name, $DOC,
+					// 		$Uploaded, $Started, $Completed, $Duration, $Status);
+     //        	        file_put_contents('/Users/darilyspereira/Desktop/test.txt', $First_Name, FILE_APPEND);
 
-            $stmt = $db_connection->prepare($sql);
-            $stmt->execute();
-            $stmt->bind_result( $First_Name, $Last_Name, $Document_Name, $DOC,
-								$Uploaded, $Started, $Completed, $Duration, $Status );
-            while($stmt->fetch()){
-                    $tmp = [
-						"Full_Name" => $First_Name.' '.$Last_Name,
-						"Document_Name" => $Document_Name,
-						"DOC" => $DOC,
-						"Uploaded" => $Uploaded,
-						"Started" => $Started,
-						"Completed" => $Completed,
-						"Duration" => $Duration < 0 ? '0.00 Sec' : $Duration,
-						"Status" => $Status == NULL ? $statusArray[1] : $statusArray[(int)$Status]
+     //        while($stmt->fetch()){
+
+     //                $tmp = [
+					// 	"Full_Name" => $First_Name.' '.$Last_Name,
+					// 	"Document_Name" => $Document_Name,
+					// 	"DOC" => $DOC,
+					// 	"Uploaded" => $Uploaded,
+					// 	"Started" => $Started,
+					// 	"Completed" => $Completed,
+					// 	"Duration" => $Duration < 0 ? '0.00 Sec' : $Duration,
+					// 	"Status" => $Status
+					// ];
+     //                array_push($logs, $tmp);
+     //        }
+     //        $stmt->close();
+
+
+
+        $rs = $db_connection->query( "CALL ViewDocuments()");
+		while($row = $rs->fetch_object())
+		{
+
+              $tmp = [
+						"Full_Name" => $row->firstname.' '.$row->lastname,
+						"Document_Name" => $row->docuname,
+						"DOC" => $row->logdoc,
+						"Uploaded" => $row->uploaddt,
+						"Started" => $row->startdt,
+						"Completed" => $row->enddt,
+						"Duration" => $row->duration < 0 ? '0.00 Sec' : $row->duration,
+						"Status" => $row->statusdesc
 					];
                     array_push($logs, $tmp);
-            }
-            $stmt->close();
+
+		}
+
+
             $db_connection->close();
             return $logs;
         }

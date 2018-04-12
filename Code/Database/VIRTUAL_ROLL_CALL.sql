@@ -611,8 +611,12 @@ BEGIN
 END;//
 DELIMITER ;
 
+--
+-- Commit Action
+--
+COMMIT;
 
---DEFAULT INSERTS
+/*DEFAULT INSERTS*/
 INSERT INTO `document_status` (`Id`, `Description`) VALUES
 (1, 'Pending'),
 (2, 'Reviewed'),
@@ -626,10 +630,11 @@ INSERT INTO `shifts` (`Id`, `Name`, `From_time`, `To_time`, `Status`) VALUES
 
 INSERT INTO `officers` (`UserID`, `First_Name`, `Last_Name`, `Username`, `Password`, `Role`, `Shift_id`, `Active`) VALUES
 (1, 'admin', 'Default', 'Admin', '$2y$10$m.sQWBJH.91SDz6uC44TK.MUMTwYZ0Gf5ykwbaLdKrFn3KW2SWrHW', 'Administrator', 1, 1);
+
+
 --
 -- Commit Action
 --
-
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

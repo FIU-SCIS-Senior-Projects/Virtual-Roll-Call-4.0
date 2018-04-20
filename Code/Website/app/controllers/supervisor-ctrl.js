@@ -165,16 +165,21 @@ supervisorModule.controller('supervisorCtrl', ['$scope', 'localStorageService', 
         document.getElementById("parseTitle").innerHTML = message;
 
         var orders = $scope.parsedWatchOrders;
-
+        var lat = 1.0;
+        var lng = 1.0;
+        
         //Geocode watch address
-        orders.forEach(function(order){
-
-          order.push(0,0);
+        orders.forEach(function(order){  
           geoCodeAddress(order).then(
             function(data){
-              order = data;
+              lat = data[2];
+              order[2] = lat;             
+              lng = data[3];
+              order[3] = lng;
+              order.push($scope.name);
             },
             function(error){
+              alert('Error: ' + error);
               console.log('Error: ' + error);
             });
         });
@@ -191,8 +196,6 @@ supervisorModule.controller('supervisorCtrl', ['$scope', 'localStorageService', 
   function geoCodeAddress(order)
   {
     return new Promise(function(resolve, reject) {
-
-
     dataService.geoCodeAddress(order[1])
     .then(
       function(data){
@@ -201,10 +204,9 @@ supervisorModule.controller('supervisorCtrl', ['$scope', 'localStorageService', 
           order[1] = data.results[0].formatted_address;   // pick first formatted address returned
           order[2] = data.results[0].geometry.location.lat;  // add lat coordinate
           order[3] = data.results[0].geometry.location.lng;   // add long coordinate
-          order[4] = expDate;   // add exp date
+          //order[4] = expDate;   // add exp date
 
           resolve(order);
-
         }
         else{
           console.log(data);
@@ -416,7 +418,7 @@ supervisorModule.controller('supervisorCtrl', ['$scope', 'localStorageService', 
           $('#editParseModal').modal('show');
         };
 
-        $scope.updateParseUser = function(){
+        $scope.updateParseWatchOrder= function(){
           var index = $scope.updateIndex;
           var desc = $scope.updateDesc;
           var address = $scope.updateAddress;
@@ -437,23 +439,32 @@ supervisorModule.controller('supervisorCtrl', ['$scope', 'localStorageService', 
           var temp = $scope.parsedWatchOrders[index];
           temp[0] = desc;
           temp[1] = address;
-          temp[2] = expDate;
-          temp[3] = startDate;
-          temp[4] = startTime;
-          temp[5] = expTime;
-          temp[6] = zone;
-          temp[7] = businessName;
-          temp[8] = ownerName;
-          temp[9] = woRequester;
-          temp[10] = phone;
-          temp[11] = woInstruction;
-          temp[12] = eName;
-          temp[13] = eAddress;
-          temp[14] = ePhone;
+          temp[2] = 0;
+          temp[3] = 0;
+          temp[4] = expDate;
+          temp[5] = startDate;
+          temp[6] = startTime;
+          temp[7] = expTime;
+          temp[8] = zone;
+          temp[9] = businessName;
+          temp[10] = ownerName;
+          temp[11] = woRequester;
+          temp[12] = phone;
+          temp[13] = woInstruction;
+          temp[14] = eName;
+          temp[15] = eAddress;
+          temp[16] = ePhone;
+          var lat = 1.0;
+          var lng = 1.0;
 
           geoCodeAddress(temp).then(
             function(data){
-              $scope.parsedWatchOrders[index] = data;
+              lat = data[2];
+              temp[2]=lat;
+              lng = data[3];
+              temp[3]=lng;
+
+              $scope.parsedWatchOrders[index] = temp;              
             },
             function(error){
               console.log('Error: ' + error);
@@ -555,6 +566,7 @@ supervisorModule.controller('supervisorCtrl', ['$scope', 'localStorageService', 
         /***** ATTEMPT TO ADD A PARSED WATCH ORDER TO THE DATABASE *****/
         self.addWatchOrder = function(order){
 
+
           return new Promise(function(resolve, reject) {
 
             //get values from parsed watch order
@@ -567,47 +579,50 @@ supervisorModule.controller('supervisorCtrl', ['$scope', 'localStorageService', 
             }
             var lat = order[2];
             var long = order[3];
+
+           
+
             if(lat == 0 || long == 0 ){
               resolve(false);
               return;
             }
             var expDate = order[4].trim();
-            var splitDate = expDate.split("-");
-
-            //check for valid year
-            if(Number(splitDate[0]) < 2017 || splitDate[0].length != 4 )
-            {
-              resolve(false);
-              return;
-            }
-            //check for valid month
-            if(Number(splitDate[1]) > 12 || Number(splitDate[1]) < 1 )
-            {
-              resolve(false);
-              return;
-            }
-            //todo: some months will different number of days
-            if(Number(splitDate[2]) > 31 || Number(splitDate[2]) < 1 )
-            {
-              resolve(false);
-              return;
-            }
-
-            var startDate = order[5];
-            var startTime = order[6];
-            var expTime = order[7];
-            var zone = order[8];
-            var businessName = order[9];
-            var ownerName = order[10]; 
-            var woRequester = order[11];
-            var phone = order[12];
-            var woInstruction = order[13]; 
-            var eName = order[14]; 
-            var eAddress = order[15]; 
-            var ePhone = order[16];
-            var createdby = order[17];
 
 
+            // var splitDate = expDate.split("-");
+            // //check for valid year
+            // if(Number(splitDate[0]) < 2017 || splitDate[0].length != 4 )
+            // {
+            //   resolve(false);
+            //   return;
+            // }
+            // //check for valid month
+            // if(Number(splitDate[1]) >= 12 || Number(splitDate[1]) <= 1 )
+            // {
+            //   resolve(false);
+            //   return;
+            // }
+            // //todo: some months will different number of days
+            // if(Number(splitDate[2]) >= 31 || Number(splitDate[2]) <= 1 )
+            // {
+            //   resolve(false);
+            //   return;
+            // }
+
+            var startDate = order[5].trim();
+            var startTime = order[6].trim();
+            var expTime = order[7].trim();
+            var zone = order[8].trim();
+            var businessName = order[9].trim();
+            var ownerName = order[10].trim(); 
+            var woRequester = order[11].trim();
+            var phone = order[12].trim();
+            var woInstruction = order[13].trim(); 
+            var eName = order[14].trim(); 
+            var eAddress = order[15].trim(); 
+            var ePhone = order[16].trim();
+            var createdby = order[17].trim();
+            
             dataService.addWatchOrder(desc, address, lat, long, expDate, startDate, startTime, expTime, 
                                       zone, businessName, ownerName, woRequester, phone, woInstruction,
                                       eName, eAddress, ePhone, createdby)
@@ -617,6 +632,7 @@ supervisorModule.controller('supervisorCtrl', ['$scope', 'localStorageService', 
                   resolve(true);
                 }
                 else{
+                  alert('Test2');
                   resolve(false);
                 }
               },

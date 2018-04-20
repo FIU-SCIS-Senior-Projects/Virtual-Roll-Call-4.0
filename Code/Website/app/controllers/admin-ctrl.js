@@ -397,7 +397,8 @@ adminModule.controller('adminCtrl', ['$scope', 'dataService', 'localStorageServi
       var last_name = user[1].trim();
       var username = user[2].trim();
       var password = user[3].trim();
-      var role = user[4].trim();
+      var shift = user[4].trim();
+      var role = user[5].trim();
 
       if(password.length < 8){
         resolve(false);
@@ -414,7 +415,7 @@ adminModule.controller('adminCtrl', ['$scope', 'dataService', 'localStorageServi
         return;
       }
 
-      dataService.addUser(first_name, last_name, username, password, role)
+      dataService.addUser(first_name, last_name, username, password, role, shift)
       .then(
         function(data){
           if(data['Added'] === true){

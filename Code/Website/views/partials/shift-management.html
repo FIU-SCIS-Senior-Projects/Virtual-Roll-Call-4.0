@@ -117,6 +117,7 @@
 					<thead>
 						<tr>
 							<th class="text-center">#</th>
+							<th>Shift ID</th>
 							<th>Shift Name</th>
 							<th>From Time</th>
 							<th>To Time</th>
@@ -127,6 +128,7 @@
 					<tbody>
 						<tr {{display_mode}} ng-repeat='o in shifts|filter:search'>
 							<td class='text-center'>{{$index + 1}}</td>
+							<td>{{o.id}}</td>
 							<td>{{o.shift_name}}</td>
 							<td>{{o.from_time}}</td>
 							<td>{{o.to_time}}</td>

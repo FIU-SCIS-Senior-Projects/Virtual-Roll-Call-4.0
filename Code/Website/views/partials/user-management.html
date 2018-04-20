@@ -175,7 +175,7 @@
 				<br>
 				<a href="./misc/users.csv" data-toggle="tooltip" title="Download Sample CSV File" download ="users.csv" class="glyphicon glyphicon-download {{display_mode_modal}}"></a>
 				<span class="glyphicon glyphicon-question-sign question-icon" data-toggle="popover" title="CSV Row Format"
-				data-content="[First Name],[Last Name],[User Name],[Password],[Role]"
+				data-content="[First Name],[Last Name],[User Name],[Password],[Shift ID],[Role]"
 				></span>
 
 				<div class="modal-body" style="padding:40px 50px;">
@@ -214,6 +214,7 @@
 											<th>Last Name</th>
 											<th>Username</th>
 											<th>Password</th>
+											<th>Shift ID</th>
 											<th>Role</th>
 											<th class="text-center">Edit</th>
 										</tr>
@@ -226,7 +227,8 @@
 											<td>{{u[2]}}</td>
 											<td>{{u[3]}}</td>
 											<td>{{u[4]}}</td>
-											<td class='text-center'><button class="btn-default" ng-click='editParsedUser($index, u[0], u[1], u[2], u[3], u[4])'><span class="glyphicon glyphicon-edit"></span> Edit</button></td>
+											<td>{{u[5]}}</td>
+											<td class='text-center'><button class="btn-default" ng-click='editParsedUser($index, u[0], u[1], u[2], u[3], u[4], u[5])'><span class="glyphicon glyphicon-edit"></span> Edit</button></td>
 										</tr>
 									</tbody>
 								</table>

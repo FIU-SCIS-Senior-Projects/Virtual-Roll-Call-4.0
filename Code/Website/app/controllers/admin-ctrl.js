@@ -439,12 +439,13 @@ adminModule.controller('adminCtrl', ['$scope', 'dataService', 'localStorageServi
   };
 
   /***** EDIT USER MODAL *****/
-  $scope.editParsedUser = function(index, update_first, update_last, update_username, update_password, update_role){
+  $scope.editParsedUser = function(index, update_first, update_last, update_username, update_password, update_shiftid, update_role){
     $scope.index = index;
     $scope.updateFirst = update_first;
     $scope.updateLast = update_last;
     $scope.updateUsername = update_username;
     $scope.updatePassword = update_password;
+	$scope.updateShiftId = update_shiftid;
     $scope.updateRole = update_role;
     $scope.display_mode_modal = sharedCtrl.getDisplayMode();
     $('#editParseModal').modal('show');
@@ -456,13 +457,15 @@ adminModule.controller('adminCtrl', ['$scope', 'dataService', 'localStorageServi
     var last_name = $scope.updateLast;
     var username =$scope.updateUsername;
     var password =$scope.updatePassword;
-    var role = $scope.updateRole;
+    var shiftid = $scope.updateShiftId;
+	var role = $scope.updateRole;
 
     $scope.parsedUsers[index][0] = first_name;
     $scope.parsedUsers[index][1] = last_name;
     $scope.parsedUsers[index][2] = username;
     $scope.parsedUsers[index][3] = password;
-    $scope.parsedUsers[index][4] = role;
+	$scope.parsedUsers[index][4] = shiftid;
+    $scope.parsedUsers[index][5] = role;
 
     $('#editParseModal').modal('hide');
   };

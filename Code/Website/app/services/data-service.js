@@ -432,7 +432,6 @@ adminModule.factory('dataService', function ($http, $q) {
 supervisorModule.factory('dataService', function ($http, $q) {
   return {
     addWatchOrder: function (desc, address, lat, long, expDate, startDate, startTime, expTime, zone, businessName, ownerName, woRequester, phone, woInstruction, eName, eAddress, ePhone, createdby) {
-  
       return $q(function (resolve, reject) {
         $http.post('../app/php/add-watch-order.php', { 'desc': desc, 'address': address, 'lat': lat, 'long': long, 'expDate': expDate, 
                                                        'startDate': startDate, 'startTime': startTime, 'expTime': expTime, 'zone': zone,

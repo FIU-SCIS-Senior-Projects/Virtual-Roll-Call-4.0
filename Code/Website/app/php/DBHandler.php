@@ -778,7 +778,7 @@ class DBHandler
 					"name" => $title,
 					"msg_description" => $description,
 					"message" => $message,
-					"catid" => $cat_id,
+					//"catid" => $cat_id,
 					"uploadedBy" => $createdBy,
 					"date" => $createdAt,
 					"updated_by" => $updatedBy,

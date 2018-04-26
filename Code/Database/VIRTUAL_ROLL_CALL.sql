@@ -631,7 +631,7 @@ INSERT INTO `shifts` (`Id`, `Name`, `From_time`, `To_time`, `Status`) VALUES
 INSERT INTO `officers` (`UserID`, `First_Name`, `Last_Name`, `Username`, `Password`, `Role`, `Shift_id`, `Active`) VALUES
 (1, 'admin', 'Default', 'Admin', '$2y$10$m.sQWBJH.91SDz6uC44TK.MUMTwYZ0Gf5ykwbaLdKrFn3KW2SWrHW', 'Administrator', 1, 1);
 
-
+INSERT INTO `categories`(`Category_ID`, `Category_Name`) VALUES (1,'Free Text');
 --
 -- Commit Action
 --

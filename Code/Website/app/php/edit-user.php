@@ -7,7 +7,8 @@ $first_name = $request->fName;
 $last_name = $request->lName;
 $username = $request->username;
 $role = $request->role;
+$shift = $request->shift;
 $connection = new DBHandler();
-$result = $connection->editUser($id, $first_name, $last_name, $username, $role);
+$result = $connection->editUser($id, $first_name, $last_name, $username, $role, $shift);
 //convert the response to a json object
 die(json_encode($result));

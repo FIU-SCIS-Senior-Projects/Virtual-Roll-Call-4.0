@@ -29,15 +29,113 @@
     </div>
   </section>
 </div>
+</div>
 
 <div style="margin: auto; width: 90%;">
   <div class='panel panel-primary {{display_mode}}'>
-		<div class='panel-heading'></div>
-		<div class='panel-body' style="height:500px; overflow-y:scroll">
+    <div class='panel-heading'></div>
+    <div class='panel-body' style="height:500px; overflow-y:scroll">
         <div style="width: 100%; height: 100%;">
         <div id="map"></div>
       </div>
     </div>
+
+      <!-- View Watch Order Modal -->
+  <div class="modal fade" id="editModal" role="dialog">
+    <div class="modal-dialog">
+
+      <!-- Modal content-->
+      <div class="modal-content {{display_mode_modal}}">
+        <div class="modal-header" style="padding:15px 15px;">
+          <button type="button" class="close" data-dismiss="modal" ng-click='updateErrorMessage = updateSuccessMessage = false'>&times;</button>
+          <h4><span class="glyphicon glyphicon-pencil"></span> View Watch Order</h4>
+        </div>
+        <div class="modal-body" style="padding:40px 50px;">
+          <form role="form" >
+            <div class="form-group">
+              <label>Description</label>
+              <input type="text" class="form-control fields {{display_mode_modal}}" ng-model='updateDesc' ng-readonly="true">
+            </div>
+            <br>
+            <div class="form-group">
+              <label>Address</label>
+              <input type="text" class="form-control fields {{display_mode_modal}}" ng-model='updateAddress' ng-readonly="true">
+            </div>
+            <br>
+            <div class="form-group">
+              <label>Start Date</label>
+              <input type="text" class="form-control fields {{display_mode_modal}}" ng-model='updateStartDate' ng-readonly="true">
+            </div>
+            <br>
+            <div class="form-group">
+              <label>Expiration Date</label>
+              <input type="text" class="form-control fields {{display_mode_modal}}" ng-model='updateExpDate' ng-readonly="true">
+            </div>
+            <br>
+            <div class="form-group">
+              <label>Start Time</label>
+              <input type="text" class="form-control fields {{display_mode_modal}}" ng-model='updateStartTime' ng-readonly="true">
+            </div>
+            <br>
+            <div class="form-group">
+              <label>Expiration Time</label>
+              <input type="text" class="form-control fields {{display_mode_modal}}" ng-model='updateExpTime' ng-readonly="true">
+            </div>
+            <br>
+             <div class="form-group">
+              <label>Watch Order Requester</label>
+              <input type="text" class="form-control fields {{display_mode_modal}}" ng-model='updateWORequester' ng-readonly="true">
+            </div>
+            <br>
+            <div class="form-group">
+              <label>Phone</label>
+              <input type="text" class="form-control fields {{display_mode_modal}}" ng-model='updatePhone' ng-readonly="true">
+            </div>
+            <br>
+            <div class="form-group">
+              <label>Emergency Name</label>
+              <input type="text" class="form-control fields {{display_mode_modal}}" ng-model='updateEName' ng-readonly="true">
+            </div>
+            <br>
+            <div class="form-group">
+              <label>Emergency Address</label>
+              <input type="text" class="form-control fields {{display_mode_modal}}" ng-model='updateEAddress' ng-readonly="true">
+            </div>
+            <br>
+            <div class="form-group">
+              <label>Emergency Phone</label>
+              <input type="text" class="form-control fields {{display_mode_modal}}" ng-model='updateEPhone' ng-readonly="true">
+            </div>
+            <div class="form-group">
+              <label>Created By</label>
+              <input type="text" class="form-control fields {{display_mode_modal}}" ng-model='updateCreatedBy' ng-readonly="true">
+            </div>
+            <div class="form-group">
+              <label>Zone</label>
+              <input type="text" class="form-control fields {{display_mode_modal}}" ng-model='updateZone' ng-readonly="true">
+            </div>
+            <br>
+            <div class="form-group">
+              <label>Business Name</label>
+              <input type="text" class="form-control fields {{display_mode_modal}}" ng-model='updateBusinessName' ng-readonly="true">
+            </div>
+            <br>
+            <div class="form-group">
+              <label>Owner Name</label>
+              <input type="text" class="form-control fields {{display_mode_modal}}" ng-model='updateOwnerName' ng-readonly="true">
+            </div>
+            <br>           
+            <div class="form-group">
+              <label>Watch Order Instruction</label>
+              <input type="text" class="form-control fields {{display_mode_modal}}" ng-model='updateWOInstruction' ng-readonly="true">
+            </div>
+            <br>            
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
 
     <!-- TO DO: Overflow not detected until page reloads -->
     <div class='panel-body {{display_mode}}' style="height:350px; overflow-y:scroll">
@@ -48,27 +146,33 @@
               <label>Search</label>
               <input type="text" ng-model="search" class="form-control fields {{display_mode}}" placeholder="Search">
             </div>
+            <div class="form-group">             
+              <button class="btn btn-success" ng-click='UnselectAllLocations(o)'><span class="glyphicon glyphicon-remove-circle"></span> Unselect All Locations</button>
+            </div>
           </form>
-          <thead>
+         <thead>
             <tr>
               <th class="text-center">#</th>
               <th>Address</th>
               <th>Description</th>
               <th>Add Date</th>
               <th>Expiration Date</th>
+              <th> </th>
             </tr>
           </thead>
           <tbody>
-            <tr {{display_mode}} ng-repeat='o in watch_orders|filter:search'>
-              <td class='text-center'>{{$index + 1}}</td>
-              <td>{{o.Address}}</td>
-              <td>{{o.Desc}}</td>
-              <td>{{o.AddDate}}</td>
-              <td>{{o.ExpDate}}</td>
+            <tr {{display_mode}} ng-class="{'selected': o.selected}" ng-repeat='o in watch_orders|filter:search' >
+              <td ng-click="select(o)" class='text-center'>{{$index + 1}}</td>
+              <td ng-click="select(o)">{{o.Address}}</td>
+              <td ng-click="select(o)">{{o.Desc}}</td>
+              <td ng-click="select(o)">{{o.AddDate}}</td>
+              <td ng-click="select(o)">{{o.ExpDate}}</td>
+              <td class='text-center' style="width: 120px"><button class="btn-default" ng-click='viewWatchOrder(o.Id, o.Desc, o.Address, o.ExpDate, o.StartDate, o.StartTime, o.ExpTime, o.Zone, o.BusinessName, o.OwnerName, o.WORequester, o.Phone, o.WOInstruction, o.EName, o.EAddress, o.EPhone, o.CreatedBy)'><span class="glyphicon glyphicon-edit"></span> View Detail</button></td>
             </tr>
           </tbody>
         </table>
       </div>
     </div>
+    
   </div>
 </div>

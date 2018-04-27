@@ -1,4 +1,9 @@
-<?php session_start(); ?>
+<?php
+session_start();
+if(!isset($_SESSION["officer_role"])){
+header('location: ../views/');
+}
+?>
 <!DOCTYPE html>
 <html ng-app='supervisor' lang='en'>
 
@@ -25,10 +30,14 @@
   <script src="../app/vendor/ui-grid.min.js"></script>
 
   <!--PDF-MAKE-CDN-->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.31/pdfmake.js"></script>
+  <!--<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.31/pdfmake.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.31/pdfmake.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.31/pdfmake.min.js.map"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.31/vfs_fonts.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.31/vfs_fonts.js"></script>-->
+  <script src="../app/vendor/pdfmake.js"></script>
+  <script src="../app/vendor/pdfmake.min.js"></script>
+  <script src="../app/vendor/pdfmake.min.js.map"></script>
+  <script src="../app/vendor/vfs_fonts.js"></script>
 
   <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAuubk4Obni7qiK7Umj7CdvUUxO23688cM"></script>
   <script src="../app/vendor/papaparse.min.js"></script>
@@ -41,6 +50,10 @@
   <script src='../app/controllers/supervisor-ctrl.js' type='text/javascript'></script>
   <script src='../app/services/data-service.js' type='text/javascript'></script>
   <script src="../app/vendor/ng-flow/dist/ng-flow-standalone.min.js"></script>
+  <script src="../app/vendor/angularjs-dropdown-multiselect.js"></script>
+  <script src="../app/vendor/angular-idle.min.js"></script>
+  <script src='http://angular-ui.github.io/bootstrap/'></script>
+
   <style> .grid { width: 100%; height: 750px; } </style>
 </head>
 
@@ -49,6 +62,7 @@
   <!-- Vertical Navigation -->
   <nav class='navbar navbar-default'>
     <div class='container-fluid'>
+      <div ng-init='timeoutInit()'></div>
       <div class='navbar-header'>
         <button type='button' class='navbar-toggle' data-toggle='collapse' data-target='#myNavbar'>
           <span class='icon-bar'></span>
@@ -64,7 +78,7 @@
           echo "<li><a href='admin-profile.php'>" . $_SESSION["officer_role"] . "</a></li>";
         ?>
         <li class='active'><a class='active'>Supervisor</a></li>
-        <li><a href='officer-profile.php'>Officer</a></li>
+        <li><a href='officer-profile.php'>Dashboard</a></li>
       </ul>
         <ul class='nav navbar-nav navbar-right'>
           <li class='dropdown'>
@@ -95,6 +109,7 @@
           <li data-ng-class="{active: isActive('/upload')}"><a class='active' href='#upload'>Manage Documents</a></li>
           <li data-ng-class="{active: isActive('/manage-freetext')}"><a href='#manage-freetext'>Manage Free Messages</a></li>
           <li data-ng-class="{active: isActive('/manage-watch-orders')}"><a class='active' href='#manage-watch-orders'>Manage Watch Orders</a></li>
+          <li data-ng-class="{active: isActive('/archived-watch-orders')}"><a class='active' href='#archived-watch-orders'>Archived Watch Orders</a></li>
           <li data-ng-class="{active: isActive('/reset')}"><a href='#reset'>Reset Password</a></li>
           <li data-ng-class="{active: isActive('/log')}"><a href='#log'>Logs</a></li>
         </ul>
@@ -117,6 +132,11 @@
       });
     });
   </script>
+
+
+<?php
+  include("../app/vendor/timeout-script.js");
+?>
 
 </body>
 </html>

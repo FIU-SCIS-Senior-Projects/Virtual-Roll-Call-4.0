@@ -1,4 +1,4 @@
-sharedModule.controller('sharedCtrl', ['$scope', 'sharedService', 'localStorageService', '$window', '$location', function ($scope, sharedService, localStorageService, $window, $location) {
+sharedModule.controller('sharedCtrl', ['$scope', 'sharedService', 'localStorageService', '$window', '$location', 'Idle', 'Keepalive', '$uibModal', function ($scope, sharedService, localStorageService, $window, $location, Idle, Keepalive, $uibModal) {
 
   var self = this;
 
@@ -24,14 +24,20 @@ sharedModule.controller('sharedCtrl', ['$scope', 'sharedService', 'localStorageS
     delete $scope.login;
   };
 
-
   self.redirect = function (login) {
     if (login == "")
       $window.location.href = 'index.html';
   };
 
+
+  self.timeoutInit = function(){
+    //set idle time when calling every view
+    var timeoutTotal = localStorageService.get('timeout')* 60;
+    Idle.setIdle(timeoutTotal);
+  }
+
   /***** GET APP NAME *****/
-  self.getSiteNames = function () {
+  self.getSiteNames = function (){ 
     sharedService.getSiteNames()
       .then(
       function (data) {
@@ -81,6 +87,72 @@ sharedModule.controller('sharedCtrl', ['$scope', 'sharedService', 'localStorageS
     }
   };
 
+
+
+  /***** SESSION TIMEOUT FUNCTIONS *****/
+    function closeModals() {
+        if ($scope.warning) {
+          $scope.warning.close();
+          $scope.warning = null;
+        }
+
+        if ($scope.timedout) {
+          $scope.timedout.close();
+          $scope.timedout = null;
+          localStorageService.set('timeoutModal', false);
+        }
+      }
+
+      $scope.$on('IdleStart', function() {
+        closeModals();
+        $scope.warning = $uibModal.open({
+          templateUrl: 'warning-dialog.html',
+          windowClass: 'modal-danger',
+        });
+      });
+
+      $scope.$on('IdleEnd', function() {
+        closeModals();
+      });
+
+      $scope.$on('IdleTimeout', function() {
+        closeModals();
+        localStorageService.set('timeoutModal', 'true');
+        $scope.timedout = $uibModal.open({
+          templateUrl: 'timedout-dialog.html',
+          windowClass: 'modal-danger',
+          keyboard : false,
+          backdrop: "static"
+        });
+       setTimeout(()=>{ $window.location.href = 'index.html';}, 10000);
+          
+      });
+
+  //Get all the documents Categories
+  self.getTimeoutMinutes = function ()
+  {
+      sharedService.getTimeoutMinutes()
+        .then(
+        function (minutes) {
+            $scope.timeout_minutes = minutes;
+        },
+        function (error) {});
+  };
+
+
+
+  self.getLatLong = function()
+  {
+      sharedService.getLatLong()
+        .then(
+        function (data) {
+            $scope.lat = data.lat;
+            $scope.lon = data.lon;
+        },
+        function (error) {});
+  };
+
+
   //Get all the documents Categories
   self.getCategories = function ()
   {
@@ -94,6 +166,7 @@ sharedModule.controller('sharedCtrl', ['$scope', 'sharedService', 'localStorageS
                 var tmp = new Object();
                 tmp.id = data[x].id;
                 tmp.name = data[x].name;
+                tmp.shifts = data[x].shifts;
                 categories.push(tmp);
                 if ( data[x].name !== "Free Text")
                   doc_categories.push(tmp);
@@ -103,6 +176,30 @@ sharedModule.controller('sharedCtrl', ['$scope', 'sharedService', 'localStorageS
         },
         function (error) {});
   };
+
+
+  self.getAuthorizedCategories= function (id){
+      sharedService.getAuthorizedCategories(id)
+        .then(
+        function (data) {
+            var authCategories = [];
+            var doc_categories = [];
+            for (var x in data)
+            {
+                var tmp = new Object();
+                tmp.id = data[x].id;
+                tmp.name = data[x].name;
+                authCategories.push(tmp);
+                if ( data[x].name !== "Free Text")
+                  doc_categories.push(tmp);
+            }
+            $scope.authCategories = authCategories;
+            $scope.doc_categories = doc_categories;
+        },
+        function (error) {});
+  };
+
+
 
   self.getPendingCount = function (id)
   {
@@ -131,6 +228,8 @@ sharedModule.controller('sharedCtrl', ['$scope', 'sharedService', 'localStorageS
           tmp.lastName = data[x].lastName;
           tmp.username = data[x].username;
           tmp.role = data[x].role;
+          tmp.shift_name = data[x].shift_name;
+          tmp.shift_id = data[x].shift_id;
           //store results in officers
           officers.push(tmp);
         }
@@ -141,6 +240,83 @@ sharedModule.controller('sharedCtrl', ['$scope', 'sharedService', 'localStorageS
         console.log('Error: ' + error);
       });
   };
+
+
+  /***** GET ALL SHIFTS *****/
+  self.getShifts = function () {
+    sharedService.getShifts()
+      .then( function (data) {
+        //initialize an empty array to store results from the database
+        var shifts = [];
+        //for each shift in the result
+        for (var x in data) {
+          //create an object and set object properties (i.e. shift data)
+          var tmp = new Object();
+          tmp.id = data[x].id;
+          tmp.shift_name = data[x].sName;
+          tmp.from_time = data[x].fTime;
+          tmp.to_time = data[x].tTime;
+          tmp.status = data[x].sStatus;
+          //store results in shifts
+          shifts.push(tmp);
+        }
+        //update value in view for use in ng-repeat (to populate)
+        $scope.shifts = shifts;
+      },
+      function (error) {
+        console.log('Error: ' + error);
+      });
+  };
+
+
+
+    /***** GET ACTIVE SHIFTS FOR USER *****/
+  self.getActiveShifts = function () {
+    sharedService.getShifts()
+      .then( function (data) {
+        //initialize an empty array to store results from the database
+        var shifts = [];
+        //for each shift in the result
+        for (var x in data) {
+          //create an object and set object properties (i.e. shift data)
+          var tmp = new Object();
+          tmp.id = data[x].id;
+          tmp.shift_name = data[x].sName;
+          //store results in shifts
+          if (data[x].sStatus === "1"){
+              shifts.push(tmp);
+          }
+        }
+        //update value in view for use in ng-repeat (to populate)
+        $scope.shifts = shifts;
+      },
+      function (error) {
+        console.log('Error: ' + error);
+      });
+  };
+
+
+  /***** POPULATE SHIFTS IN MULTISELECT *****/
+  self.populateMultiShifts = function(){
+    sharedService.getShifts()
+    .then(function (data){
+      var tempShift =[];
+      //populate array with active shifts
+      for (var x in data){
+        var tmp = new Object();
+        tmp.id = data[x].id;
+        tmp.label = data[x].sName;
+        if (data[x].sStatus === "1"){
+          tempShift.push(tmp);
+        }
+      }
+      $scope.shiftData = tempShift;
+    },
+    function (error) {
+      console.log('Error: ' + error);
+    });
+  };
+
 
   /***** GET ALL MESSAGES *****/
   self.getMessages = function() {
@@ -275,4 +451,5 @@ sharedModule.controller('sharedCtrl', ['$scope', 'sharedService', 'localStorageS
   };
   return self;
 
-}]);
+}])
+

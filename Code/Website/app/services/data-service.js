@@ -33,6 +33,16 @@ sharedModule.factory('sharedService', function ($http, $q) {
           function (error) { reject(error); });
       });
     },
+
+    getAuthorizedCategories: function (id) {
+      return $q(function (resolve, reject) {
+        $http.post('../app/php/get-authorized-categories.php', {'user_id': id})
+          .then(
+          function (response) { resolve(response.data); },
+          function (error) { reject(error); });
+      });
+    },
+
     getDocuments: function () {
       return $q(function (resolve, reject) {
         $http.post('../app/php/get-documents.php', {'type': 'all', 'user_id': 0, 'cat' : ''})
@@ -65,6 +75,20 @@ sharedModule.factory('sharedService', function ($http, $q) {
           });
       });
     },
+
+    getShifts: function () {
+      return $q(function (resolve, reject) {
+        $http.post('../app/php/get-shifts.php', {})
+          .then(
+          function (response) {
+            resolve(response.data);
+          },
+          function (error) {
+            reject(error);
+          });
+      });
+    },
+
     getlogs: function () {
       return $q(function (resolve, reject) {
         $http.post('../app/php/get-logs.php', {})
@@ -77,6 +101,34 @@ sharedModule.factory('sharedService', function ($http, $q) {
           });
       });
     },
+
+
+    getTimeoutMinutes:function(){
+      return $q(function (resolve, reject) {
+        $http.post('../app/php/get-timeout.php', {})
+          .then(
+          function (response) {
+            resolve(response.data);
+          },
+          function (error){
+            reject(error);
+          });
+      });
+    },
+
+    getLatLong:function(){
+      return $q(function (resolve, reject) {
+        $http.post('../app/php/get-lat-long.php', {})
+          .then(
+          function (response) {
+            resolve(response.data);
+          },
+          function (error){
+            reject(error);
+          });
+      });
+    },
+
    updateDocument: function(id,categorie,name,pinned){
      return $q(function (resolve, reject){
          	$http.post('../app/php/update-document.php',{'id':id,'categories':categorie,'name':name,'pinned':pinned})
@@ -116,8 +168,7 @@ loginModule.factory('dataService', function ($http, $q) {
           });
       });
     },
-    getTally: function( username )
-    {
+    getTally: function( username ){
         return $q(function (resolve) {
           $http.post('../app/php/get-tally.php', {'username': username})
               .then( function(response) { resolve(response.data); });
@@ -133,15 +184,40 @@ loginModule.factory('dataService', function ($http, $q) {
             );
       });
     },
-    lockUser: function (userid)
-    {
+
+    getLatLong:function(){
+      return $q(function (resolve, reject) {
+        $http.post('../app/php/get-lat-long.php', {})
+          .then(
+          function (response) {
+            resolve(response.data);
+          },
+          function (error){
+            reject(error);
+          });
+      });
+    },
+
+    getTimeoutMinutes:function(){
+      return $q(function (resolve, reject) {
+        $http.post('../app/php/get-timeout.php', {})
+          .then(
+          function (response) {
+            resolve(response.data);
+          },
+          function (error){
+            reject(error);
+          });
+      });
+    },
+
+    lockUser: function (userid){
         return $q(function (resolve) {
           $http.post('../app/php/lockUser.php', {'userid': userid})
             .then( function(response) { resolve(response.data); });
         });
     },
-    resetLock: function(userid)
-    {
+    resetLock: function(userid){
         return $q(function(resolve) {
           $http.post('../app/php/resetLock.php', {'userid': userid})
             .then( function(response) {
@@ -155,9 +231,10 @@ loginModule.factory('dataService', function ($http, $q) {
 //SERVICE for admin controller
 adminModule.factory('dataService', function ($http, $q) {
   return {
-    addUser: function (fname, lname, email, password, role) {
+
+    addUser: function (fname, lname, email, password, role, shift) {
       return $q(function (resolve, reject) {
-        $http.post('../app/php/add-user.php', { 'fName': fname, 'lName': lname, 'email': email, 'password': password, 'role': role })
+        $http.post('../app/php/add-user.php', { 'fName': fname, 'lName': lname, 'email': email, 'password': password, 'role': role , 'shift' : shift})
           .then(
           function (response) {
             resolve(response.data);
@@ -179,9 +256,9 @@ adminModule.factory('dataService', function ($http, $q) {
           });
       });
     },
-    updateUser: function (id, fname, lname, username, role) {
+    updateUser: function (id, fname, lname, username, role, shift) {
       return $q(function (resolve, reject) {
-        $http.post('../app/php/edit-user.php', { 'id': id, 'fName': fname, 'lName': lname, 'username': username, 'role': role })
+        $http.post('../app/php/edit-user.php', { 'id': id, 'fName': fname, 'lName': lname, 'username': username, 'role': role, 'shift' : shift})
           .then(
           function (response) {
             resolve(response.data);
@@ -203,9 +280,51 @@ adminModule.factory('dataService', function ($http, $q) {
           });
       });
     },
-    addCategory: function (new_cat) {
+
+
+
+    addShift: function (shift_name, from_time, to_time, status) {
       return $q(function (resolve, reject) {
-        $http.post('../app/php/add-category.php', { 'category': new_cat })
+        $http.post('../app/php/add-shift.php', { 'sName': shift_name, 'fTime': from_time, 'tTime': to_time, 'sStatus': status})
+          .then(
+          function (response) {
+            resolve(response.data);
+          },
+          function (error) {
+            reject(error);
+          });
+      });
+    },
+
+    updateShift: function (id, shift_name, from_time, to_time, status) {
+      return $q(function (resolve, reject) {
+        $http.post('../app/php/edit-shift.php', { 'id': id, 'sName': shift_name, 'fTime': from_time, 'tTime': to_time, 'sStatus': status })
+          .then(
+          function (response) {
+            resolve(response.data);
+          },
+          function (error) {
+            reject(error);
+          });
+      });
+    },
+
+    removeShift: function (id) {
+      return $q(function (resolve, reject) {
+        $http.post('../app/php/remove-shift.php', { 'id': id })
+          .then(
+          function (response) {
+            resolve(response.data);
+          },
+          function (error) {
+            reject(error);
+          });
+      });
+    },
+
+    addCategory: function (new_cat, shiftCodes) {
+      return $q(function (resolve, reject) {
+        $http.post('../app/php/add-category.php', { 'category': new_cat , 'shifts' : shiftCodes})
           .then(
           function (response) {
             resolve(response.data);
@@ -227,9 +346,9 @@ adminModule.factory('dataService', function ($http, $q) {
           });
       });
     },
-    updateCategory: function (cid, cname) {
+    updateCategory: function (cid, cname, shifts) {
       return $q(function (resolve, reject) {
-        $http.post('../app/php/update-category.php', { 'id': cid, 'name': cname })
+        $http.post('../app/php/update-category.php', { 'id': cid, 'name': cname, 'shifts': shifts})
           .then(
           function (response) {
             resolve(response.data);
@@ -252,6 +371,21 @@ adminModule.factory('dataService', function ($http, $q) {
           });
       });
     },
+
+    updateLatLang: function(lat, lon){
+      return $q(function (resolve, reject) {
+        $http.post('../app/php/update-lat-long.php', { 'lat': lat, 'lon': lon })
+          .then(
+          function (response) {
+            resolve(response.data);
+          },
+          function (error) {
+            reject(error);
+          });
+      });
+    },
+
+
     deleteArchive: function(from,to) {
       return $q(function (resolve, reject) {
 
@@ -276,6 +410,19 @@ adminModule.factory('dataService', function ($http, $q) {
             reject(error);
           });
       });
+    },
+
+    updateTimeout: function (time) {
+      return $q(function (resolve, reject) {
+        $http.post('../app/php/update-session-timeout.php', { 'time': time })
+          .then(
+          function (response) {
+            resolve(response.data);
+          },
+          function (error) {
+            reject(error);
+          });
+      });
     }
   }
 });
@@ -284,9 +431,13 @@ adminModule.factory('dataService', function ($http, $q) {
 //SERVICE for supervisor controller
 supervisorModule.factory('dataService', function ($http, $q) {
   return {
-    addWatchOrder: function (desc, address, lat, long, expDate) {
+    addWatchOrder: function (desc, address, lat, long, expDate, startDate, startTime, expTime, zone, businessName, ownerName, woRequester, phone, woInstruction, eName, eAddress, ePhone, createdby) {
       return $q(function (resolve, reject) {
-        $http.post('../app/php/add-watch-order.php', { 'desc': desc, 'address': address, 'lat': lat, 'long': long, 'expDate': expDate })
+        $http.post('../app/php/add-watch-order.php', { 'desc': desc, 'address': address, 'lat': lat, 'long': long, 'expDate': expDate, 
+                                                       'startDate': startDate, 'startTime': startTime, 'expTime': expTime, 'zone': zone,
+                                                       'businessName': businessName, 'ownerName': ownerName, 'woRequester': woRequester,
+                                                       'phone': phone, 'woInstruction': woInstruction, 'eName': eName, 'eAddress': eAddress,
+                                                       'ePhone': ePhone, 'createdby': createdby})
           .then(
           function (response) {
             resolve(response.data);
@@ -308,6 +459,8 @@ supervisorModule.factory('dataService', function ($http, $q) {
           });
       });
     },
+
+    //Depricated in version 4.0 No need to delete watch orders. 
     removeWatchOrders: function () {
       return $q(function (resolve, reject) {
         $http.post('../app/php/remove-watch-orders.php')
@@ -329,9 +482,13 @@ supervisorModule.factory('dataService', function ($http, $q) {
             );
       });
     },
-    updateWatchOrder: function (id, desc, address, lat, lng, expDate) {
+    updateWatchOrder: function (id, desc, address, lat, lng, expDate, startDate, startTime, expTime, zone, businessName, ownerName, woRequester, phone, woInstruction, eName, eAddress, ePhone) {
       return $q(function (resolve, reject) {
-        $http.post('../app/php/edit-watch-order.php', { 'id': id, 'desc': desc, 'address': address, 'lat': lat, 'lng': lng, 'expDate': expDate})
+        $http.post('../app/php/edit-watch-order.php', { 'id': id, 'desc': desc, 'address': address, 'lat': lat, 'lng': lng, 'expDate': expDate,
+                                                        'startDate': startDate, 'startTime': startTime, 'expTime': expTime, 'zone': zone,
+                                                        'businessName': businessName, 'ownerName': ownerName, 'woRequester': woRequester,
+                                                        'phone': phone, 'woInstruction': woInstruction, 'eName': eName, 'eAddress': eAddress,
+                                                        'ePhone': ePhone})
           .then(
           function (response) {
             resolve(response.data);
@@ -460,9 +617,35 @@ return {
           });
       });
     },
-    viewWatchOrders: function () {
+    getLatLong:function(){
       return $q(function (resolve, reject) {
-        $http.post('../app/php/get-watch-orders.php')
+        $http.post('../app/php/get-lat-long.php', {})
+          .then(
+          function (response) {
+            resolve(response.data);
+          },
+          function (error){
+            reject(error);
+          });
+      });
+    },  
+    updateWatchOrderTracking: function (wo_id, user_id, is_selected) {
+      return $q(function (resolve, reject) {
+        $http.post('../app/php/edit-watch-order-tracking.php', { 'wo_id': wo_id, 'user_id': user_id, 'is_selected': is_selected })
+          .then(
+          function (response) {
+            console.log(response.data);
+            resolve(response.data);
+          },
+          function (error) {
+            console.log(error);
+            reject(error);
+          });
+      });
+    },  
+    viewWatchOrders: function (user_id) {      
+      return $q(function (resolve, reject) {
+        $http.post('../app/php/get-watch-orders.php',{'user_id': user_id})
           .then(
           function (response) {
             resolve(response.data);

@@ -38,6 +38,13 @@
 				<input class='fields {{display_mode}}' class='fields {{display_mode}}' type='password' ng-model='password' pattern='^[a-zA-Z0-9]{8,}$' title='Must contain at least 8 or more characters. Only alphanumeric characters allowed.' required>
 				<br>
 				<br>
+				<label>Shift</label><br>
+				<div ng-init='getActiveShifts()'>
+					<select ng-model="selectedShift" ng-options= "x.shift_name for x in shifts" required>
+						<option value="">--Select Shift--</option>
+					</select>
+				</div>
+				<br>
 				<label>Role</label><br>
 				<select class='fields {{display_mode}}' ng-model='role'>
 					<option value='Officer'>Officer</option>
@@ -82,6 +89,7 @@
 							<th>Last Name</th>
 							<th>Username</th>
 							<th>Role</th>
+							<th>Shift</th>
 							<th class="text-center">Edit</th>
 						</tr>
 					</thead>
@@ -92,7 +100,8 @@
 							<td>{{o.lastName}}</td>
 							<td>{{o.username}}</td>
 							<td>{{o.role}}</td>
-							<td class='text-center'><button class="btn-default" ng-click='editUser(o.id, o.firstName, o.lastName, o.username, o.role)'><span class="glyphicon glyphicon-edit"></span> Edit</button></td>
+							<td>{{o.shift_name}}</td>
+							<td class='text-center'><button class="btn-default" ng-click='editUser(o.id, o.firstName, o.lastName, o.username, o.role, o.shift_name)'><span class="glyphicon glyphicon-edit"></span> Edit</button></td>
 						</tr>
 					</tbody>
 				</table>
@@ -128,6 +137,14 @@
 							<input type="text" class="form-control fields {{display_mode_modal}}" ng-model='updateUsername' required>
 						</div>
 						<div class="form-group">
+							<label>Shift</label><br>
+							<input type="text" class="form-control fields {{display_mode_modal}}" ng-model='oldShift' ng-readonly="true" required />
+							<div ng-init='getActiveShifts()'>
+								<select class="form-control fields {{display_mode_modal}}"  ng-model="updateShift" ng-options= "x.shift_name for x in shifts" required>
+								</select>
+							</div>
+						</div>
+						<div class="form-group">
 							<label>Role</label>
 							<select ng-model='updateRole' class="form-control fields {{display_mode_modal}}">
 								<option value='Officer'>Officer</option>
@@ -158,7 +175,7 @@
 				<br>
 				<a href="./misc/users.csv" data-toggle="tooltip" title="Download Sample CSV File" download ="users.csv" class="glyphicon glyphicon-download {{display_mode_modal}}"></a>
 				<span class="glyphicon glyphicon-question-sign question-icon" data-toggle="popover" title="CSV Row Format"
-				data-content="[First Name],[Last Name],[User Name],[Password],[Role]"
+				data-content="[First Name],[Last Name],[User Name],[Password],[Shift ID],[Role]"
 				></span>
 
 				<div class="modal-body" style="padding:40px 50px;">
@@ -197,6 +214,7 @@
 											<th>Last Name</th>
 											<th>Username</th>
 											<th>Password</th>
+											<th>Shift ID</th>
 											<th>Role</th>
 											<th class="text-center">Edit</th>
 										</tr>
@@ -209,7 +227,8 @@
 											<td>{{u[2]}}</td>
 											<td>{{u[3]}}</td>
 											<td>{{u[4]}}</td>
-											<td class='text-center'><button class="btn-default" ng-click='editParsedUser($index, u[0], u[1], u[2], u[3], u[4])'><span class="glyphicon glyphicon-edit"></span> Edit</button></td>
+											<td>{{u[5]}}</td>
+											<td class='text-center'><button class="btn-default" ng-click='editParsedUser($index, u[0], u[1], u[2], u[3], u[4], u[5])'><span class="glyphicon glyphicon-edit"></span> Edit</button></td>
 										</tr>
 									</tbody>
 								</table>
@@ -261,6 +280,10 @@
 						<div class="form-group">
 							<label>Password</label>
 							<input type="text" class="form-control fields {{display_mode_modal}}" ng-model='updatePassword' required>
+						</div>
+						<div class="form-group">
+							<label>Shift ID</label>
+							<input type="text" class="form-control fields {{display_mode_modal}}" ng-model='updateShiftId' required>
 						</div>
 						<div class="form-group">
 							<label>Role</label>

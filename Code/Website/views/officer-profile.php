@@ -1,4 +1,9 @@
-<?php session_start(); ?>
+<?php
+session_start();
+if(!isset($_SESSION["officer_role"])){
+header('location: ../views/');
+}
+?>
 <!DOCTYPE html>
 <html ng-app='officer' lang='en'>
 <head>
@@ -31,6 +36,9 @@
   <script src="../app/vendor/ng-flow/dist/ng-flow-standalone.min.js"></script>
   <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAuubk4Obni7qiK7Umj7CdvUUxO23688cM"></script>
   <link rel="stylesheet" href="partials/css/style.css">
+  <script src="../app/vendor/angularjs-dropdown-multiselect.js"></script>
+  <script src="../app/vendor/angular-idle.min.js"></script>
+
 
 </head>
 <body class = "{{display_mode}}" ng-controller='officerCtrl' ng-init='getSiteNames()'>
@@ -38,6 +46,7 @@
   <!-- Vertical Navigation -->
   <nav class='navbar navbar-default'>
     <div class='container-fluid'>
+      <div ng-init='timeoutInit()'></div>
       <div class='navbar-header'>
         <button type='button' class='navbar-toggle' data-toggle='collapse' data-target='#myNavbar'>
           <span class='icon-bar'></span>
@@ -57,7 +66,7 @@
                     echo "<li><a href='supervisor-profile.php'>Supervisor</a></li>";
             }
         ?>
-          <li class='active'><a class='active'>Officer</a></li>
+          <li class='active'><a class='active'>Dashboard</a></li>
         </ul>
         <ul class='nav navbar-nav navbar-right'>
           <li class='dropdown'>
@@ -83,6 +92,10 @@
 
   <!-- content will change according to route -->
   <section ng-view></section>
+
+<?php
+  include("../app/vendor/timeout-script.js");
+?>
 
 </body>
 </html>

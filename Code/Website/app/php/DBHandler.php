@@ -9,10 +9,10 @@ class DBHandler
 		global $crypter;
 		global $stmt;
 
-		$un = 'vrc';
-		$pw = 'VirtualRollCall';
+		$un = 'root';
+		$pw = '1234';
 		$dbName = 'virtual_roll_call';
-		$address = 'localhost';
+		$address = 'localhost:3306';
 		$db_connection = new mysqli($address, $un, $pw, $dbName);
 		$crypter = new JCrypter();
 
@@ -32,8 +32,47 @@ class DBHandler
 	//Get All Documents from DB
 	function getDocuments($type, $id, $category)
 	{
-		return (strtolower($category) == 'free text')
-			? $this->getMessages( $id )  : $this->getMediaDocs($id, $type, $category);
+		if (strtolower($type) == 'all')
+			return $this->getDocumentList();
+		else if (strtolower($category) == 'free text')
+			return $this->getMessages( $id );
+		else
+			return $this->getMediaDocs($id, $type, $category);
+
+		// return (strtolower($category) == 'free text')
+		// 	? $this->getMessages( $id )  : $this->getMediaDocs($id, $type, $category);
+	}
+
+
+	function getDocumentList(){
+		global $db_connection;
+		$documents = [];
+		$sql = "SELECT d.Document_ID, 
+					   d.Document_Name, 
+					   c.Category_ID, 
+					   c.Category_Name, 
+					   d.Upload_Date, 
+					   CASE WHEN d.Pinned = 0 THEN 'N' else 'Y' end as 'Pinned', 
+					   d.Uploaded_By, CASE WHEN D.Manual_Archived = 0 THEN 'N' ELSE 'Y' END as 'Archived'
+				FROM DOCUMENTS d JOIN CATEGORIES c on d.Category_ID = c.Category_ID";
+		$stmt = $db_connection->prepare( $sql );
+		$stmt->execute();
+		$stmt->bind_result($id, $name, $cat_id, $cat_name, $created_at, $pinned, $uploaded, $archived);
+		while($stmt->fetch())
+		{
+			$tmpArray = ["id" => $id,
+					"name" => $name,
+					"catid" => $cat_id,
+					"category" => $cat_name,
+					"date" => $created_at,
+					"pinned" => $pinned,
+					"uploadedBy" => $uploaded,
+					"archived" => $archived];
+			array_push($documents, $tmpArray);
+		}
+		$stmt->close();
+		$db_connection->close();
+		return $documents;
 	}
 
 	function getMediaDocs($user_id, $type, $category)
@@ -43,14 +82,17 @@ class DBHandler
 		$where_clause = '';
 
 		if ( $type == 'archived' )
-			$where_clause = " WHERE ((d.Upload_Date < (DATE(NOW()) - INTERVAL 7 DAY) AND d.Pinned = false) OR d.Manual_Archived = true) " ;
+			$where_clause = " WHERE s.IsArchived = 1 " ;
 		else if ( $type == 'active' )
-			$where_clause = " WHERE ((d.Upload_Date >= (DATE(NOW()) - INTERVAL 7 DAY) OR d.Pinned = true) AND d.Manual_Archived = false) ";
-
+			// $where_clause = " WHERE (s.IsArchived = 0) or (d.document_id NOT IN (select uds.documentId from user_doc_status uds where uds.DocumentId = d.document_ID and uds.officerId = ?)) ";
+			$where_clause = " WHERE ((s.IsArchived = 0) or (d.document_id NOT IN (select uds.documentId 
+																				from user_doc_status uds 
+																				join categories cat on uds.CategoryId = cat.Category_ID 
+																				where (uds.DocumentId = d.document_ID and cat.Category_ID  = d.Category_ID and cat.Category_Name = ? and uds.officerId = ? )))) ";
 		$sql = "SELECT
 					d.document_id, d.document_name, d.category_id, d.upload_date,  d.pinned, d.uploaded_by, c.category_name, d.upload_name, d.description,
 					IFNULL(ds.Description, 'Pending') as status,
-					IF( ((d.upload_date < (DATE(now()) - INTERVAL 7 DAY) AND d.Pinned = false) OR d.manual_archived = true), 'Yes', 'No') AS archived,
+					IF((s.IsArchived = 1), 'Yes', 'No') AS archived,
 					d.has_quiz,
 					IFNULL(q.QA, '') AS questions,
 					IFNULL(ql.answers, '') AS answers,
@@ -59,14 +101,18 @@ class DBHandler
 				LEFT JOIN categories c ON d.category_id = c.category_id
     			LEFT JOIN quizzes q ON d.document_name = q.document_name
     			LEFT JOIN ( select answers, score, document_id from quiz_logs where officer_id = ? ) AS ql on ql.document_id = d.document_id
-    			LEFT JOIN ( select max(z.statusid) as statusid, z.DocumentId from user_doc_status z where z.OfficerId = ? group by z.documentid ) AS s on s.documentid = d.document_id
+    			 LEFT JOIN ( select z.statusid as statusid, z.DocumentId, z.IsArchived from user_doc_status z where z.id in (select max(z2.id) from user_doc_status z2 where z2.OfficerId = ? group by documentid) ) AS s on s.documentid = d.document_id
     			LEFT JOIN document_status ds ON s.statusid = ds.id "
     		 . $where_clause
     		 . " AND c.category_name = ? "
 			 . " ORDER BY d.upload_date DESC";
 
 		$stmt = $db_connection->prepare( $sql );
-		$stmt->bind_param('iis', $user_id, $user_id, $category);
+		if ( $type == 'archived' )
+			$stmt->bind_param('iis', $user_id, $user_id, $category);
+		else if ( $type == 'active' )
+			// $stmt->bind_param('iiis', $user_id, $user_id, $user_id, $category);
+			$stmt->bind_param('iisis', $user_id, $user_id, $category, $user_id, $category);
 		$stmt->execute();
 		$stmt->bind_result($id, $name, $cat_id, $created_at, $pinned, $uploaded_by, $cat_name,
 						   $upload_name, $doc_description, $status, $archived, $quiz, $qa, $answers, $score);
@@ -135,14 +181,16 @@ class DBHandler
 	{
 		global $db_connection;
 		$officers = [];
-		$stmt = $db_connection->prepare( 'SELECT userID, First_Name, Last_Name, Username, Role FROM OFFICERS' );
+		$stmt = $db_connection->prepare( 'SELECT A.userID, A.First_Name, A.Last_Name, A.Username, A.Role, B.Name 
+										  FROM OFFICERS A
+ 										  LEFT JOIN SHIFTS B ON B.Id = A.Shift_id ' );
 		$stmt->execute();
-		$stmt->bind_result( $userID, $First_Name, $Last_Name, $Username, $Role );
+		$stmt->bind_result( $userID, $First_Name, $Last_Name, $Username, $Role, $Shift_name);
 		while($stmt->fetch())
 		{
 			$tmp = ["id" => $userID,
 					"firstName" => $First_Name, "lastName" => $Last_Name,
-					"username" => $Username, "role" => $Role];
+					"username" => $Username, "role" => $Role, 'shift_name' => $Shift_name];
 			array_push($officers, $tmp);
 		}
 		$stmt->close();
@@ -150,9 +198,67 @@ class DBHandler
 		return $officers;
 	}
 
+	function getShifts(){
+		global $db_connection;
+		$shifts = [];
+		$stmt = $db_connection->prepare( 'SELECT Id, Name, From_time, To_time, Status FROM SHIFTS' );
+		$stmt->execute();
+		$stmt->bind_result($Id, $Name, $From_time, $To_time, $Status);
+		while($stmt->fetch())
+		{
+			$tmp = ["id" => $Id,
+					"sName" => $Name, 
+					"fTime" => $From_time,
+					"tTime" => $To_time,
+					"sStatus" => $Status];
+			array_push($shifts, $tmp);
+		}
+		$stmt->close();
+		$db_connection->close();
+		return $shifts;
+	}
+
+
+ 	function getTimeout(){
+ 		global $db_connection;
+ 		$minutes = 0;
+ 		$stmt = $db_connection->prepare( 'SELECT Session_Timeout FROM SETTINGS' );
+		$stmt->execute();
+		$stmt->bind_result($min);
+		while($stmt->fetch())
+		{
+			$minutes = $min;
+		}
+		$stmt->close();
+		$db_connection->close();
+	    return $minutes;
+
+ 	}
+
+
+ 	function getLatLong(){
+ 		global $db_connection;
+ 		$lat_long = [];
+ 		$stmt = $db_connection->prepare( 'SELECT Latitude, Longitude FROM SETTINGS' );
+		$stmt->execute();
+		$stmt->bind_result($lat, $lon);
+
+		while($stmt->fetch())
+		{
+			$lat_long = [
+						"lat" => $lat,
+						"lon" => $lon
+						];
+		}
+		$stmt->close();
+		$db_connection->close();
+	    return $lat_long;
+
+ 	}
+
 	/*******************
 			HELPER FUNCTIONS
-			******************/
+	******************/
 	//
 	function GetStatusDescription($statusId)
 	{
@@ -194,18 +300,18 @@ class DBHandler
 	}
 
 	//ADD NEW WATCH ORDER TO DATABASE
-	function addWatchOrder($desc, $address, $lat, $long, $addDate, $expDate) {
+	function addWatchOrder($desc, $address, $lat, $long, $addDate, $expDate, $startDate, $startTime, $expTime, $zone, $businessName,                                 $ownerName, $woRequester, $phone, $woInstruction, $eName, $eAddress, $ePhone, $createdby) {
 		global $db_connection;
 		$result = ['Added' => false];
-		$sql = "INSERT INTO WATCH_ORDERS (`Desc`,`Address`,`Lat`,`Lng`,`AddDate`,`ExpDate`) VALUES (?,?,?,?,?,?)";
+		$sql = "INSERT INTO WATCH_ORDERS (`Desc`,`Address`,`Lat`,`Lng`,`AddDate`,`ExpDate`,`StartDate`, `StartTime`, `ExpTime`,`Zone`,`BusinessName`,`OwnerName`,`WORequester`,`Phone`,`WOInstruction`,`EName`,`EAddress`,`EPhone`,`CreatedBy`) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 		$stmt = $db_connection->prepare($sql);
-		if (!$stmt->bind_param('ssddss', $desc, $address, $lat, $long, $addDate, $expDate))
+		if (!$stmt->bind_param('ssddsssssssssssssss', $desc, $address, $lat, $long, $addDate, $expDate, $startDate, $startTime, $expTime, $zone, $businessName, $ownerName, $woRequester, $phone, $woInstruction, $eName, $eAddress, $ePhone, $createdby))
 			echo "Binding parameters failed: (" . $stmt->errno . ") " . $stmt->error;
 		if (!$stmt->execute())
 		{
 			return $result;
 		}
-			$result['Added'] = true;
+		$result['Added'] = true;
 		$stmt->close();
 		$db_connection->close();
 		return $result;
@@ -247,10 +353,10 @@ class DBHandler
 	function getWatchOrders() {
 		global $db_connection;
 		$orders = [];
-		$sql = "SELECT `Id`,`Desc`,`Address`,`Lat`,`Lng`,`AddDate`,`ExpDate` FROM WATCH_ORDERS";
+		$sql = "SELECT `Id`,`Desc`,`Address`,`Lat`,`Lng`,`AddDate`,`ExpDate`,`StartDate`, `StartTime`, `ExpTime`,`Zone`,`BusinessName`,`OwnerName`,`WORequester`,`Phone`,`WOInstruction`,`EName`,`EAddress`,`EPhone`,`CreatedBy` FROM WATCH_ORDERS";
 		$stmt = $db_connection->prepare($sql);
 		$stmt->execute();
-		$stmt->bind_result($Id, $Desc, $Address, $Lat, $Lng, $AddDate, $ExpDate);
+		$stmt->bind_result($Id, $Desc, $Address, $Lat, $Lng, $AddDate, $ExpDate, $StartDate, $StartTime, $ExpTime, $Zone, $BusinessName, $OwnerName, $WORequester, $Phone, $WOInstruction, $EName, $EAddress, $EPhone, $CreatedBy);
 		while($stmt->fetch()){
 			$tmp = ["Id" => $Id,
 			"Desc" => $Desc,
@@ -258,20 +364,113 @@ class DBHandler
 			"Lat" => $Lat,
 			"Lng" => $Lng,
 			"AddDate" => $AddDate,
-			"ExpDate" => $ExpDate];
+			"ExpDate" => $ExpDate,
+			"StartDate" => $StartDate,
+			"StartTime" => $StartTime,
+			"ExpTime" => $ExpTime, 
+			"Zone" => $Zone,
+			"BusinessName" => $BusinessName, 
+			"OwnerName" => $OwnerName, 
+			"WORequester" => $WORequester, 
+			"Phone" => $Phone, 
+			"WOInstruction" => $WOInstruction, 
+			"EName" => $EName, 
+			"EAddress" => $EAddress,
+			"EPhone" => $EPhone,
+			"CreatedBy" => $CreatedBy];
 			array_push($orders, $tmp);
 		}
 		$stmt->close();
 		$db_connection->close();
 		return $orders;
 	}
-	function editWatchOrder($id, $desc, $address, $lat, $lng, $expDate) {
+	function getWatchOrdersForUser($user_id) {
+		global $db_connection;
+		$orders = [];
+
+		$sql =" SELECT a.Id
+				     , a.Desc
+				     , a.Address
+				     , a.Lat
+				     , a.Lng
+				     , a.AddDate
+				     , a.ExpDate
+				     , a.StartDate
+				     , a.StartTime
+				     , a.ExpTime
+				     , a.Zone
+				     , a.BusinessName
+				     , a.OwnerName
+				     , a.WORequester
+				     , a.Phone
+				     , a.WOInstruction
+				     , a.EName
+					 , a.EAddress
+				     , a.EPhone
+				     , a.CreatedBy
+				     , b.is_selected
+				  FROM WATCH_ORDERS a
+				  left join watch_orders_tracking b on a.Id = b.watch_orders_id and b.officers_userid = ?";
+
+		$stmt = $db_connection->prepare($sql);
+	    $stmt->bind_param('s', $user_id);
+		$stmt->execute();
+		$stmt->bind_result($Id, $Desc, $Address, $Lat, $Lng, $AddDate, $ExpDate, $StartDate, $StartTime, $ExpTime, $Zone, $BusinessName, $OwnerName, $WORequester, $Phone, $WOInstruction, $EName, $EAddress, $EPhone, $CreatedBy, $is_selected);
+		while($stmt->fetch()){
+			$tmp = ["Id" => $Id,
+			"Desc" => $Desc,
+			"Address" => $Address,
+			"Lat" => $Lat,
+			"Lng" => $Lng,
+			"AddDate" => $AddDate,
+			"ExpDate" => $ExpDate,
+			"StartDate" => $StartDate,
+			"StartTime" => $StartTime,
+			"ExpTime" => $ExpTime, 
+			"Zone" => $Zone,
+			"BusinessName" => $BusinessName, 
+			"OwnerName" => $OwnerName, 
+			"WORequester" => $WORequester, 
+			"Phone" => $Phone, 
+			"WOInstruction" => $WOInstruction, 
+			"EName" => $EName, 
+			"EAddress" => $EAddress,
+			"EPhone" => $EPhone,
+			"CreatedBy" => $CreatedBy,
+			"is_selected" => $is_selected];
+
+			array_push($orders, $tmp);
+		}
+		$stmt->close();
+		$db_connection->close();
+		return $orders;
+	}
+	function editWatchOrder($id, $desc, $address, $lat, $lng, $expDate, $startDate, $startTime, $expTime, $zone, $businessName,                                 $ownerName, $woRequester, $phone, $woInstruction, $eName, $eAddress, $ePhone) {
 		global $db_connection;
 		$result = ["Updated" => false];
 		$table = "WATCH_ORDERS";
-		$sql = "UPDATE $table SET `Desc`=?, `Address`=?, `Lat`=?, `Lng`=?, `ExpDate`=? WHERE `Id`=?";
+		$sql = "UPDATE $table SET `Desc`=?, `Address`=?, `Lat`=?, `Lng`=?, `ExpDate`=?, `StartDate`=?, `StartTime`=?, `ExpTime`=?,`Zone`=?,`BusinessName`=?,`OwnerName`=?,`WORequester`=?,`Phone`=?,`WOInstruction`=?,`EName`=?,`EAddress`=?,`EPhone`=? WHERE `Id`=?";
 		$stmt = $db_connection->prepare($sql);
-		if( !$stmt->bind_param('sssssd', $desc, $address, $lat, $lng, $expDate, $id) )
+		if( !$stmt->bind_param('sssssssssssssssssd', $desc, $address, $lat, $lng, $expDate, $startDate, $startTime, $expTime, $zone, $businessName, $ownerName, $woRequester, $phone, $woInstruction, $eName, $eAddress, $ePhone, $id) )
+		{
+			return $result;
+		}
+		if (!$stmt->execute())
+		{
+			return $result;
+		}
+		$result["Updated"] = true;
+		$stmt->close();
+		$db_connection->close();
+		return $result;
+	}
+	function editWatchOrderTracking($wo_id, $user_id, $is_selected) {
+		global $db_connection;
+		$result = ["Updated" => false];
+		$table = "watch_orders_tracking";
+		$sql = "UPDATE $table SET `is_selected`=? WHERE `watch_orders_id` = ? and `officers_userid`=?";
+		$stmt = $db_connection->prepare($sql);
+		if( !$stmt->bind_param('ddd', $is_selected, $wo_id, $user_id))
 		{
 			return $result;
 		}
@@ -286,15 +485,15 @@ class DBHandler
 	}
 
   //ADD NEW USER TO DATABASE
-	function addUser($first_name, $last_name, $username, $password, $role) {
+	function addUser($first_name, $last_name, $username, $password, $role, $shift) {
 		global $db_connection;
 		global $crypter;
 		$hash_password = $crypter->hash($password);
 
 		$result = ['Added' => false,'Username' => $username, 'Password' => $hash_password];
-		$sql = "INSERT INTO OFFICERS (First_Name, Last_Name, Username, Password, Role) VALUES (?,?,?,?,?)";
+		$sql = "INSERT INTO OFFICERS (First_Name, Last_Name, Username, Password, Role, Shift_id) VALUES (?,?,?,?,?,?)";
 		$stmt = $db_connection->prepare($sql);
-		if (!$stmt->bind_param('sssss', $first_name, $last_name, $username, $hash_password, $role))
+		if (!$stmt->bind_param('ssssss', $first_name, $last_name, $username, $hash_password, $role, $shift))
 			echo "Binding parameters failed: (" . $stmt->errno . ") " . $stmt->error;
 		if (!$stmt->execute())
 			return $result;
@@ -305,14 +504,14 @@ class DBHandler
 		return $result;
 	}
 
-	function editUser($id, $first_name, $last_name, $username, $role) {
+	function editUser($id, $first_name, $last_name, $username, $role, $shift) {
 		global $db_connection;
 		$result = ["Updated" => false];
 		$table = "OFFICERS";
-		$sql = "UPDATE $table SET First_Name=?, Last_Name=?, Username=?, Role=?
+		$sql = "UPDATE $table SET First_Name=?, Last_Name=?, Username=?, Role=?, Shift_id = ?
 		        WHERE userID=?";
 		$stmt = $db_connection->prepare($sql);
-		if( !$stmt->bind_param('ssssd', $first_name, $last_name, $username, $role, $id) )
+		if( !$stmt->bind_param('sssssd', $first_name, $last_name, $username, $role, $shift, $id) )
 		{
 			return $result;
 		}
@@ -465,6 +664,71 @@ class DBHandler
 		return $result;
 	}
 
+
+
+	 //ADD NEW SHIFT TO DATABASE
+	function addShift($shift_name, $from_time, $to_time, $status) {
+		global $db_connection;
+
+		$result = ['Added' => false,'Name' => $shift_name, 'From_time' => $from_time, 'To_time' => $to_time, 'Status' => $status];
+		$sql = "INSERT INTO SHIFTS (Name, From_time, To_time, Status) VALUES (?,?,?,?)";
+		$stmt = $db_connection->prepare($sql);
+		if (!$stmt->bind_param('ssss', $shift_name, $from_time, $to_time, $status))
+			echo "Binding parameters failed: (" . $stmt->errno . ") " . $stmt->error;
+		if (!$stmt->execute())
+			return $result;
+
+    	$result['Added'] = true;
+		$stmt->close();
+		$db_connection->close();
+		return $result;
+	}
+
+
+
+	function editShift($id, $shift_name, $from_time, $to_time, $status) {
+		global $db_connection;
+		$result = ["Updated" => false];
+		$table = "SHIFTS";
+		$sql = "UPDATE $table SET Name=?, From_time=?, To_time=?, Status=?
+		        WHERE Id=?";
+		$stmt = $db_connection->prepare($sql);
+		if( !$stmt->bind_param('ssssd', $shift_name, $from_time, $to_time, $status, $id) )
+		{
+			return $result;
+		}
+		if (!$stmt->execute())
+		{
+			return $result;
+		}
+		$result["Updated"] = true;
+		$stmt->close();
+		$db_connection->close();
+		return $result;
+	}
+
+	function removeShift($id) {
+		global $db_connection;
+		$result = ["Removed" => false];
+		$table = "SHIFTS";
+		$sql = "DELETE FROM $table
+		        WHERE Id=?";
+		$stmt = $db_connection->prepare($sql);
+		if( !$stmt->bind_param('d', $id) )
+		{
+			return $result;
+		}
+		if (!$stmt->execute())
+		{
+			return $result;
+		}
+		$result["Removed"] = true;
+		$stmt->close();
+		$db_connection->close();
+		return $result;
+	}
+
+
 	//GET ALL MESSAGES FROM THE DATABASE
 	function getMessages( $user_id )
 	{
@@ -514,7 +778,7 @@ class DBHandler
 					"name" => $title,
 					"msg_description" => $description,
 					"message" => $message,
-					"catid" => $cat_id,
+					//"catid" => $cat_id,
 					"uploadedBy" => $createdBy,
 					"date" => $createdAt,
 					"updated_by" => $updatedBy,
@@ -583,45 +847,54 @@ class DBHandler
 
     function getlogs()
     {
-		$statusArray = $this->GetStatusArray();
+		// $statusArray = $this->GetStatusArray();
 
         global $db_connection;
         $logs = [];
-        $sql = 'SELECT
-				OFFICERS.First_Name,
-				OFFICERS.Last_Name,
-				DOCUMENTS.Document_Name,
-				LOGS.DOC,
-				DOCUMENTS.Upload_Date AS Uploaded,
-				USER_DOC_STATUS.StartDateTime AS Started,
-				USER_DOC_STATUS.EndDateTime AS Completed,
-				CONCAT(TRUNCATE((TIMESTAMPDIFF(SECOND, USER_DOC_STATUS.startdatetime, USER_DOC_STATUS.enddatetime)), 2), \' Sec\') AS Duration,
-				USER_DOC_STATUS.StatusId
-				FROM DOCUMENTS
-				LEFT JOIN LOGS ON LOGS.documentid = DOCUMENTS.document_ID
-				LEFT JOIN OFFICERS ON LOGS.userid = OFFICERS.userID
-				LEFT JOIN USER_DOC_STATUS ON DOCUMENTS.document_ID = USER_DOC_STATUS.DocumentId AND OFFICERS.userID = USER_DOC_STATUS.OfficerId
-				LEFT JOIN DOCUMENT_STATUS ON USER_DOC_STATUS.StatusId = DOCUMENT_STATUS.Id
-				ORDER BY DOCUMENTS.Upload_Date DESC';
+     //    $sql = "call ViewDocuments()";
+     //    $stmt = $db_connection->prepare($sql);
+     //    $stmt->execute();
+     //    $stmt->bind_result($First_Name, $Last_Name, $Document_Name, $DOC,
+					// 		$Uploaded, $Started, $Completed, $Duration, $Status);
+     //        	        file_put_contents('/Users/darilyspereira/Desktop/test.txt', $First_Name, FILE_APPEND);
 
-            $stmt = $db_connection->prepare($sql);
-            $stmt->execute();
-            $stmt->bind_result( $First_Name, $Last_Name, $Document_Name, $DOC,
-								$Uploaded, $Started, $Completed, $Duration, $Status );
-            while($stmt->fetch()){
-                    $tmp = [
-						"Full_Name" => $First_Name.' '.$Last_Name,
-						"Document_Name" => $Document_Name,
-						"DOC" => $DOC,
-						"Uploaded" => $Uploaded,
-						"Started" => $Started,
-						"Completed" => $Completed,
-						"Duration" => $Duration < 0 ? '0.00 Sec' : $Duration,
-						"Status" => $Status == NULL ? $statusArray[1] : $statusArray[(int)$Status]
+     //        while($stmt->fetch()){
+
+     //                $tmp = [
+					// 	"Full_Name" => $First_Name.' '.$Last_Name,
+					// 	"Document_Name" => $Document_Name,
+					// 	"DOC" => $DOC,
+					// 	"Uploaded" => $Uploaded,
+					// 	"Started" => $Started,
+					// 	"Completed" => $Completed,
+					// 	"Duration" => $Duration < 0 ? '0.00 Sec' : $Duration,
+					// 	"Status" => $Status
+					// ];
+     //                array_push($logs, $tmp);
+     //        }
+     //        $stmt->close();
+
+
+
+        $rs = $db_connection->query( "CALL ViewDocuments()");
+		while($row = $rs->fetch_object())
+		{
+
+              $tmp = [
+						"Full_Name" => $row->firstname.' '.$row->lastname,
+						"Document_Name" => $row->docuname,
+						"DOC" => $row->logdoc,
+						"Uploaded" => $row->uploaddt,
+						"Started" => $row->startdt,
+						"Completed" => $row->enddt,
+						"Duration" => $row->duration < 0 ? '0.00 Sec' : $row->duration,
+						"Status" => $row->statusdesc
 					];
                     array_push($logs, $tmp);
-            }
-            $stmt->close();
+
+		}
+
+
             $db_connection->close();
             return $logs;
         }
@@ -683,15 +956,107 @@ class DBHandler
 	function getCategories(){
 		global $db_connection;
 		$categories = [];
+
+		//Get all category id and name. Add blanks temporarly for the shifts
 		$sql = "SELECT category_ID, Category_Name FROM CATEGORIES";
 		$stmt = $db_connection->prepare($sql);
 		$stmt->execute();
 		$stmt->bind_result($id, $name);
-		while($stmt->fetch())
-			array_push($categories, ["id" => $id, "name" => $name]);
+		while($stmt->fetch()) {
+			array_push($categories, ["id" => $id, "name" => $name, "shifts" => ""]);
+		}
+
+		//append the shifts for each category
+		$arrayCount = count($categories);
+		for ($i=0; $i <$arrayCount  ; $i++) {
+			$category_shift = []; 
+
+			//get category id
+			$cat_id = $categories[$i]['id'];
+
+			//execute new query
+			$sql2 = 'SELECT distinct s.Name FROM CATEGORY_SHIFT_ACCESS csa LEFT JOIN SHIFTS s ON csa.Shift_Id = s.Id WHERE csa.Category_ID = ?';
+			$stmt2 = $db_connection->prepare($sql2);
+			$stmt2->bind_param('i', $cat_id);
+			$stmt2->execute();
+			$stmt2->bind_result($shifts);
+
+			while($stmt2->fetch()) {
+				array_push($category_shift, ["shift" => $shifts]);
+			}
+
+			$category_shift = array_reverse($category_shift);
+			// convert the array of shifts to a string separated by coma
+			$shift_string = "";
+			for($j = 0 ; $j< count($category_shift) ; $j++){
+				if ($j == (count($category_shift) -1)){
+					$shift_string = $category_shift[$j]['shift'] . $shift_string;
+				}
+				else {
+					$shift_string = ", ". $category_shift[$j]['shift'] . $shift_string;
+				}
+			}
+
+		// append the string of shifts to the category array	
+			$categories[$i]['shifts'] = $shift_string;
+		}
+
 		$stmt->close();
 		$db_connection->close();
 		return $categories;
+	}
+
+
+
+   //************GET AUTHORIZED CATEGORIES*************************************
+	function getAuthorizedCategories($id){
+		global $db_connection;
+		$authCategories = [];
+		//Get shift id for the logged in officer
+		$sql = "SELECT Shift_id FROM OFFICERS WHERE userid = ?";
+		$stmt = $db_connection->prepare($sql);
+		$stmt->bind_param('i', $id);
+		$stmt->execute();
+		$stmt->bind_result($sId);
+		$shift_id = array();
+		while($stmt->fetch()) {
+			$shift_id[] = $sId;
+		}
+		$shiftId = $shift_id[0];
+
+		//if officer can see ALL shifts then get all categories
+		if ($shiftId == 1){
+			$sql2 = "SELECT Category_ID, Category_Name FROM CATEGORIES";
+			$stmt2 = $db_connection->prepare($sql2);
+			$stmt2->execute();
+			$stmt2->bind_result($cat_id, $name);
+			while($stmt2->fetch()) {
+				array_push($authCategories, ["id" => $cat_id, "name" => $name]);
+			}
+		}
+		//else, get only the authorized categories for that officer
+		else{
+			$sql3 = "SELECT Category_ID, Category_Name 
+					FROM categories c 
+					WHERE c.Category_ID in (
+											SELECT csa.Category_ID 
+											from category_shift_access csa, officers o 
+											where (csa.Shift_Id = o.Shift_id and o.UserID = ?)
+											UNION 
+                        					SELECT csa1.Category_ID from category_shift_access csa1 where csa1.Shift_Id = 1) ";
+			$stmt3 = $db_connection->prepare($sql3);
+			$stmt3->bind_param('i', $id);
+			$stmt3->execute();
+			$stmt3->bind_result($cat_id, $name);
+			while($stmt3->fetch()) {
+				array_push($authCategories, ["id" => $cat_id, "name" => $name]);
+			}
+		}
+
+		$stmt->close();
+		$db_connection->close();
+		return $authCategories;
+
 	}
 
 	//GET PENDING DOCS BY CATEGORY
@@ -706,7 +1071,7 @@ class DBHandler
  				  WHERE document_id NOT IN
 							(select documentId from user_doc_status uds
 						     where uds.DocumentId = d.document_ID and officerId = ? )
-				  AND ((d.Upload_Date >= (DATE(NOW()) - INTERVAL 7 DAY) OR d.Pinned = true) AND d.Manual_Archived = false)
+				  AND d.Manual_Archived = false
 				  GROUP BY category_name
                   UNION
                   SELECT count(1), 'Free Text'
@@ -731,9 +1096,11 @@ class DBHandler
 	}
 
 	//ADD NEW CATEGORY TO DATABASE
-	function addCategory($name) {
+	function addCategory($name, $shift) {
 		global $db_connection;
 		$result = ['Added' => false,'name' => $name];
+		
+		//***********INSERT NEW CATEGORY INTO CATEGORIES TABLE*****************
 		$sql = "INSERT INTO CATEGORIES (Category_Name) VALUES (?)";
 		$stmt = $db_connection->prepare($sql);
 		if (!$stmt->bind_param('s', $name)){
@@ -742,6 +1109,37 @@ class DBHandler
 		if (!$stmt->execute()){
 			return $result;
 		}
+
+
+		//***********GET ID OF NEW CATEGORY CREATED*****************
+		$sql2 = "SELECT Category_ID FROM CATEGORIES WHERE Category_Name = (?)";
+		$stmt2 = $db_connection->prepare($sql2);
+		if (!$stmt2->bind_param('s', $name)){
+			echo "Binding parameters failed: (" . $stmt2->errno . ") " . $stmt2->error;
+		}
+		if (!$stmt2->execute()){
+			return $result;
+		}
+		$cat_id = array();
+		$stmt2->bind_result($id);
+		while ( $stmt2->fetch()) {
+			$cat_id[] = $id;
+		}
+		$cId = $cat_id[0];
+
+
+		// //***********INSERT NEW CATEGORY AND SHIFT(S) INTO CATEGORY_SHIFT_ACCESS TABLE**************
+		for ($i = 0 ; $i < count($shift); $i++){
+		$sql3 = "INSERT INTO CATEGORY_SHIFT_ACCESS(Category_ID, Shift_Id) VALUES (?, ?)";
+		$stmt3 = $db_connection->prepare($sql3);
+			if (!$stmt3->bind_param('ii', $cId, $shift[$i])){
+				echo "Binding parameters failed: (" . $stmt3->errno . ") " . $stmt3->error;
+			}
+			if (!$stmt3->execute()){
+				return $result;
+			}
+		}
+
         $result['Added'] = true;
 		$stmt->close();
 		$db_connection->close();
@@ -761,6 +1159,17 @@ class DBHandler
 		if (!$stmt->execute())
 			return $result;
 
+
+		$sql2 = "DELETE FROM CATEGORY_SHIFT_ACCESS WHERE Category_ID = ?";
+		$stmt2 = $db_connection->prepare($sql2);
+		if( !$stmt2->bind_param('i', $cat_id) )
+			return $result;
+
+		if (!$stmt2->execute())
+			return $result;
+
+
+
 		$result["Removed"] = true;
 		$stmt->close();
 		$db_connection->close();
@@ -772,12 +1181,23 @@ class DBHandler
 	{
 			global $db_connection;
 			$result = ["Document_Removed" => false];
+			
+			//remove entries from documents table
 			$query = 'DELETE FROM Documents WHERE Document_ID = ?';
 			$stmt = $db_connection->prepare($query);
 
 			if( !$stmt->bind_param('i', $document_id) )
 				return $result;
 			if (!$stmt->execute())
+				return $result;
+
+			//remove entries from user_doc_status
+			$query2 = 'DELETE FROM user_doc_status WHERE DocumentId = ?';
+			$stmt2 = $db_connection->prepare($query2);
+
+			if( !$stmt2->bind_param('i', $document_id) )
+				return $result;
+			if (!$stmt2->execute())
 				return $result;
 
 			$result["Document_Removed"] = true;
@@ -806,9 +1226,11 @@ class DBHandler
 	}
 
     //UPDATE CATEGORY IN THE DATABASE
-	function updateCategory($cat_id, $cat_name) {
+	function updateCategory($cat_id, $cat_name, $shift) {
 		global $db_connection;
 		$result = ["Updated" => false];
+
+		//****************UPDATE CATEGORIES TABLE*****************
 		$sql = "UPDATE CATEGORIES SET Category_Name=? WHERE category_ID=?";
 		$stmt = $db_connection->prepare($sql);
 		if( !$stmt->bind_param('sd', $cat_name, $cat_id)){
@@ -817,6 +1239,29 @@ class DBHandler
 		if (!$stmt->execute()){
 			return $result;
 		}
+
+		//************REMOVE ALL ROWS FROM CATEGORY_SHIFT_ACCESS TABLES**********
+		$sql2 = "DELETE FROM CATEGORY_SHIFT_ACCESS WHERE Category_ID = ?";
+		$stmt2 = $db_connection->prepare($sql2);
+		if( !$stmt2->bind_param('i', $cat_id) )
+			return $result;
+
+		if (!$stmt2->execute())
+			return $result;
+
+
+		//************INSERT NEW SELECTIONS INTO CATEGORY_SHIFT_ACCESS TABLES**********
+		for ($i = 0 ; $i < count($shift); $i++){
+		$sql3 = "INSERT INTO CATEGORY_SHIFT_ACCESS(Category_ID, Shift_Id) VALUES (?, ?)";
+		$stmt3 = $db_connection->prepare($sql3);
+			if (!$stmt3->bind_param('ii', $cat_id, $shift[$i])){
+				echo "Binding parameters failed: (" . $stmt3->errno . ") " . $stmt3->error;
+			}
+			if (!$stmt3->execute()){
+				return $result;
+			}
+		}
+
 		$result["Updated"] = true;
 		$stmt->close();
 		$db_connection->close();
@@ -917,6 +1362,37 @@ class DBHandler
 		return $result;
 	}
 
+
+	//UPDATE SESSION TIMEOUT IN DATABASE
+	function updateTimeout($time) {
+		global $db_connection;
+		$result = ["Updated" => false];
+		$sql = "UPDATE SETTINGS SET Session_Timeout=?";
+		$stmt = $db_connection->prepare($sql);
+		if( !$stmt->bind_param('s', $time)) return $result;
+		if (!$stmt->execute()) return $result;
+		$result["Updated"] = true;
+		$stmt->close();
+		$db_connection->close();
+		return $result;
+	}
+
+	//UPDATE APP DEFAULT MAP LATITUDE AND LONGITUDE
+	function updateLatLong($lat, $lon) {
+		global $db_connection;
+		$result = ["Updated" => false];
+		$sql = "UPDATE settings SET Latitude= ?,Longitude = ?";
+		$stmt = $db_connection->prepare($sql);
+		if( !$stmt->bind_param('dd', $lat, $lon)) return $result;
+		if (!$stmt->execute()) return $result;
+		$result["Updated"] = true;
+		$stmt->close();
+		$db_connection->close();
+		return $result;
+	}
+
+
+
 	function logQuiz( $officerId, $documentId, $category_id, $answers, $score, $status )
 	{
 		global $db_connection;
@@ -933,6 +1409,8 @@ class DBHandler
 
 	function updateDocument($id,$name,$categories,$pinned){
 		global $db_connection;
+		
+		//update DOCUMENTS table
 		$sql = "Update DOCUMENTS set Document_Name=?,Category_ID=?,Pinned=? where document_ID =?";
 		$rs = $db_connection->prepare($sql);
 		if(!$rs->bind_param('siii',$name,$categories,$pinned,$id))
@@ -941,6 +1419,17 @@ class DBHandler
 		if(!$rs->execute())
 			return "Execute Error";
 		$rs->close();
+
+		//update user_doc_staus if row exist
+		$sql2 = "Update USER_DOC_STATUS set CategoryId=? where DocumentId =?";
+		$rs2 = $db_connection->prepare($sql2);
+		if(!$rs2->bind_param('ii',$categories,$id))
+				return "Bind paramenter error";
+
+		if(!$rs2->execute())
+			return "Execute Error";
+		$rs2->close();
+
 		$db_connection->close();
 		return true;
 	}
@@ -997,8 +1486,8 @@ class DBHandler
 		//document is read by first time, status will be set to reviewed and start date time will be set as well
 		if( $insert )
 		{
-			$sql = "INSERT INTO USER_DOC_STATUS (StartDateTime, EndDateTime, DocumentId,OfficerId,StatusId, CategoryId)
-						   values(now(),now(),?,?,?,?) ";
+			$sql = "INSERT INTO USER_DOC_STATUS (StartDateTime, EndDateTime, DocumentId,OfficerId,StatusId, CategoryId, IsArchived)
+						   values(now(),now(),?,?,?,?,0) ";
 			$stmt = $db_connection->prepare($sql);
 			$stmt->bind_param('iiii',$document_id, $user_id, $new_status_id, $category_id);
 		}

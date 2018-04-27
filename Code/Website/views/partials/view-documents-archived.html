@@ -60,10 +60,14 @@
 									          </h4>
 									        </div>
 									        <div class="modal-body" style="width:98%; min-height:700px; height:100%;" >
-									          <iframe align="center" style="margin:0 auto; position:absolute; border: 0; height:98%; width:100%;" 
-									          		  src='{{ selected_cat == "Free Text" 
-									          		  			? "../app/php/download-message.php?message_id=" + d.id 
-									          		  			: "../app/php/download-document.php?upload_name=" + d.upload_name }}'></iframe>
+									          <object align="center" style="margin:0 auto; position:absolute; border: 0; height:98%; width:100%;"
+								          		  data='{{ selected_cat == "Free Text"
+								          		  			? "../app/php/download-message.php?message_id=" + d.id
+								          		  			: "../app/php/download-document.php?upload_name=" + d.upload_name }}'>
+								          		  <iframe align="center" style="margin:0 auto; position:absolute; border: 0; height:100%; width:100%;" src='{{ selected_cat == "Free Text"
+								          		  			? "../app/php/download-message.php?message_id=" + d.id
+								          		  			: "../app/php/download-document.php?upload_name=" + d.upload_name }}'>></iframe>
+											</object>
 									        </div>
 									        <div class="modal-footer">
 									          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>

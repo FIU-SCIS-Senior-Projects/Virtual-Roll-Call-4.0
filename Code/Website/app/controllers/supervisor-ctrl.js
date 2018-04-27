@@ -31,6 +31,7 @@ supervisorModule.controller('supervisorCtrl', ['$scope', 'localStorageService', 
   $scope.getDocuments = function(){ sharedCtrl.getDocuments(); }
   $scope.getMessages = function() { sharedCtrl.getMessages(); }
   $scope.getlogs = function(){ sharedCtrl.getlogs(); }
+  $scope.timeoutInit = function(){sharedCtrl.timeoutInit();};
   $scope.refresh = function(){ setTimeout(function(){ window.location.reload(); }, 100); }
 
   $scope.editDocument = function(id ,name, pinned, category)
@@ -118,6 +119,7 @@ supervisorModule.controller('supervisorCtrl', ['$scope', 'localStorageService', 
   $scope.night_mode = localStorageService.get('nightMode');
 
   /***** BATCH ADD WATCH ORDERS MODAL *****/
+   /***** BATCH ADD WATCH ORDERS MODAL *****/
   $scope.addBatchWatchOrders = function(){
     document.getElementById("parsedWatchOrdersPanel").style.display = "none";
     document.getElementById("successMessage").style.display = "none";
@@ -163,16 +165,21 @@ supervisorModule.controller('supervisorCtrl', ['$scope', 'localStorageService', 
         document.getElementById("parseTitle").innerHTML = message;
 
         var orders = $scope.parsedWatchOrders;
-
+        var lat = 1.0;
+        var lng = 1.0;
+        
         //Geocode watch address
-        orders.forEach(function(order){
-
-          order.push(0,0);
+        orders.forEach(function(order){  
           geoCodeAddress(order).then(
             function(data){
-              order = data;
+              lat = data[2];
+              order[2] = lat;             
+              lng = data[3];
+              order[3] = lng;
+              order.push($scope.name);
             },
             function(error){
+              alert('Error: ' + error);
               console.log('Error: ' + error);
             });
         });
@@ -189,8 +196,6 @@ supervisorModule.controller('supervisorCtrl', ['$scope', 'localStorageService', 
   function geoCodeAddress(order)
   {
     return new Promise(function(resolve, reject) {
-
-
     dataService.geoCodeAddress(order[1])
     .then(
       function(data){
@@ -199,10 +204,9 @@ supervisorModule.controller('supervisorCtrl', ['$scope', 'localStorageService', 
           order[1] = data.results[0].formatted_address;   // pick first formatted address returned
           order[2] = data.results[0].geometry.location.lat;  // add lat coordinate
           order[3] = data.results[0].geometry.location.lng;   // add long coordinate
-          order[4] = expDate;   // add exp date
+          //order[4] = expDate;   // add exp date
 
           resolve(order);
-
         }
         else{
           console.log(data);
@@ -216,7 +220,32 @@ supervisorModule.controller('supervisorCtrl', ['$scope', 'localStorageService', 
     });
   }
 
-
+  $scope.CopyContactInfo = function(){
+    if ($scope.copycontactinfo) {
+        $scope.order.eName = $scope.order.woRequester;
+        $scope.order.eAddress = $scope.order.address;
+        $scope.order.ePhone = $scope.order.phone;
+    }
+    else{
+        $scope.order.eName = "";
+        $scope.order.eAddress = "";
+        $scope.order.ePhone = "";
+    }
+   
+  };
+  $scope.CopyContactInfoUpdate = function(){
+    if ($scope.copycontactinfo) {
+        $scope.updateEName = $scope.updateWORequester;
+        $scope.updateEAddress = $scope.updateAddress;
+        $scope.updateEPhone = $scope.updatePhone;
+    }
+    else{
+        $scope.order.eName = "";
+        $scope.order.eAddress = "";
+        $scope.order.ePhone = "";
+    }
+   
+  };
 
   $scope.addSingleWatchOrder = function(){
 
@@ -237,6 +266,24 @@ supervisorModule.controller('supervisorCtrl', ['$scope', 'localStorageService', 
         order[1] = results[0].formatted_address;   //pick first formatted address returned
         order.push(results[0].geometry.viewport.f.b, results[0].geometry.viewport.b.b);   // add lat and long coordinates
         order.push($scope.order.expDate);
+        order.push($scope.order.startDate);
+        order.push($scope.order.startTime);
+        order.push($scope.order.expTime);
+        order.push($scope.order.zone);
+        order.push($scope.order.businessName);
+        order.push($scope.order.ownerName);
+        order.push($scope.order.woRequester);
+        order.push($scope.order.phone);
+        order.push($scope.order.woInstruction);
+        order.push($scope.order.eName);
+         if ($scope.copycontactinfo) {
+          $scope.order.eAddress = results[0].formatted_address;
+        }
+        order.push($scope.order.eAddress);
+        order.push($scope.order.ePhone);
+        order.push($scope.name);
+
+
         addWatchOrder(order).then(
           function(data){
             if(data == true )
@@ -248,6 +295,18 @@ supervisorModule.controller('supervisorCtrl', ['$scope', 'localStorageService', 
               $scope.order.desc = '';
               $scope.order.address = '';
               $scope.order.expDate = '';
+              $scope.order.startDate = '';
+              $scope.order.startTime = '';
+              $scope.order.expTime = '';
+              $scope.order.zone = '';
+              $scope.order.businessName = '';
+              $scope.order.ownerName = '';
+              $scope.order.woRequester = '';
+              $scope.order.phone = '';
+              $scope.order.woInstruction = '';
+              $scope.order.eName = '';
+              $scope.order.eAddress = '';
+              $scope.order.ePhone = '';
 
               $scope.getWatchOrders();
             }
@@ -337,29 +396,75 @@ supervisorModule.controller('supervisorCtrl', ['$scope', 'localStorageService', 
 
 
         /***** EDIT PARSED WATCH ORDER MODAL *****/
-        $scope.editParsedWatchOrder = function(index, desc, address, expDate){
+        $scope.editParsedWatchOrder = function(index, desc, address, expDate, startDate, startTime, expTime, zone, businessName, ownerName, woRequester, phone, woInstruction, eName, eAddress, ePhone){
           $scope.updateIndex = index;
           $scope.updateDesc = desc;
           $scope.updateAddress = address;
           $scope.updateExpDate = expDate;
+          $scope.updateStartDate = startDate;
+          $scope.updateStartTime = startTime;
+          $scope.updateExpTime = expTime;          
+          $scope.updateZone = zone;
+          $scope.updateBusinessName = businessName;
+          $scope.updateOwnerName = ownerName;
+          $scope.updateWORequester = woRequester;
+          $scope.updatePhone = phone;
+          $scope.updateWOInstruction = woInstruction;
+          $scope.updateEName = eName;
+          $scope.updateEAddress = eAddress;
+          $scope.updateEPhone = ePhone;
+
           $scope.display_mode_modal = sharedCtrl.getDisplayMode();
           $('#editParseModal').modal('show');
         };
 
-        $scope.updateParseUser = function(){
+        $scope.updateParseWatchOrder= function(){
           var index = $scope.updateIndex;
           var desc = $scope.updateDesc;
           var address = $scope.updateAddress;
           var expDate = $scope.updateExpDate;
+          var startDate = $scope.updateStartDate;
+          var startTime = $scope.updateStartTime;
+          var expTime = $scope.updateExpTime;          
+          var zone = $scope.updateZone;
+          var businessName = $scope.updateBusinessName;
+          var ownerName = $scope.updateOwnerName;
+          var woRequester = $scope.updateWORequester;
+          var phone = $scope.updatePhone;
+          var woInstruction = $scope.updateWOInstruction;
+          var eName = $scope.updateEName;
+          var eAddress = $scope.updateEAddress;
+          var ePhone = $scope.updateEPhone;
 
           var temp = $scope.parsedWatchOrders[index];
           temp[0] = desc;
           temp[1] = address;
-          temp[2] = expDate;
+          temp[2] = 0;
+          temp[3] = 0;
+          temp[4] = expDate;
+          temp[5] = startDate;
+          temp[6] = startTime;
+          temp[7] = expTime;
+          temp[8] = zone;
+          temp[9] = businessName;
+          temp[10] = ownerName;
+          temp[11] = woRequester;
+          temp[12] = phone;
+          temp[13] = woInstruction;
+          temp[14] = eName;
+          temp[15] = eAddress;
+          temp[16] = ePhone;
+          var lat = 1.0;
+          var lng = 1.0;
 
           geoCodeAddress(temp).then(
             function(data){
-              $scope.parsedWatchOrders[index] = data;
+              lat = data[2];
+              temp[2]=lat;
+              lng = data[3];
+              temp[3]=lng;
+
+              $scope.parsedWatchOrders[index] = temp;              
             },
             function(error){
               console.log('Error: ' + error);
@@ -378,11 +483,24 @@ supervisorModule.controller('supervisorCtrl', ['$scope', 'localStorageService', 
         };
 
         /***** EDIT WATCH ORDER MODAL *****/
-        $scope.editWatchOrder = function(id, desc, address, expDate){
+        $scope.editWatchOrder = function(id, desc, address, expDate, startDate, startTime, expTime, zone, businessName, ownerName, woRequester, phone, woInstruction, eName, eAddress, ePhone){
           $scope.updateID = id;
           $scope.updateDesc = desc;
           $scope.updateAddress = address;
           $scope.updateExpDate = expDate;
+          $scope.updateStartDate = startDate;
+          $scope.updateStartTime = startTime;
+          $scope.updateExpTime = expTime;          
+          $scope.updateZone = zone;
+          $scope.updateBusinessName = businessName;
+          $scope.updateOwnerName = ownerName;
+          $scope.updateWORequester = woRequester;
+          $scope.updatePhone = phone;
+          $scope.updateWOInstruction = woInstruction;
+          $scope.updateEName = eName;
+          $scope.updateEAddress = eAddress;
+          $scope.updateEPhone = ePhone;
+
           $scope.display_mode_modal = sharedCtrl.getDisplayMode();
           $('#editModal').modal('show');
         };
@@ -394,6 +512,18 @@ supervisorModule.controller('supervisorCtrl', ['$scope', 'localStorageService', 
           var desc = $scope.updateDesc;
           var address = $scope.updateAddress;
           var expDate = $scope.updateExpDate;
+          var startDate = $scope.updateStartDate;
+          var startTime = $scope.updateStartTime;
+          var expTime = $scope.updateExpTime;          
+          var zone = $scope.updateZone;
+          var businessName = $scope.updateBusinessName;
+          var ownerName = $scope.updateOwnerName;
+          var woRequester = $scope.updateWORequester;
+          var phone = $scope.updatePhone;
+          var woInstruction = $scope.updateWOInstruction;
+          var eName = $scope.updateEName;
+          var eAddress = $scope.updateEAddress;
+          var ePhone = $scope.updateEPhone;
           var order = [desc, address, expDate, 0, 0];
 
           geoCodeAddress(order).then(
@@ -402,7 +532,7 @@ supervisorModule.controller('supervisorCtrl', ['$scope', 'localStorageService', 
               lat = data[2];
               lng = data[3];
 
-              dataService.updateWatchOrder(id, desc, address, lat, lng, expDate)
+              dataService.updateWatchOrder(id, desc, address, lat, lng, expDate, startDate, startTime, expTime, zone, businessName, ownerName, woRequester, phone, woInstruction, eName, eAddress, ePhone)
               .then(
                 function(data){
                   if(data['Updated'] === true){
@@ -436,6 +566,7 @@ supervisorModule.controller('supervisorCtrl', ['$scope', 'localStorageService', 
         /***** ATTEMPT TO ADD A PARSED WATCH ORDER TO THE DATABASE *****/
         self.addWatchOrder = function(order){
 
+
           return new Promise(function(resolve, reject) {
 
             //get values from parsed watch order
@@ -448,40 +579,60 @@ supervisorModule.controller('supervisorCtrl', ['$scope', 'localStorageService', 
             }
             var lat = order[2];
             var long = order[3];
+
+           
+
             if(lat == 0 || long == 0 ){
               resolve(false);
               return;
             }
             var expDate = order[4].trim();
-            var splitDate = expDate.split("-");
-
-            //check for valid year
-            if(Number(splitDate[0]) < 2017 || splitDate[0].length != 4 )
-            {
-              resolve(false);
-              return;
-            }
-            //check for valid month
-            if(Number(splitDate[1]) > 12 || Number(splitDate[1]) < 1 )
-            {
-              resolve(false);
-              return;
-            }
-            //todo: some months will different number of days
-            if(Number(splitDate[2]) > 31 || Number(splitDate[2]) < 1 )
-            {
-              resolve(false);
-              return;
-            }
 
 
-            dataService.addWatchOrder(desc, address, lat, long, expDate)
+            // var splitDate = expDate.split("-");
+            // //check for valid year
+            // if(Number(splitDate[0]) < 2017 || splitDate[0].length != 4 )
+            // {
+            //   resolve(false);
+            //   return;
+            // }
+            // //check for valid month
+            // if(Number(splitDate[1]) >= 12 || Number(splitDate[1]) <= 1 )
+            // {
+            //   resolve(false);
+            //   return;
+            // }
+            // //todo: some months will different number of days
+            // if(Number(splitDate[2]) >= 31 || Number(splitDate[2]) <= 1 )
+            // {
+            //   resolve(false);
+            //   return;
+            // }
+
+            var startDate = order[5].trim();
+            var startTime = order[6].trim();
+            var expTime = order[7].trim();
+            var zone = order[8].trim();
+            var businessName = order[9].trim();
+            var ownerName = order[10].trim(); 
+            var woRequester = order[11].trim();
+            var phone = order[12].trim();
+            var woInstruction = order[13].trim(); 
+            var eName = order[14].trim(); 
+            var eAddress = order[15].trim(); 
+            var ePhone = order[16].trim();
+            var createdby = order[17].trim();
+            
+            dataService.addWatchOrder(desc, address, lat, long, expDate, startDate, startTime, expTime, 
+                                      zone, businessName, ownerName, woRequester, phone, woInstruction,
+                                      eName, eAddress, ePhone, createdby)
             .then(
               function(data){
                 if(data['Added'] === true){
                   resolve(true);
                 }
                 else{
+                  alert('Test2');
                   resolve(false);
                 }
               },
@@ -493,7 +644,7 @@ supervisorModule.controller('supervisorCtrl', ['$scope', 'localStorageService', 
           };
 
           /***********************
-          * GET WATCH ORDERS
+          * GET ACTIVE WATCH ORDERS
           ***********************/
           $scope.getWatchOrders = function getWatchOrders(){
             dataService.viewWatchOrders()
@@ -502,7 +653,9 @@ supervisorModule.controller('supervisorCtrl', ['$scope', 'localStorageService', 
 
                 //initialize an empty array to store results from the database
                 var watch_orders = [];
-                var exp_watch_orders = [];
+
+                //Depricated for version 4.0. No longer deleting expired watch orders.
+                //var exp_watch_orders = [];
 
                 //for each category in the result
                 for (var x in data) {
@@ -516,24 +669,90 @@ supervisorModule.controller('supervisorCtrl', ['$scope', 'localStorageService', 
                   tmp.Lng = data[x].Lng;
                   tmp.AddDate = data[x].AddDate;
                   tmp.ExpDate = data[x].ExpDate;
+                  tmp.StartDate = data[x].StartDate;
+                  tmp.StartTime = data[x].StartTime;
+                  tmp.ExpTime = data[x].ExpTime;
+                  tmp.Zone = data[x].Zone;
+                  tmp.BusinessName = data[x].BusinessName;
+                  tmp.OwnerName = data[x].OwnerName;
+                  tmp.WORequester = data[x].WORequester;
+                  tmp.Phone = data[x].Phone;
+                  tmp.WOInstruction = data[x].WOInstruction;
+                  tmp.EName = data[x].EName;
+                  tmp.EAddress = data[x].EAddress;
+                  tmp.EPhone = data[x].EPhone;
+                  tmp.CreatedBy = data[x].CreatedBy;
+
                   if(validDate(tmp)){
                     watch_orders.push(tmp);
                   }
-                  else {
-                    exp_watch_orders.push(tmp);
-                  }
+                  // else {
+                  //   exp_watch_orders.push(tmp);
+                  // }
                 }
 
                 //update for use in view
                 $scope.watch_orders = watch_orders;
 
                 //remove expired watch orders
-                removeExpiredWatchOrders(exp_watch_orders);
+                //removeExpiredWatchOrders(exp_watch_orders);
               },
               function (error) {
                 console.log('Error: ' + error);
               });
             };
+
+          /***********************
+          * GET ARCHIVED ORDERS
+          ***********************/
+          $scope.getArchivedWatchOrders = function getArchivedWatchOrders(){
+            dataService.viewWatchOrders()
+            .then(
+              function (data) {
+
+                //initialize an empty array to store results from the database
+                var watch_archived_orders = [];
+
+                //for each category in the result
+                for (var x in data) {
+
+                  //create an object and set object properties
+                  var tmp = new Object();
+                  tmp.Id = data[x].Id;
+                  tmp.Desc = data[x].Desc;
+                  tmp.Address = data[x].Address;
+                  tmp.Lat = data[x].Lat;
+                  tmp.Lng = data[x].Lng;
+                  tmp.AddDate = data[x].AddDate;
+                  tmp.ExpDate = data[x].ExpDate;
+                  tmp.StartDate = data[x].StartDate;
+                  tmp.StartTime = data[x].StartTime;
+                  tmp.ExpTime = data[x].ExpTime;
+                  tmp.Zone = data[x].Zone;
+                  tmp.BusinessName = data[x].BusinessName;
+                  tmp.OwnerName = data[x].OwnerName;
+                  tmp.WORequester = data[x].WORequester;
+                  tmp.Phone = data[x].Phone;
+                  tmp.WOInstruction = data[x].WOInstruction;
+                  tmp.EName = data[x].EName;
+                  tmp.EAddress = data[x].EAddress;
+                  tmp.EPhone = data[x].EPhone;
+                  tmp.CreatedBy = data[x].CreatedBy;
+
+
+                  if(!validDate(tmp)){
+                    watch_archived_orders.push(tmp);
+                  }
+                }
+
+                //update for use in view
+                $scope.watch_archived_orders = watch_archived_orders;
+
+              },
+              function (error) {
+                console.log('Error: ' + error);
+              });
+            };    
 
             //compare current date with expiration date
             self.validDate = function(order){
@@ -619,6 +838,34 @@ supervisorModule.controller('supervisorCtrl', ['$scope', 'localStorageService', 
         $scope.selected = {};
         $scope.pick = null;
       });
+
+
+      /***** VIEW WATCH ORDER MODAL *****/
+      $scope.viewWatchOrder = function(id, desc, address, expDate, startDate, startTime, expTime, zone, businessName, ownerName, woRequester, phone, woInstruction, eName, eAddress, ePhone, createdBy){
+
+        $scope.updateID = id;
+        $scope.updateDesc = desc;
+        $scope.updateAddress = address;
+        $scope.updateExpDate = expDate;
+        $scope.updateStartDate = startDate;
+        $scope.updateStartTime = startTime;
+        $scope.updateExpTime = expTime;          
+        $scope.updateZone = zone;
+        $scope.updateBusinessName = businessName;
+        $scope.updateOwnerName = ownerName;
+        $scope.updateWORequester = woRequester;
+        $scope.updatePhone = phone;
+        $scope.updateWOInstruction = woInstruction;
+        $scope.updateEName = eName;
+        $scope.updateEAddress = eAddress;
+        $scope.updateEPhone = ePhone;
+        $scope.updateCreatedBy = createdBy;
+
+        $scope.display_mode_modal = sharedCtrl.getDisplayMode();
+        $('#editModal').modal('show');
+      };
+
+
 
       /***** RESET USER PASSWORD *****/
       $scope.resetPassword = function(reset_password, reset_password_conf){

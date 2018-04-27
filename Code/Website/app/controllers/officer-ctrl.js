@@ -31,6 +31,9 @@ officerModule.controller('officerCtrl', ['$scope', 'localStorageService', 'dataS
 
     $scope.getSiteNames = function () { sharedCtrl.getSiteNames(); };
     $scope.logout = function () { sharedCtrl.logout(); }
+    $scope.getAuthorizedCategories = function(){sharedCtrl.getAuthorizedCategories(id);};
+    $scope.getLatLong = function(){sharedCtrl.getLatLong();};
+    $scope.timeoutInit = function(){sharedCtrl.timeoutInit();};
     $scope.getCategories = function () 
     {  
         sharedCtrl.getCategories(); 
@@ -172,11 +175,23 @@ officerModule.controller('officerCtrl', ['$scope', 'localStorageService', 'dataS
      * GET WATCH ORDERS
      To do: move to shared ctrl
      ***********************/
+      /* Select Row */
+      $scope.select = function(item) {
+        item.selected ? item.selected = false : item.selected = true;
+        $scope.updateWatchOrderTracking(item.Id, id, item.selected);
+      };
+      $scope.UnselectAllLocations = function() {
+          angular.forEach($scope.watch_orders, function(o) {
+            o.selected = false;
+            $scope.updateWatchOrderTracking(o.Id, id, o.selected);
+          })
+      };
+
       function getWatchOrders(){
 
         return new Promise(function(resolve, reject) {
 
-          dataService.viewWatchOrders()
+          dataService.viewWatchOrders(id)
             .then(
             function (data) {
 
@@ -195,8 +210,24 @@ officerModule.controller('officerCtrl', ['$scope', 'localStorageService', 'dataS
                   tmp.Lng = data[x].Lng;
                   tmp.AddDate = data[x].AddDate;
                   tmp.ExpDate = data[x].ExpDate;
+                  tmp.StartDate = data[x].StartDate;
+                  tmp.StartTime = data[x].StartTime;
+                  tmp.ExpTime = data[x].ExpTime;
+                  tmp.Zone = data[x].Zone;
+                  tmp.BusinessName = data[x].BusinessName;
+                  tmp.OwnerName = data[x].OwnerName;
+                  tmp.WORequester = data[x].WORequester;
+                  tmp.Phone = data[x].Phone;
+                  tmp.WOInstruction = data[x].WOInstruction;
+                  tmp.EName = data[x].EName;
+                  tmp.EAddress = data[x].EAddress;
+                  tmp.EPhone = data[x].EPhone;
+                  tmp.CreatedBy = data[x].CreatedBy;
+                  tmp.selected = data[x].is_selected;
 
-                  watch_orders.push(tmp);
+                  if(validDate(tmp)){
+                    watch_orders.push(tmp);
+                  }
               }
 
               resolve(watch_orders);
@@ -209,11 +240,48 @@ officerModule.controller('officerCtrl', ['$scope', 'localStorageService', 'dataS
         });
       }
 
+
+    //compare current date with expiration date
+    function validDate(order){
+      var today = new Date();
+      var currDay = today.getDate();
+      var currMonth = today.getMonth();
+      var currYear = today.getFullYear();
+
+      var expDate = order.ExpDate.split("-");
+      var expDay = Number(expDate[2]);
+      var expMonth = Number(expDate[1]);
+      var expYear = Number(expDate[0]);
+
+      var expiration = new Date();
+      expiration.setFullYear(expYear, expMonth - 1, expDay);
+
+      if(expiration < today)
+      {
+        return false;
+      }
+      return true;
+
+    };
+
       //Initialize map
       $scope.initMap = function initMap() {
 
+
         $scope.markerCount = 0;
-        var defaultLocation = {lat: 25.6622835, lng: -80.307}; //default location set in Pinecrest,FL
+
+        //updated in version 4.0 to get latitude and longitude specified in Site Settings.
+        // var defaultLocation = {lat: 25.6622835, lng: -80.307}; //default location set in Pinecrest,FL
+
+
+        var defaultLat = localStorageService.get('lat');
+        var defaultLong = localStorageService.get('lon');
+        var defaultLocation = {lat: 0, lng: 0};
+        defaultLocation.lat = defaultLat;
+        defaultLocation.lng = defaultLong;
+
+        // alert(defaultLocation.lat);
+        // alert(defaultLocation.lng);
 
         var map = new google.maps.Map(document.getElementById('map'), {
           zoom: 13,
@@ -231,8 +299,11 @@ officerModule.controller('officerCtrl', ['$scope', 'localStorageService', 'dataS
 
               var contentString = "<h5><b>" + order.Address + "</b> </h5><hr>";
               contentString += "<p><b>Description:</b> " + order.Desc + "</p>";
-              contentString += "<p><b>Date Added:</b> " + order.AddDate + "</p>";
+              contentString += "<p><b>Created On:</b> " + order.AddDate + "</p>";
+              contentString += "<p><b>Start Date:</b> " + order.StartDate + "</p>";
               contentString += "<p><b>Expiration:</b> " + order.ExpDate + "</p>";
+              contentString += "<p><b>Start Time:</b> " + order.StartTime + "</p>";
+              contentString += "<p><b>Expiration Time:</b> " + order.ExpTime + "</p>";
 
               var infowindow = new google.maps.InfoWindow({
                 content: contentString
@@ -247,14 +318,19 @@ officerModule.controller('officerCtrl', ['$scope', 'localStorageService', 'dataS
               marker.addListener('click', function() {
                 infowindow.open(map, marker);
               });
+
+              /* **** CODE TO VIEW DETAIL WITHIN MAP... NOT WORKING PROPERLY *****
+              marker.addListener('dblclick', function() {
+                if (order.Address !== null) {
+                  $scope.viewWatchOrder(order.Id, order.Desc, order.Address, order.ExpDate, order.StartDate, order.StartTime, order.ExpTime,
+                                        order.Zone, order.BusinessName, order.OwnerName, order.WORequester, order.Phone, order.WOInstruction,
+                                        order.EName, order.EAddress, order.EPhone);};});*/
             }
           );
 
           $scope.$apply(function () {
             $scope.markerCount = markerCount;
           });
-
-
           }
         );
       };
@@ -273,6 +349,31 @@ officerModule.controller('officerCtrl', ['$scope', 'localStorageService', 'dataS
           }
         });
       }
+
+      /***** VIEW WATCH ORDER MODAL *****/
+      $scope.viewWatchOrder = function(id, desc, address, expDate, startDate, startTime, expTime, zone, businessName, ownerName, woRequester, phone, woInstruction, eName, eAddress, ePhone, createdBy){
+
+        $scope.updateID = id;
+        $scope.updateDesc = desc;
+        $scope.updateAddress = address;
+        $scope.updateExpDate = expDate;
+        $scope.updateStartDate = startDate;
+        $scope.updateStartTime = startTime;
+        $scope.updateExpTime = expTime;          
+        $scope.updateZone = zone;
+        $scope.updateBusinessName = businessName;
+        $scope.updateOwnerName = ownerName;
+        $scope.updateWORequester = woRequester;
+        $scope.updatePhone = phone;
+        $scope.updateWOInstruction = woInstruction;
+        $scope.updateEName = eName;
+        $scope.updateEAddress = eAddress;
+        $scope.updateEPhone = ePhone;
+        $scope.updateCreatedBy = createdBy;
+
+        $scope.display_mode_modal = sharedCtrl.getDisplayMode();
+        $('#editModal').modal('show');
+      };
 
 
 
@@ -305,6 +406,18 @@ officerModule.controller('officerCtrl', ['$scope', 'localStorageService', 'dataS
           function (error) { console.log('Error: ' + error);
           });
     };
+
+    $scope.updateWatchOrderTracking = function (wo_id, user_id, is_selected)
+    {
+        dataService.updateWatchOrderTracking(wo_id, user_id, is_selected)
+          .then(
+            function (data) {
+              console.log('Update Successful');             
+          },
+          function (error) { console.log('Error: ' + error);
+          });
+    };
+
     //alert functions (displays accordingly in views)
     $scope.alert = sharedCtrl.alert;
   }]);

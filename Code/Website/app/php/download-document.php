@@ -5,7 +5,7 @@ $fileExt =strtolower(substr($fileName, -4));
 if( $fileExt == ".pdf" )
 {
     header('Content-Type: application/pdf');
-    header('Content-Disposition: inline; filename="' . $filename . '"');
+    header('Content-Disposition: inline; filename="' . $fileName . '"');
     header('Content-Transfer-Encoding: binary');
     header('Accept-Ranges: bytes');
     header("Cache-Control: no-cache");
@@ -14,7 +14,7 @@ if( $fileExt == ".pdf" )
 else if ( $fileExt == ".jpg" || $fileExt == "jpeg" || $fileExt == ".gif" || $fileExt == ".png" || $fileExt == ".bmp")
 {
     header('Content-Type: image');
-    header('Content-Disposition: inline; filename="' . $filename . '"');
+    header('Content-Disposition: inline; filename="' . $fileName . '"');
     echo file_get_contents('uploads/' . $fileName);
 }
 else

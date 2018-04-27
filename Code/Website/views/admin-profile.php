@@ -1,4 +1,9 @@
-<?php session_start(); ?>
+<?php
+session_start();
+if(!isset($_SESSION["officer_role"])){
+header('location: ../views/');
+}
+?>
 <!DOCTYPE html>
 <html ng-app='admin' lang='en'>
 <head>
@@ -32,8 +37,10 @@
   <script src='../app/controllers/admin-ctrl.js' type='text/javascript'></script>
   <script src='../app/services/data-service.js' type='text/javascript'></script>
   <script src="../app/vendor/ng-flow/dist/ng-flow-standalone.min.js"></script>
+  <script src="../app/vendor/angularjs-dropdown-multiselect.js"></script>
+  <script src="../app/vendor/angular-idle.min.js"></script>
 
-    <script>
+  <script>
   $( function() {
     var dateFormat = "mm/dd/yy",
       from = $( "#from" )
@@ -68,6 +75,7 @@
   <!-- Vertical Navigation -->
   <nav class='navbar navbar-default'>
     <div class='container-fluid'>
+      <div ng-init='timeoutInit()'></div>
       <div class='navbar-header'>
         <button type='button' class='navbar-toggle' data-toggle='collapse' data-target='#myNavbar'>
           <span class='icon-bar'></span>
@@ -80,7 +88,7 @@
         <ul class='nav navbar-nav'>
           <li class='active'><a>Administrator</a></li>
           <li><a href='supervisor-profile.php#/upload'>Supervisor</a></li>
-          <li><a href='officer-profile.php#/categories'>Officer</a></li>
+          <li><a href='officer-profile.php#/categories'>Dashboard</a></li>
         </ul>
         <ul class='nav navbar-nav navbar-right'>
           <li class='dropdown'>
@@ -112,6 +120,7 @@
           <li data-ng-class="{active: isActive('/categories')}"><a href='#categories'>Document Categories</a></li>
           <li data-ng-class="{active: isActive('/settings')}"><a href='#settings'>Site Settings</a></li>
           <li data-ng-class="{active: isActive('/archive')}"><a href='#archive'>Archive Documents</a></li>
+          <li data-ng-class="{active: isActive('/shift-management')}"><a href='#shift-management'>Shift Management</a></li>
         </ul>
       </div>
       <div class='col-sm-10' >
@@ -121,5 +130,8 @@
       </div>
     </div>
   </div>
+<?php
+  include("../app/vendor/timeout-script.js");
+?>
 </body>
 </html>
